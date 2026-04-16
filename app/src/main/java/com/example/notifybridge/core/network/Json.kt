@@ -1,9 +1,11 @@
 package com.example.notifybridge.core.network
 
 import com.example.notifybridge.domain.model.ForwardPayload
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
+@OptIn(ExperimentalSerializationApi::class)
 val appJson: Json = Json {
     ignoreUnknownKeys = true
     explicitNulls = false

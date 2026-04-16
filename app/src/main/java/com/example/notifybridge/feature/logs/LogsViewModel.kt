@@ -7,6 +7,7 @@ import com.example.notifybridge.domain.model.DeliveryStatus
 import com.example.notifybridge.domain.repository.DeliveryLogRepository
 import com.example.notifybridge.system.util.DeliveryWorkScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -29,6 +30,7 @@ data class LogsUiState(
     val records: List<DeliveryRecord> = emptyList(),
 )
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class LogsViewModel @Inject constructor(
     private val deliveryLogRepository: DeliveryLogRepository,
