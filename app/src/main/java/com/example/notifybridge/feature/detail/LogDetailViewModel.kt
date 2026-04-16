@@ -31,7 +31,7 @@ class LogDetailViewModel @Inject constructor(
     val uiState: StateFlow<LogDetailUiState> = combine(
         deliveryLogRepository.observeDetail(eventId),
         deliveryLogRepository.observeAttempts(eventId),
-    ) { record, attempts ->
+    ) { record: DeliveryRecord?, attempts: List<DeliveryAttempt> ->
         LogDetailUiState(record = record, attempts = attempts)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), LogDetailUiState())
 

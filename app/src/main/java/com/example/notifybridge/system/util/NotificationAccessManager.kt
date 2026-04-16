@@ -15,7 +15,7 @@ class NotificationAccessManager @Inject constructor(
     fun isNotificationAccessEnabled(): Boolean {
         val enabledListeners = Settings.Secure.getString(
             context.contentResolver,
-            Settings.Secure.ENABLED_NOTIFICATION_LISTENERS
+            "enabled_notification_listeners"
         ).orEmpty()
         val serviceName = ComponentName(context, BridgeNotificationListenerService::class.java).flattenToString()
         return enabledListeners.contains(serviceName)
