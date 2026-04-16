@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -28,6 +29,11 @@ enum class LogStatusFilter(val status: DeliveryStatus?) {
 data class LogsUiState(
     val selectedFilter: LogStatusFilter = LogStatusFilter.ALL,
     val records: List<DeliveryRecord> = emptyList(),
+    val searchQuery: String = "",
+    val totalMatchedCount: Int = 0,
+    val canLoadMore: Boolean = false,
+    val canBulkRetry: Boolean = false,
+    val message: String? = null,
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -38,22 +44,90 @@ class LogsViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val filterState = MutableStateFlow(LogStatusFilter.ALL)
+    private val queryState = MutableStateFlow("")
+    private val visibleCountState = MutableStateFlow(DEFAULT_PAGE_SIZE)
+    private val messageState = MutableStateFlow<String?>(null)
 
     val uiState: StateFlow<LogsUiState> = combine(
         filterState,
         filterState.flatMapLatest { filter -> deliveryLogRepository.observeLogs(filter.status) },
-    ) { filter, records ->
-        LogsUiState(selectedFilter = filter, records = records)
+        queryState,
+        visibleCountState,
+        messageState,
+    ) { filter, records, query, visibleCount, message ->
+        val filteredRecords = records.filterByQuery(query)
+        val visibleRecords = filteredRecords.take(visibleCount)
+        val retryableCount = visibleRecords.count {
+            it.status == DeliveryStatus.FAILED || it.status == DeliveryStatus.RETRYING
+        }
+        LogsUiState(
+            selectedFilter = filter,
+            records = visibleRecords,
+            searchQuery = query,
+            totalMatchedCount = filteredRecords.size,
+            canLoadMore = filteredRecords.size > visibleRecords.size,
+            canBulkRetry = retryableCount > 1,
+            message = message,
+        )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), LogsUiState())
 
     fun setFilter(filter: LogStatusFilter) {
         filterState.value = filter
+        visibleCountState.value = DEFAULT_PAGE_SIZE
+    }
+
+    fun updateSearchQuery(query: String) {
+        queryState.value = query
+        visibleCountState.value = DEFAULT_PAGE_SIZE
+    }
+
+    fun loadMore() {
+        visibleCountState.update { it + DEFAULT_PAGE_SIZE }
     }
 
     fun retry(eventId: String) {
         viewModelScope.launch {
             deliveryLogRepository.markPending(eventId)
             deliveryWorkScheduler.enqueueNow()
+            messageState.value = "已重新入队 1 条记录"
         }
+    }
+
+    fun retryVisible(records: List<DeliveryRecord>) {
+        val retryableIds = records
+            .filter { it.status == DeliveryStatus.FAILED || it.status == DeliveryStatus.RETRYING }
+            .map { it.eventId }
+            .distinct()
+        if (retryableIds.isEmpty()) {
+            messageState.value = "当前没有可重试记录"
+            return
+        }
+        viewModelScope.launch {
+            retryableIds.forEach { deliveryLogRepository.markPending(it) }
+            deliveryWorkScheduler.enqueueNow()
+            messageState.value = "已重新入队 ${retryableIds.size} 条记录"
+        }
+    }
+
+    companion object {
+        private const val DEFAULT_PAGE_SIZE = 50
+    }
+}
+
+private fun List<DeliveryRecord>.filterByQuery(query: String): List<DeliveryRecord> {
+    val normalizedQuery = query.trim()
+    if (normalizedQuery.isEmpty()) return this
+    return filter { record ->
+        buildString {
+            append(record.appName)
+            append(' ')
+            append(record.title.orEmpty())
+            append(' ')
+            append(record.text.orEmpty())
+            append(' ')
+            append(record.errorMessage.orEmpty())
+            append(' ')
+            append(record.status.name)
+        }.contains(normalizedQuery, ignoreCase = true)
     }
 }
