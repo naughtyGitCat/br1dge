@@ -1,0 +1,31 @@
+# macOS
+.DS_Store
+
+# Gradle
+.gradle/
+build/
+**/build/
+local.properties
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Kotlin / JVM
+*.log
+*.class
+out/
+
+# Generated files
+app/release/
+app/debug/
+
+# Keystore / signing
+*.jks
+*.keystore
+
+# Misc
+.env
