@@ -26,7 +26,7 @@ class LogDetailViewModel @Inject constructor(
     private val deliveryLogRepository: DeliveryLogRepository,
     private val deliveryWorkScheduler: DeliveryWorkScheduler,
 ) : ViewModel() {
-    private val eventId: String = savedStateHandle["eventId"].orEmpty()
+    private val eventId: String = savedStateHandle.get<String>("eventId").orEmpty()
 
     val uiState: StateFlow<LogDetailUiState> = combine(
         deliveryLogRepository.observeDetail(eventId),
