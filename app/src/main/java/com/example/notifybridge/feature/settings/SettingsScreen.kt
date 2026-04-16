@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -23,7 +24,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.notifybridge.domain.model.AppSettings
-import com.example.notifybridge.domain.model.FilterRuleSet
 
 @Composable
 fun SettingsScreenRoute(
@@ -61,6 +61,21 @@ private fun SettingsScreen(
     var dedupeSeconds by remember(uiState.settings.filterRuleSet.dedupeWindowSeconds) {
         mutableStateOf(uiState.settings.filterRuleSet.dedupeWindowSeconds.toString())
     }
+    val draft = SettingsDraft(
+        forwardingEnabled = uiState.settings.forwardingEnabled,
+        webhookUrl = webhookUrl,
+        bearerToken = token,
+        allowedPackages = allowedPackages,
+        blockedPackages = blockedPackages,
+        keywordWhitelist = whitelist,
+        keywordBlacklist = blacklist,
+        dedupeSeconds = dedupeSeconds,
+        filtersEnabled = uiState.settings.filterRuleSet.enabled,
+        excludeSystem = uiState.settings.filterRuleSet.excludeSystemNotifications,
+        excludeOngoing = uiState.settings.filterRuleSet.excludeOngoingNotifications,
+        excludeEmpty = uiState.settings.filterRuleSet.excludeEmptyTextNotifications,
+        autoRetry = uiState.settings.filterRuleSet.autoRetryEnabled,
+    )
 
     LazyColumn(
         modifier = Modifier
@@ -110,12 +125,18 @@ private fun SettingsScreen(
                         }
                     )
                     OutlinedTextField(value = webhookUrl, onValueChange = { webhookUrl = it }, label = { Text("Webhook URL") }, modifier = Modifier.fillMaxWidth())
+                    uiState.validation.webhookUrlError?.let {
+                        Text(it, color = MaterialTheme.colorScheme.error)
+                    }
                     OutlinedTextField(value = token, onValueChange = { token = it }, label = { Text("Bearer Token") }, modifier = Modifier.fillMaxWidth())
                     OutlinedTextField(value = allowedPackages, onValueChange = { allowedPackages = it }, label = { Text("允许应用包名（逗号分隔）") }, modifier = Modifier.fillMaxWidth())
                     OutlinedTextField(value = blockedPackages, onValueChange = { blockedPackages = it }, label = { Text("黑名单应用包名（逗号分隔）") }, modifier = Modifier.fillMaxWidth())
                     OutlinedTextField(value = whitelist, onValueChange = { whitelist = it }, label = { Text("关键词白名单（逗号分隔）") }, modifier = Modifier.fillMaxWidth())
                     OutlinedTextField(value = blacklist, onValueChange = { blacklist = it }, label = { Text("关键词黑名单（逗号分隔）") }, modifier = Modifier.fillMaxWidth())
                     OutlinedTextField(value = dedupeSeconds, onValueChange = { dedupeSeconds = it }, label = { Text("去重秒数") }, modifier = Modifier.fillMaxWidth())
+                    uiState.validation.dedupeSecondsError?.let {
+                        Text(it, color = MaterialTheme.colorScheme.error)
+                    }
                     SwitchRow(
                         title = "排除系统通知",
                         checked = uiState.settings.filterRuleSet.excludeSystemNotifications,
@@ -146,12 +167,16 @@ private fun SettingsScreen(
                     )
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
                         Button(onClick = {
-                            save(uiState.settings, onAction, webhookUrl, token, allowedPackages, blockedPackages, whitelist, blacklist, dedupeSeconds)
+                            onAction(SettingsAction.Save(draft))
                         }, modifier = Modifier.weight(1f)) {
                             Text("保存设置")
                         }
-                        Button(onClick = { onAction(SettingsAction.TestSend) }, modifier = Modifier.weight(1f)) {
-                            Text("测试发送")
+                        Button(
+                            onClick = { onAction(SettingsAction.TestSend(draft)) },
+                            modifier = Modifier.weight(1f),
+                            enabled = uiState.testSendState !is TestSendState.Running,
+                        ) {
+                            Text(if (uiState.testSendState is TestSendState.Running) "测试中..." else "测试发送")
                         }
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
@@ -163,6 +188,12 @@ private fun SettingsScreen(
                         }
                     }
                     uiState.message?.let { Text(it) }
+                    when (val state = uiState.testSendState) {
+                        TestSendState.Idle -> Unit
+                        TestSendState.Running -> Text("正在请求当前表单配置对应的 Webhook...")
+                        is TestSendState.Success -> Text("连通性结果：${state.message}")
+                        is TestSendState.Failure -> Text("连通性结果：${state.message}")
+                    }
                     uiState.exportingPath?.let { Text("导出文件(JSON)：$it") }
                 }
             }
@@ -199,27 +230,21 @@ private fun save(
     excludeEmpty: Boolean = current.filterRuleSet.excludeEmptyTextNotifications,
     autoRetry: Boolean = current.filterRuleSet.autoRetryEnabled,
 ) {
-    onAction(
-        SettingsAction.Save(
-            current.copy(
-                forwardingEnabled = forwardingEnabled,
-                webhookUrl = webhookUrl.trim(),
-                bearerToken = token.trim(),
-                filterRuleSet = FilterRuleSet(
-                    enabled = filtersEnabled,
-                    allowedPackages = allowedPackages.splitToSet(),
-                    blockedPackages = blockedPackages.splitToSet(),
-                    keywordWhitelist = whitelist.splitToSet(),
-                    keywordBlacklist = blacklist.splitToSet(),
-                    excludeSystemNotifications = excludeSystem,
-                    excludeOngoingNotifications = excludeOngoing,
-                    excludeEmptyTextNotifications = excludeEmpty,
-                    dedupeWindowSeconds = dedupeSeconds.toIntOrNull() ?: current.filterRuleSet.dedupeWindowSeconds,
-                    autoRetryEnabled = autoRetry,
-                )
-            )
+    onAction(SettingsAction.Save(
+        SettingsDraft(
+            forwardingEnabled = forwardingEnabled,
+            webhookUrl = webhookUrl,
+            bearerToken = token,
+            allowedPackages = allowedPackages,
+            blockedPackages = blockedPackages,
+            keywordWhitelist = whitelist,
+            keywordBlacklist = blacklist,
+            dedupeSeconds = dedupeSeconds,
+            filtersEnabled = filtersEnabled,
+            excludeSystem = excludeSystem,
+            excludeOngoing = excludeOngoing,
+            excludeEmpty = excludeEmpty,
+            autoRetry = autoRetry,
         )
-    )
+    ))
 }
-
-private fun String.splitToSet(): Set<String> = split(",").map { it.trim() }.filter { it.isNotEmpty() }.toSet()

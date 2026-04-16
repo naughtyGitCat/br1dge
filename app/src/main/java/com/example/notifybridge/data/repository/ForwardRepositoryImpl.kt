@@ -27,6 +27,31 @@ class ForwardRepositoryImpl @Inject constructor(
 
     override suspend fun sendPayload(payload: ForwardPayload): ForwardResult {
         val settings = settingsRepository.getSettings()
+        return sendPayload(payload = payload, settings = settings)
+    }
+
+    override suspend fun sendTestPayload(settings: com.example.notifybridge.domain.model.AppSettings?): ForwardResult {
+        val resolvedSettings = settings ?: settingsRepository.getSettings()
+        return sendPayload(
+            payload = ForwardPayload(
+                appPackage = context.packageName,
+                appName = "NotifyBridge",
+                title = "NotifyBridge Test",
+                text = "This is a test payload.",
+                subText = "MVP",
+                postTime = System.currentTimeMillis(),
+                receivedAt = System.currentTimeMillis(),
+                deviceModel = android.os.Build.MODEL ?: "Unknown",
+                androidVersion = android.os.Build.VERSION.RELEASE ?: "Unknown",
+            ),
+            settings = resolvedSettings,
+        )
+    }
+
+    private suspend fun sendPayload(
+        payload: ForwardPayload,
+        settings: com.example.notifybridge.domain.model.AppSettings,
+    ): ForwardResult {
         val endpoint = settings.webhookUrl.trim()
         if (endpoint.isEmpty()) {
             return ForwardResult.Failure(ForwardError.EndpointNotConfigured)
@@ -72,22 +97,6 @@ class ForwardRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             ForwardResult.Failure(ForwardError.Unknown(e.message ?: "未知错误"))
         }
-    }
-
-    override suspend fun sendTestPayload(): ForwardResult {
-        return sendPayload(
-            ForwardPayload(
-                appPackage = context.packageName,
-                appName = "NotifyBridge",
-                title = "NotifyBridge Test",
-                text = "This is a test payload.",
-                subText = "MVP",
-                postTime = System.currentTimeMillis(),
-                receivedAt = System.currentTimeMillis(),
-                deviceModel = android.os.Build.MODEL ?: "Unknown",
-                androidVersion = android.os.Build.VERSION.RELEASE ?: "Unknown",
-            )
-        )
     }
 
     private fun isNetworkAvailable(): Boolean {
