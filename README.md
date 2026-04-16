@@ -60,6 +60,10 @@ app/src/main/java/com/example/notifybridge
 3. 使用 Android 8.0+ 真机运行，建议 Android 13/14。
 4. 首次运行后进入应用首页与设置页完成授权和 Webhook 配置。
 
+命令行构建：
+
+- `./gradlew :app:assembleDebug`
+
 当前配置：
 
 - `minSdk = 26`
@@ -131,6 +135,7 @@ MVP 仅支持：
 - 触发方式：`push main`、`pull_request`、手动 `workflow_dispatch`
 - 当前产物：`Debug APK`
 - 产物下载：GitHub Actions 页面中的 `notifybridge-debug-apk`
+- CI 构建入口：`./gradlew :app:assembleDebug`
 
 ## 状态定义
 
@@ -173,7 +178,7 @@ Room migration 预留点：
 - 当前 MVP 只支持一个 Webhook endpoint
 - 日志列表目前是懒加载列表，但尚未做真正分页数据库查询
 - 当前导出调试信息为本地文本快照，未接入系统分享或 SAF
-- 当前仓库未包含 Gradle Wrapper；在 Android Studio 中首次打开后，建议立即生成/补齐 wrapper 再做 CI
+- 本地命令行构建需要可用的 Java 17 环境
 
 ## 常见 ROM 限制
 
