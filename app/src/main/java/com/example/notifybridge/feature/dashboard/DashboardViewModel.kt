@@ -37,17 +37,23 @@ class DashboardViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val actionMessage = MutableStateFlow<String?>(null)
+    private val listenerEnabled = MutableStateFlow(notificationAccessManager.isNotificationAccessEnabled())
 
     val uiState: StateFlow<DashboardUiState> = combine(
         getDashboardStateUseCase(),
         actionMessage,
-    ) { dashboardState, actionMsg ->
+        listenerEnabled,
+    ) { dashboardState, actionMsg, accessEnabled ->
         DashboardUiState(
             dashboardState = dashboardState,
-            listenerEnabled = notificationAccessManager.isNotificationAccessEnabled(),
+            listenerEnabled = accessEnabled,
             lastActionMessage = actionMsg,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DashboardUiState())
+
+    fun refreshStatus() {
+        listenerEnabled.value = notificationAccessManager.isNotificationAccessEnabled()
+    }
 
     fun onAction(action: DashboardAction) {
         viewModelScope.launch {
@@ -69,6 +75,7 @@ class DashboardViewModel @Inject constructor(
                 }
             }
             actionMessage.value = message
+            listenerEnabled.value = notificationAccessManager.isNotificationAccessEnabled()
         }
     }
 }

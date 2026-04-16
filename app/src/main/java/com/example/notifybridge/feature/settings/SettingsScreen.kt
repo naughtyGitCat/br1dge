@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -163,7 +164,7 @@ private fun SettingsScreen(
                         }
                     }
                     uiState.message?.let { Text(it) }
-                    uiState.exportingPath?.let { Text("导出文件：$it") }
+                    uiState.exportingPath?.let { Text("导出文件(JSON)：$it") }
                 }
             }
         }

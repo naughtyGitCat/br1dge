@@ -10,9 +10,9 @@ import javax.inject.Singleton
 class DebugExportManager @Inject constructor(
     @ApplicationContext private val context: Context,
 ) {
-    fun exportText(content: String): File {
+    fun exportJson(content: String): File {
         val dir = File(context.filesDir, "exports").apply { mkdirs() }
-        val file = File(dir, "notifybridge-debug-${System.currentTimeMillis()}.txt")
+        val file = File(dir, "notifybridge-debug-${System.currentTimeMillis()}.json")
         file.writeText(content)
         return file
     }

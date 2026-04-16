@@ -123,6 +123,15 @@ MVP 仅支持：
 5. 观察 Logs 页面是否出现新记录。
 6. 也可以在 Settings 点击“测试发送”，验证网络链路本身。
 
+## GitHub Actions
+
+仓库内置了 APK 打包工作流：
+
+- 文件位置：`.github/workflows/build-apk.yml`
+- 触发方式：`push main`、`pull_request`、手动 `workflow_dispatch`
+- 当前产物：`Debug APK`
+- 产物下载：GitHub Actions 页面中的 `notifybridge-debug-apk`
+
 ## 状态定义
 
 Outbox 状态：

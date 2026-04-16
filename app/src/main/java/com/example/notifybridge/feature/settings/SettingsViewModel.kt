@@ -79,7 +79,7 @@ class SettingsViewModel @Inject constructor(
                     ephemeralState.value = ephemeralState.value.copy(message = "日志已清空")
                 }
                 SettingsAction.ExportDebug -> {
-                    val file = debugExportManager.exportText(deliveryLogRepository.exportDebugSnapshot())
+                    val file = debugExportManager.exportJson(deliveryLogRepository.exportDebugSnapshot())
                     ephemeralState.value = ephemeralState.value.copy(
                         message = "调试信息已导出",
                         exportingPath = file.absolutePath,
