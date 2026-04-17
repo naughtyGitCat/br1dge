@@ -139,6 +139,9 @@ interface OutboxDao {
     @Query("SELECT errorMessage FROM outbox WHERE status = 'FAILED' ORDER BY updatedAt DESC LIMIT 1")
     fun observeLastFailureReason(): Flow<String?>
 
+    @Query("SELECT MIN(nextRetryAt) FROM outbox WHERE status = 'RETRYING' AND nextRetryAt IS NOT NULL")
+    fun observeNextRetryAt(): Flow<Long?>
+
     @Query("SELECT COUNT(*) FROM outbox WHERE status = 'SUCCESS' AND updatedAt >= :startOfDay")
     fun observeTodaySuccessCount(startOfDay: Long): Flow<Int>
 

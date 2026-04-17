@@ -79,6 +79,13 @@ private fun DashboardScreen(
                     Text("今日失败：${uiState.dashboardState.todayFailureCount}")
                     Text("最近一次成功：${uiState.dashboardState.lastSuccessAt?.toFriendlyTime() ?: "暂无"}")
                     Text("最近一次失败：${uiState.dashboardState.lastFailureReason ?: "暂无"}")
+                    Text(
+                        "下一次自动重试：${
+                            uiState.dashboardState.nextRetryAt?.let {
+                                "${it.toFriendlyTime()}（${it.toRelativeRetryText()}）"
+                            } ?: "暂无"
+                        }"
+                    )
                     uiState.lastActionMessage?.let { Text(it, color = MaterialTheme.colorScheme.primary) }
                 }
             }
@@ -112,4 +119,17 @@ private fun DashboardScreen(
 private fun Long.toFriendlyTime(): String {
     val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
     return formatter.format(Date(this))
+}
+
+private fun Long.toRelativeRetryText(now: Long = System.currentTimeMillis()): String {
+    val delta = this - now
+    if (delta <= 0) return "即将执行"
+    val totalSeconds = delta / 1000
+    val minutes = totalSeconds / 60
+    val seconds = totalSeconds % 60
+    return when {
+        minutes > 0 && seconds > 0 -> "${minutes}分${seconds}秒后"
+        minutes > 0 -> "${minutes}分钟后"
+        else -> "${seconds}秒后"
+    }
 }

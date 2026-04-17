@@ -224,16 +224,28 @@ class DeliveryLogRepositoryImpl @Inject constructor(
             .toInstant()
             .toEpochMilli()
         return combine(
-            outboxDao.observePendingCount(),
-            outboxDao.observeLastSuccessAt(),
-            outboxDao.observeLastFailureReason(),
-            outboxDao.observeTodaySuccessCount(todayStart),
-            outboxDao.observeTodayFailureCount(todayStart),
-        ) { pending, lastSuccess, lastFailure, successCount, failureCount ->
+            combine(
+                outboxDao.observePendingCount(),
+                outboxDao.observeLastSuccessAt(),
+                outboxDao.observeLastFailureReason(),
+            ) { pending, lastSuccess, lastFailure ->
+                Triple(pending, lastSuccess, lastFailure)
+            },
+            combine(
+                outboxDao.observeNextRetryAt(),
+                outboxDao.observeTodaySuccessCount(todayStart),
+                outboxDao.observeTodayFailureCount(todayStart),
+            ) { nextRetryAt, successCount, failureCount ->
+                Triple(nextRetryAt, successCount, failureCount)
+            },
+        ) { left, right ->
+            val (pending, lastSuccess, lastFailure) = left
+            val (nextRetryAt, successCount, failureCount) = right
             DashboardState(
                 pendingCount = pending,
                 lastSuccessAt = lastSuccess,
                 lastFailureReason = lastFailure,
+                nextRetryAt = nextRetryAt,
                 todaySuccessCount = successCount,
                 todayFailureCount = failureCount,
             )
