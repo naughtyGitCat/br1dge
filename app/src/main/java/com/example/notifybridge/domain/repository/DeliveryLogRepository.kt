@@ -17,6 +17,7 @@ interface DeliveryLogRepository {
     suspend fun appendAttempt(eventId: String, errorMessage: String?, responseCode: Int?, payloadJson: String)
     fun observeLogs(status: DeliveryStatus?): Flow<List<DeliveryRecord>>
     fun observeDetail(eventId: String): Flow<DeliveryRecord?>
+    fun observeNotificationEvent(eventId: String): Flow<NotificationEvent?>
     fun observeAttempts(eventId: String): Flow<List<DeliveryAttempt>>
     fun observeDashboardState(): Flow<DashboardState>
     suspend fun getLastAcceptedAtForDedupe(packageName: String, title: String?, text: String?): Long?

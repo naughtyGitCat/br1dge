@@ -10,6 +10,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -62,6 +63,7 @@ private fun LogDetailScreen(
         }
         Card(modifier = Modifier.fillMaxWidth()) {
             Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("当前投递状态", style = MaterialTheme.typography.titleMedium)
                 Text("事件 ID：$eventId")
                 val record = uiState.record
                 if (record == null) {
@@ -78,23 +80,42 @@ private fun LogDetailScreen(
                 }
             }
         }
+        uiState.notificationEvent?.let { event ->
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("原始通知元数据", style = MaterialTheme.typography.titleMedium)
+                    Text("来源包名：${event.packageName}")
+                    Text("通知键：${event.notificationKey}")
+                    Text("接收时间：${event.receivedAt.toFriendlyTime()}")
+                    Text("发送时间：${event.postTime.toFriendlyTime()}")
+                    Text("SubText：${event.subText ?: "(无)"}")
+                    Text("ongoing：${if (event.ongoing) "是" else "否"}")
+                    Text("clearable：${if (event.clearable) "是" else "否"}")
+                    Text("系统通知：${if (event.isSystemNotification) "是" else "否"}")
+                }
+            }
+        }
         if (uiState.attempts.isNotEmpty()) {
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("投递尝试历史")
+                    Text("投递尝试历史", style = MaterialTheme.typography.titleMedium)
                     uiState.attempts.forEach { attempt ->
-                        Text(
-                            buildString {
-                                append(SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date(attempt.createdAt)))
-                                append(" | code=")
-                                append(attempt.responseCode ?: "-")
-                                append(" | error=")
-                                append(attempt.errorMessage ?: "none")
+                        Card(modifier = Modifier.fillMaxWidth()) {
+                            Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                Text("尝试时间：${attempt.createdAt.toFriendlyTime()}")
+                                Text("响应码：${attempt.responseCode?.toString() ?: "无"}")
+                                Text("错误信息：${attempt.errorMessage ?: "无"}")
+                                Text("请求 Payload：")
+                                Text(attempt.payloadJson.ifBlank { "(空 payload)" })
                             }
-                        )
+                        }
                     }
                 }
             }
         }
     }
+}
+
+private fun Long.toFriendlyTime(): String {
+    return SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date(this))
 }

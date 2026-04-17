@@ -143,6 +143,27 @@ class DeliveryLogRepositoryImpl @Inject constructor(
         }
     }
 
+    override fun observeNotificationEvent(eventId: String): Flow<NotificationEvent?> {
+        return outboxDao.observeByEventId(eventId).map { outbox ->
+            val resolvedEventId = outbox?.eventId ?: eventId
+            val entity = notificationEventDao.getById(resolvedEventId) ?: return@map null
+            NotificationEvent(
+                eventId = entity.eventId,
+                packageName = entity.packageName,
+                appName = entity.appName,
+                title = entity.title,
+                text = entity.text,
+                subText = entity.subText,
+                postTime = entity.postTime,
+                notificationKey = entity.notificationKey,
+                ongoing = entity.ongoing,
+                clearable = entity.clearable,
+                isSystemNotification = entity.isSystemNotification,
+                receivedAt = entity.receivedAt,
+            )
+        }
+    }
+
     override fun observeAttempts(eventId: String): Flow<List<DeliveryAttempt>> {
         return deliveryAttemptDao.observeByEventId(eventId).map { attempts ->
             attempts.map {
