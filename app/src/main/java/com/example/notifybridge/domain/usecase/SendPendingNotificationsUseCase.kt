@@ -9,6 +9,7 @@ import com.example.notifybridge.domain.model.ForwardResult
 import com.example.notifybridge.domain.repository.DeliveryLogRepository
 import com.example.notifybridge.domain.repository.ForwardRepository
 import com.example.notifybridge.domain.repository.SettingsRepository
+import com.example.notifybridge.system.util.NotificationCancellationCoordinator
 import kotlinx.coroutines.coroutineScope
 import javax.inject.Inject
 
@@ -16,9 +17,11 @@ class SendPendingNotificationsUseCase @Inject constructor(
     private val deliveryLogRepository: DeliveryLogRepository,
     private val forwardRepository: ForwardRepository,
     private val settingsRepository: SettingsRepository,
+    private val notificationCancellationCoordinator: NotificationCancellationCoordinator,
 ) {
     suspend operator fun invoke(): DeliveryRunSummary = coroutineScope {
-        val autoRetryEnabled = settingsRepository.getSettings().filterRuleSet.autoRetryEnabled
+        val settings = settingsRepository.getSettings()
+        val autoRetryEnabled = settings.filterRuleSet.autoRetryEnabled
         var success = 0
         var retrying = 0
         var failed = 0
@@ -45,6 +48,9 @@ class SendPendingNotificationsUseCase @Inject constructor(
                         payloadJson = payload.toJson(),
                     )
                     deliveryLogRepository.markDelivered(event.eventId)
+                    if (settings.cancelNotificationOnSuccess && event.clearable) {
+                        notificationCancellationCoordinator.cancelNotification(event.notificationKey)
+                    }
                     success++
                 }
                 is ForwardResult.Failure -> {

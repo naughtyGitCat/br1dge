@@ -102,6 +102,7 @@ app/src/main/java/com/example/notifybridge
 Settings 页面支持配置：
 
 - 启用转发总开关
+- 转发成功后清除本机原通知
 - Bark Server URL
 - Bark Device Key
 - 应用白名单/黑名单
@@ -132,6 +133,12 @@ Settings 页面支持配置：
 4. Dashboard 点击“生成测试通知”。
 5. 观察 Logs 页面是否出现新记录。
 6. 也可以在 Settings 点击“测试发送”，验证 Bark 推送链路本身。
+
+如果开启“转发成功后清除本机原通知”：
+
+- 仅会在转发成功后尝试清除原通知
+- 当前只会清除仍然可清除的通知，系统限制或不可清除通知会跳过
+- 清除动作依赖通知监听服务仍处于连接状态
 
 ## GitHub Actions
 

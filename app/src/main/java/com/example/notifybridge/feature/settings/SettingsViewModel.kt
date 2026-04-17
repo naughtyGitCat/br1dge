@@ -29,6 +29,7 @@ sealed class SettingsAction {
 
 data class SettingsDraft(
     val forwardingEnabled: Boolean,
+    val cancelNotificationOnSuccess: Boolean,
     val barkServerUrl: String,
     val barkDeviceKey: String,
     val barkDeviceKeys: String,
@@ -262,6 +263,7 @@ class SettingsViewModel @Inject constructor(
 
 private fun SettingsDraft.toAppSettings(): AppSettings = AppSettings(
     forwardingEnabled = forwardingEnabled,
+    cancelNotificationOnSuccess = cancelNotificationOnSuccess,
     barkServerUrl = barkServerUrl.trim(),
     barkDeviceKey = barkDeviceKey.trim(),
     barkDeviceKeys = barkDeviceKeys.splitToList(),

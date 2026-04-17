@@ -5,6 +5,7 @@ import android.service.notification.StatusBarNotification
 import com.example.notifybridge.core.common.AppDispatchers
 import com.example.notifybridge.domain.usecase.HandleIncomingNotificationUseCase
 import com.example.notifybridge.system.util.DeliveryWorkScheduler
+import com.example.notifybridge.system.util.NotificationCancellationCoordinator
 import com.example.notifybridge.system.util.NotificationParser
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -28,8 +29,16 @@ class BridgeNotificationListenerService : NotificationListenerService() {
     @Inject
     lateinit var deliveryWorkScheduler: DeliveryWorkScheduler
 
+    @Inject
+    lateinit var notificationCancellationCoordinator: NotificationCancellationCoordinator
+
     private val serviceScope by lazy {
         CoroutineScope(SupervisorJob() + dispatchers.io)
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        notificationCancellationCoordinator.attach(this)
     }
 
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
@@ -46,6 +55,7 @@ class BridgeNotificationListenerService : NotificationListenerService() {
     }
 
     override fun onDestroy() {
+        notificationCancellationCoordinator.detach(this)
         serviceScope.cancel()
         super.onDestroy()
     }

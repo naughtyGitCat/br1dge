@@ -81,6 +81,7 @@ private fun SettingsScreen(
     }
     val draft = SettingsDraft(
         forwardingEnabled = uiState.settings.forwardingEnabled,
+        cancelNotificationOnSuccess = uiState.settings.cancelNotificationOnSuccess,
         barkServerUrl = barkServerUrl,
         barkDeviceKey = barkDeviceKey,
         barkDeviceKeys = barkDeviceKeys,
@@ -157,6 +158,24 @@ private fun SettingsScreen(
                                 blacklist = blacklist,
                                 dedupeSeconds = dedupeSeconds,
                                 filtersEnabled = it,
+                            )
+                        }
+                    )
+                    SwitchRow(
+                        title = "转发成功后清除本机原通知",
+                        checked = uiState.settings.cancelNotificationOnSuccess,
+                        onCheckedChange = {
+                            save(
+                                current = uiState.settings,
+                                onAction = onAction,
+                                barkServerUrl = barkServerUrl,
+                                barkDeviceKey = barkDeviceKey,
+                                allowedPackages = allowedPackages,
+                                blockedPackages = blockedPackages,
+                                whitelist = whitelist,
+                                blacklist = blacklist,
+                                dedupeSeconds = dedupeSeconds,
+                                cancelNotificationOnSuccess = it,
                             )
                         }
                     )
@@ -310,6 +329,7 @@ private fun save(
     blacklist: String,
     dedupeSeconds: String,
     forwardingEnabled: Boolean = current.forwardingEnabled,
+    cancelNotificationOnSuccess: Boolean = current.cancelNotificationOnSuccess,
     filtersEnabled: Boolean = current.filterRuleSet.enabled,
     excludeSystem: Boolean = current.filterRuleSet.excludeSystemNotifications,
     excludeOngoing: Boolean = current.filterRuleSet.excludeOngoingNotifications,
@@ -319,6 +339,7 @@ private fun save(
     onAction(SettingsAction.Save(
         SettingsDraft(
             forwardingEnabled = forwardingEnabled,
+            cancelNotificationOnSuccess = cancelNotificationOnSuccess,
             barkServerUrl = barkServerUrl,
             barkDeviceKey = barkDeviceKey,
             barkDeviceKeys = barkDeviceKeys,

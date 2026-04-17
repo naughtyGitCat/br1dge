@@ -22,6 +22,7 @@ class SettingsDataStore @Inject constructor(
 ) {
     private object Keys {
         val forwardingEnabled = booleanPreferencesKey("forwarding_enabled")
+        val cancelNotificationOnSuccess = booleanPreferencesKey("cancel_notification_on_success")
         val barkServerUrl = stringPreferencesKey("bark_server_url")
         val barkDeviceKey = stringPreferencesKey("bark_device_key")
         val barkDeviceKeys = stringPreferencesKey("bark_device_keys")
@@ -59,6 +60,7 @@ class SettingsDataStore @Inject constructor(
     fun observeSettings(): Flow<AppSettings> = context.settingsDataStore.data.map { prefs ->
         AppSettings(
             forwardingEnabled = prefs[Keys.forwardingEnabled] ?: false,
+            cancelNotificationOnSuccess = prefs[Keys.cancelNotificationOnSuccess] ?: false,
             barkServerUrl = prefs[Keys.barkServerUrl] ?: "https://api.day.app",
             barkDeviceKey = prefs[Keys.barkDeviceKey].orEmpty(),
             barkDeviceKeys = prefs[Keys.barkDeviceKeys].toTokenList(),
@@ -99,6 +101,7 @@ class SettingsDataStore @Inject constructor(
     suspend fun updateSettings(settings: AppSettings) {
         context.settingsDataStore.edit { prefs ->
             prefs[Keys.forwardingEnabled] = settings.forwardingEnabled
+            prefs[Keys.cancelNotificationOnSuccess] = settings.cancelNotificationOnSuccess
             prefs[Keys.barkServerUrl] = settings.barkServerUrl
             prefs[Keys.barkDeviceKey] = settings.barkDeviceKey
             prefs[Keys.barkDeviceKeys] = settings.barkDeviceKeys.joinToString(",")

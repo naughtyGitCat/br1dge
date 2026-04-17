@@ -2,6 +2,7 @@ package com.example.notifybridge.domain.model
 
 data class AppSettings(
     val forwardingEnabled: Boolean = false,
+    val cancelNotificationOnSuccess: Boolean = false,
     val barkServerUrl: String = "https://api.day.app",
     val barkDeviceKey: String = "",
     val barkDeviceKeys: List<String> = emptyList(),
