@@ -10,6 +10,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
@@ -24,6 +28,56 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.notifybridge.domain.model.AppSettings
+
+private const val BarkSoundDefaultValue = ""
+
+private val barkLevelOptions = listOf(
+    "active" to "active",
+    "timeSensitive" to "timeSensitive",
+    "passive" to "passive",
+    "critical" to "critical",
+)
+
+private val barkActionOptions = listOf(
+    "" to "不设置",
+    "alert" to "alert",
+)
+
+private val barkSoundOptions = listOf(
+    BarkSoundDefaultValue to "跟随 Bark 默认",
+    "alarm.caf" to "alarm.caf",
+    "anticipate.caf" to "anticipate.caf",
+    "bell.caf" to "bell.caf",
+    "birdsong.caf" to "birdsong.caf",
+    "bloom.caf" to "bloom.caf",
+    "calypso.caf" to "calypso.caf",
+    "chime.caf" to "chime.caf",
+    "choo.caf" to "choo.caf",
+    "descent.caf" to "descent.caf",
+    "electronic.caf" to "electronic.caf",
+    "fanfare.caf" to "fanfare.caf",
+    "glass.caf" to "glass.caf",
+    "gotosleep.caf" to "gotosleep.caf",
+    "healthnotification.caf" to "healthnotification.caf",
+    "horn.caf" to "horn.caf",
+    "ladder.caf" to "ladder.caf",
+    "mailsent.caf" to "mailsent.caf",
+    "minuet.caf" to "minuet.caf",
+    "multiwayinvitation.caf" to "multiwayinvitation.caf",
+    "newmail.caf" to "newmail.caf",
+    "newsflash.caf" to "newsflash.caf",
+    "noir.caf" to "noir.caf",
+    "paymentsuccess.caf" to "paymentsuccess.caf",
+    "shake.caf" to "shake.caf",
+    "sherwoodforest.caf" to "sherwoodforest.caf",
+    "silence.caf" to "silence.caf",
+    "spell.caf" to "spell.caf",
+    "suspense.caf" to "suspense.caf",
+    "telegraph.caf" to "telegraph.caf",
+    "tiptoes.caf" to "tiptoes.caf",
+    "typewriters.caf" to "typewriters.caf",
+    "update.caf" to "update.caf",
+)
 
 @Composable
 fun SettingsScreenRoute(
@@ -191,14 +245,24 @@ private fun SettingsScreen(
                         Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             Text("Bark 高级参数")
                             OutlinedTextField(value = barkDeviceKeys, onValueChange = { barkDeviceKeys = it }, label = { Text("Device Keys（逗号分隔，可选）") }, modifier = Modifier.fillMaxWidth())
-                            OutlinedTextField(value = barkLevel, onValueChange = { barkLevel = it }, label = { Text("Level") }, modifier = Modifier.fillMaxWidth())
+                            SelectionField(
+                                label = "Level",
+                                value = barkLevel,
+                                options = barkLevelOptions,
+                                onValueSelected = { barkLevel = it },
+                            )
                             uiState.validation.barkLevelError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
                             OutlinedTextField(value = barkVolume, onValueChange = { barkVolume = it }, label = { Text("Volume（0-10，可选）") }, modifier = Modifier.fillMaxWidth())
                             uiState.validation.barkVolumeError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
                             OutlinedTextField(value = barkBadge, onValueChange = { barkBadge = it }, label = { Text("Badge（整数，可选）") }, modifier = Modifier.fillMaxWidth())
                             uiState.validation.barkBadgeError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
                             OutlinedTextField(value = barkCopy, onValueChange = { barkCopy = it }, label = { Text("Copy（可选）") }, modifier = Modifier.fillMaxWidth())
-                            OutlinedTextField(value = barkSound, onValueChange = { barkSound = it }, label = { Text("Sound（可选）") }, modifier = Modifier.fillMaxWidth())
+                            SelectionField(
+                                label = "Sound",
+                                value = barkSound,
+                                options = barkSoundOptions.withCurrentValue(barkSound),
+                                onValueSelected = { barkSound = it },
+                            )
                             OutlinedTextField(value = barkIcon, onValueChange = { barkIcon = it }, label = { Text("Icon URL（可选）") }, modifier = Modifier.fillMaxWidth())
                             uiState.validation.barkIconError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
                             OutlinedTextField(value = barkImage, onValueChange = { barkImage = it }, label = { Text("Image URL（可选）") }, modifier = Modifier.fillMaxWidth())
@@ -207,7 +271,13 @@ private fun SettingsScreen(
                             OutlinedTextField(value = barkCiphertext, onValueChange = { barkCiphertext = it }, label = { Text("Ciphertext（可选）") }, modifier = Modifier.fillMaxWidth())
                             OutlinedTextField(value = barkUrl, onValueChange = { barkUrl = it }, label = { Text("点击跳转 URL（可选）") }, modifier = Modifier.fillMaxWidth())
                             uiState.validation.barkUrlError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-                            OutlinedTextField(value = barkAction, onValueChange = { barkAction = it }, label = { Text("Action（可选）") }, modifier = Modifier.fillMaxWidth())
+                            SelectionField(
+                                label = "Action",
+                                value = barkAction,
+                                options = barkActionOptions,
+                                onValueSelected = { barkAction = it },
+                            )
+                            uiState.validation.barkActionError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
                             OutlinedTextField(value = barkNotificationId, onValueChange = { barkNotificationId = it }, label = { Text("通知 ID（可选）") }, modifier = Modifier.fillMaxWidth())
                             SwitchRow(title = "Call", checked = barkCall, onCheckedChange = { barkCall = it })
                             SwitchRow(title = "AutoCopy", checked = barkAutoCopy, onCheckedChange = { barkAutoCopy = it })
@@ -288,6 +358,47 @@ private fun SettingsScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SelectionField(
+    label: String,
+    value: String,
+    options: List<Pair<String, String>>,
+    onValueSelected: (String) -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val selectedLabel = options.firstOrNull { it.first == value }?.second ?: value
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded },
+    ) {
+        OutlinedTextField(
+            value = selectedLabel,
+            onValueChange = {},
+            readOnly = true,
+            label = { Text(label) },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            modifier = Modifier
+                .menuAnchor()
+                .fillMaxWidth(),
+        )
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+        ) {
+            options.forEach { (optionValue, optionLabel) ->
+                DropdownMenuItem(
+                    text = { Text(optionLabel) },
+                    onClick = {
+                        onValueSelected(optionValue)
+                        expanded = false
+                    },
+                )
+            }
+        }
+    }
+}
+
 @Composable
 private fun SwitchRow(
     title: String,
@@ -298,6 +409,11 @@ private fun SwitchRow(
         Text(title, modifier = Modifier.weight(1f))
         Switch(checked = checked, onCheckedChange = onCheckedChange)
     }
+}
+
+private fun List<Pair<String, String>>.withCurrentValue(current: String): List<Pair<String, String>> {
+    if (current.isBlank() || any { it.first == current }) return this
+    return this + listOf(current to current)
 }
 
 private fun save(

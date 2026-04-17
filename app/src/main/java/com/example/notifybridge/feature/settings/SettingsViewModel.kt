@@ -68,6 +68,7 @@ data class SettingsValidationState(
     val barkLevelError: String? = null,
     val barkVolumeError: String? = null,
     val barkBadgeError: String? = null,
+    val barkActionError: String? = null,
     val barkUrlError: String? = null,
     val barkIconError: String? = null,
     val barkImageError: String? = null,
@@ -79,6 +80,7 @@ data class SettingsValidationState(
             barkLevelError == null &&
             barkVolumeError == null &&
             barkBadgeError == null &&
+            barkActionError == null &&
             barkUrlError == null &&
             barkIconError == null &&
             barkImageError == null &&
@@ -217,6 +219,10 @@ class SettingsViewModel @Inject constructor(
             "" -> null
             else -> value.toIntOrNull()?.let { null } ?: "角标需填写整数"
         }
+        val barkActionError = when (draft.barkAction.trim()) {
+            "", "alert" -> null
+            else -> "Action 目前仅支持留空或 alert"
+        }
         val barkUrlError = validateOptionalHttpUrlOrScheme(draft.barkUrl)
         val barkIconError = validateOptionalHttpUrl(draft.barkIcon, "Icon URL")
         val barkImageError = validateOptionalHttpUrl(draft.barkImage, "Image URL")
@@ -231,6 +237,7 @@ class SettingsViewModel @Inject constructor(
             barkLevelError = barkLevelError,
             barkVolumeError = barkVolumeError,
             barkBadgeError = barkBadgeError,
+            barkActionError = barkActionError,
             barkUrlError = barkUrlError,
             barkIconError = barkIconError,
             barkImageError = barkImageError,

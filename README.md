@@ -105,6 +105,7 @@ Settings 页面支持配置：
 - 转发成功后清除本机原通知
 - Bark Server URL
 - Bark Device Key
+- Bark Level / Action / Sound 下拉选择
 - 应用白名单/黑名单
 - 关键词白名单/黑名单
 - 排除系统通知
