@@ -10,6 +10,7 @@ data class DeliveryLogRow(
     val errorMessage: String?,
     val createdAt: Long,
     val updatedAt: Long,
+    val nextRetryAt: Long?,
     val payloadJson: String,
     val responseCode: Int?,
 )

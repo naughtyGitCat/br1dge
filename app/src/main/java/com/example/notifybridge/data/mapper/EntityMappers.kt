@@ -45,6 +45,7 @@ fun OutboxEntity.toDomain(appName: String, title: String?, text: String?): Deliv
     errorMessage = errorMessage,
     createdAt = createdAt,
     updatedAt = updatedAt,
+    nextRetryAt = nextRetryAt,
     payloadJson = payloadJson,
     responseCode = responseCode,
 )

@@ -71,6 +71,10 @@ private fun LogDetailScreen(
                 } else {
                     Text("App：${record.appName}")
                     Text("状态：${record.status}")
+                    record.nextRetryAt?.let {
+                        Text("预计下次重试：${it.toFriendlyTime()}（${it.toRelativeRetryText()}）")
+                    }
+                    Text("已尝试次数：${record.attemptCount}")
                     Text("标题：${record.title ?: "(无标题)"}")
                     Text("正文：${record.text ?: "(无正文)"}")
                     Text("错误：${record.errorMessage ?: "无"}")
@@ -133,4 +137,17 @@ private fun LogDetailScreen(
 
 private fun Long.toFriendlyTime(): String {
     return SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date(this))
+}
+
+private fun Long.toRelativeRetryText(now: Long = System.currentTimeMillis()): String {
+    val delta = this - now
+    if (delta <= 0) return "即将执行"
+    val totalSeconds = delta / 1000
+    val minutes = totalSeconds / 60
+    val seconds = totalSeconds % 60
+    return when {
+        minutes > 0 && seconds > 0 -> "${minutes}分${seconds}秒后"
+        minutes > 0 -> "${minutes}分钟后"
+        else -> "${seconds}秒后"
+    }
 }

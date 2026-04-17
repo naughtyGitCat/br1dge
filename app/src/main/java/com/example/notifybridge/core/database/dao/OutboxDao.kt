@@ -15,14 +15,25 @@ interface OutboxDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(entity: OutboxEntity): Long
 
-    @Query("UPDATE outbox SET status = :status, updatedAt = :updatedAt WHERE eventId = :eventId")
-    suspend fun updateStatus(eventId: String, status: DeliveryStatus, updatedAt: Long)
+    @Query(
+        """
+        UPDATE outbox
+        SET status = :status, nextRetryAt = :nextRetryAt, updatedAt = :updatedAt
+        WHERE eventId = :eventId
+        """
+    )
+    suspend fun updateStatus(
+        eventId: String,
+        status: DeliveryStatus,
+        nextRetryAt: Long?,
+        updatedAt: Long,
+    )
 
     @Query(
         """
         UPDATE outbox
         SET status = :status, attemptCount = attemptCount + 1, errorMessage = :errorMessage,
-            responseCode = :responseCode, updatedAt = :updatedAt
+            responseCode = :responseCode, nextRetryAt = :nextRetryAt, updatedAt = :updatedAt
         WHERE eventId = :eventId
         """
     )
@@ -31,6 +42,7 @@ interface OutboxDao {
         status: DeliveryStatus,
         errorMessage: String,
         responseCode: Int?,
+        nextRetryAt: Long?,
         updatedAt: Long,
     )
 
@@ -64,6 +76,7 @@ interface OutboxDao {
             o.errorMessage AS errorMessage,
             o.createdAt AS createdAt,
             o.updatedAt AS updatedAt,
+            o.nextRetryAt AS nextRetryAt,
             o.payloadJson AS payloadJson,
             o.responseCode AS responseCode
         FROM outbox o
@@ -110,6 +123,9 @@ interface OutboxDao {
 
     @Query("SELECT * FROM outbox WHERE eventId = :eventId LIMIT 1")
     fun observeByEventId(eventId: String): Flow<OutboxEntity?>
+
+    @Query("SELECT * FROM outbox WHERE eventId = :eventId LIMIT 1")
+    suspend fun getByEventId(eventId: String): OutboxEntity?
 
     @Query("SELECT * FROM outbox ORDER BY updatedAt DESC")
     suspend fun getAllNow(): List<OutboxEntity>

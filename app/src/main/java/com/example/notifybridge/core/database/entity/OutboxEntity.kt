@@ -12,6 +12,7 @@ data class OutboxEntity(
     val attemptCount: Int,
     val errorMessage: String?,
     val responseCode: Int?,
+    val nextRetryAt: Long?,
     val payloadJson: String,
     val createdAt: Long,
     val updatedAt: Long,

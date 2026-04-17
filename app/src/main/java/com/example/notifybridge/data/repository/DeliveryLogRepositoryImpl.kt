@@ -12,6 +12,7 @@ import com.example.notifybridge.domain.model.DeliveryAttempt
 import com.example.notifybridge.domain.model.DeliveryRecord
 import com.example.notifybridge.domain.model.DeliveryStatus
 import com.example.notifybridge.domain.model.NotificationEvent
+import com.example.notifybridge.domain.model.RetrySchedule
 import com.example.notifybridge.domain.repository.DeliveryLogRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -40,6 +41,7 @@ class DeliveryLogRepositoryImpl @Inject constructor(
                 attemptCount = 0,
                 errorMessage = null,
                 responseCode = null,
+                nextRetryAt = null,
                 payloadJson = "",
                 createdAt = now,
                 updatedAt = now,
@@ -67,25 +69,51 @@ class DeliveryLogRepositoryImpl @Inject constructor(
     }
 
     override suspend fun markSending(eventId: String) {
-        outboxDao.updateStatus(eventId, DeliveryStatus.RETRYING, System.currentTimeMillis())
+        outboxDao.updateStatus(
+            eventId = eventId,
+            status = DeliveryStatus.RETRYING,
+            nextRetryAt = null,
+            updatedAt = System.currentTimeMillis(),
+        )
     }
 
     override suspend fun markDelivered(eventId: String) {
-        outboxDao.updateStatus(eventId, DeliveryStatus.SUCCESS, System.currentTimeMillis())
+        outboxDao.updateStatus(
+            eventId = eventId,
+            status = DeliveryStatus.SUCCESS,
+            nextRetryAt = null,
+            updatedAt = System.currentTimeMillis(),
+        )
     }
 
     override suspend fun markFailed(eventId: String, errorMessage: String, retrying: Boolean, responseCode: Int?) {
+        val now = System.currentTimeMillis()
+        val currentAttemptCount = outboxDao.getByEventId(eventId)?.attemptCount ?: 0
+        val nextRetryAt = if (retrying) {
+            RetrySchedule.nextRetryAt(
+                baseTimeMillis = now,
+                completedAttempts = currentAttemptCount + 1,
+            )
+        } else {
+            null
+        }
         outboxDao.markFailure(
             eventId = eventId,
             status = if (retrying) DeliveryStatus.RETRYING else DeliveryStatus.FAILED,
             errorMessage = errorMessage,
             responseCode = responseCode,
-            updatedAt = System.currentTimeMillis(),
+            nextRetryAt = nextRetryAt,
+            updatedAt = now,
         )
     }
 
     override suspend fun markPending(eventId: String) {
-        outboxDao.updateStatus(eventId, DeliveryStatus.PENDING, System.currentTimeMillis())
+        outboxDao.updateStatus(
+            eventId = eventId,
+            status = DeliveryStatus.PENDING,
+            nextRetryAt = null,
+            updatedAt = System.currentTimeMillis(),
+        )
     }
 
     override suspend fun appendAttempt(eventId: String, errorMessage: String?, responseCode: Int?, payloadJson: String) {
@@ -118,6 +146,7 @@ class DeliveryLogRepositoryImpl @Inject constructor(
                     errorMessage = row.errorMessage,
                     createdAt = row.createdAt,
                     updatedAt = row.updatedAt,
+                    nextRetryAt = row.nextRetryAt,
                     payloadJson = row.payloadJson,
                     responseCode = row.responseCode,
                 )
@@ -146,6 +175,7 @@ class DeliveryLogRepositoryImpl @Inject constructor(
                 errorMessage = entity.errorMessage,
                 createdAt = entity.createdAt,
                 updatedAt = entity.updatedAt,
+                nextRetryAt = entity.nextRetryAt,
                 payloadJson = entity.payloadJson,
                 responseCode = entity.responseCode,
             )
@@ -243,6 +273,7 @@ class DeliveryLogRepositoryImpl @Inject constructor(
                         attemptCount = it.attemptCount,
                         errorMessage = it.errorMessage,
                         responseCode = it.responseCode,
+                        nextRetryAt = it.nextRetryAt,
                         updatedAt = it.updatedAt,
                     )
                 },
@@ -284,6 +315,7 @@ private data class DebugOutbox(
     val attemptCount: Int,
     val errorMessage: String?,
     val responseCode: Int?,
+    val nextRetryAt: Long?,
     val updatedAt: Long,
 )
 

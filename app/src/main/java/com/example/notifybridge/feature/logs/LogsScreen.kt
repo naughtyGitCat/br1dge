@@ -118,6 +118,9 @@ private fun LogsScreen(
                     Text(record.text ?: "(无正文)")
                     Text("状态：${record.status.name} | 重试：${record.attemptCount}")
                     record.errorMessage?.let { Text("错误：$it") }
+                    record.nextRetryAt?.let {
+                        Text("预计重试：${SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date(it))}")
+                    }
                     Text(SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date(record.updatedAt)))
                     if (record.status == com.example.notifybridge.domain.model.DeliveryStatus.FAILED ||
                         record.status == com.example.notifybridge.domain.model.DeliveryStatus.RETRYING
