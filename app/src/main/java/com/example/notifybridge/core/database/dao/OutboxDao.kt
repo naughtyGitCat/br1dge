@@ -55,8 +55,11 @@ interface OutboxDao {
     )
     suspend fun updatePayloadSnapshot(eventId: String, payloadJson: String, updatedAt: Long)
 
-    @Query("SELECT COUNT(*) FROM outbox WHERE status IN ('PENDING', 'RETRYING')")
+    @Query("SELECT COUNT(*) FROM outbox WHERE status = 'PENDING'")
     fun observePendingCount(): Flow<Int>
+
+    @Query("SELECT COUNT(*) FROM outbox WHERE status = 'RETRYING'")
+    fun observeRetryingCount(): Flow<Int>
 
     @Query("SELECT * FROM outbox ORDER BY updatedAt DESC")
     fun observeAll(): Flow<List<OutboxEntity>>

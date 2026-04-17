@@ -6,6 +6,7 @@ data class DashboardState(
     val lastFailureReason: String? = null,
     val nextRetryAt: Long? = null,
     val pendingCount: Int = 0,
+    val retryingCount: Int = 0,
     val todaySuccessCount: Int = 0,
     val todayFailureCount: Int = 0,
 )

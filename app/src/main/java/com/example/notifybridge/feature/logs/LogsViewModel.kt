@@ -105,7 +105,7 @@ class LogsViewModel @Inject constructor(
     fun retry(eventId: String) {
         viewModelScope.launch {
             deliveryLogRepository.markPending(eventId)
-            deliveryWorkScheduler.enqueueNow()
+            deliveryWorkScheduler.enqueueUserInitiated()
             messageState.value = "已重新入队 1 条记录"
         }
     }
@@ -121,7 +121,7 @@ class LogsViewModel @Inject constructor(
         }
         viewModelScope.launch {
             retryableIds.forEach { deliveryLogRepository.markPending(it) }
-            deliveryWorkScheduler.enqueueNow()
+            deliveryWorkScheduler.enqueueUserInitiated()
             messageState.value = "已重新入队 ${retryableIds.size} 条记录"
         }
     }

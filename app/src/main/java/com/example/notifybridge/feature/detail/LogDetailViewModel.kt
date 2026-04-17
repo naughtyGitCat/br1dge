@@ -45,7 +45,7 @@ class LogDetailViewModel @Inject constructor(
     fun retry() {
         viewModelScope.launch {
             deliveryLogRepository.markPending(eventId)
-            deliveryWorkScheduler.enqueueNow()
+            deliveryWorkScheduler.enqueueUserInitiated()
         }
     }
 }

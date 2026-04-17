@@ -75,6 +75,7 @@ private fun DashboardScreen(
                     Text("NotifyBridge 状态总览", style = MaterialTheme.typography.titleLarge)
                     Text("通知监听权限：${if (uiState.listenerEnabled) "已开启" else "未开启"}")
                     Text("待发送队列：${uiState.dashboardState.pendingCount}")
+                    Text("自动重试中：${uiState.dashboardState.retryingCount}")
                     Text("今日成功：${uiState.dashboardState.todaySuccessCount}")
                     Text("今日失败：${uiState.dashboardState.todayFailureCount}")
                     Text("最近一次成功：${uiState.dashboardState.lastSuccessAt?.toFriendlyTime() ?: "暂无"}")

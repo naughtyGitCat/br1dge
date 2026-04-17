@@ -226,10 +226,16 @@ class DeliveryLogRepositoryImpl @Inject constructor(
         return combine(
             combine(
                 outboxDao.observePendingCount(),
+                outboxDao.observeRetryingCount(),
                 outboxDao.observeLastSuccessAt(),
                 outboxDao.observeLastFailureReason(),
-            ) { pending, lastSuccess, lastFailure ->
-                Triple(pending, lastSuccess, lastFailure)
+            ) { pending, retryingCount, lastSuccess, lastFailure ->
+                DashboardLeft(
+                    pending = pending,
+                    retryingCount = retryingCount,
+                    lastSuccess = lastSuccess,
+                    lastFailure = lastFailure,
+                )
             },
             combine(
                 outboxDao.observeNextRetryAt(),
@@ -239,10 +245,14 @@ class DeliveryLogRepositoryImpl @Inject constructor(
                 Triple(nextRetryAt, successCount, failureCount)
             },
         ) { left, right ->
-            val (pending, lastSuccess, lastFailure) = left
+            val pending = left.pending
+            val retryingCount = left.retryingCount
+            val lastSuccess = left.lastSuccess
+            val lastFailure = left.lastFailure
             val (nextRetryAt, successCount, failureCount) = right
             DashboardState(
                 pendingCount = pending,
+                retryingCount = retryingCount,
                 lastSuccessAt = lastSuccess,
                 lastFailureReason = lastFailure,
                 nextRetryAt = nextRetryAt,
@@ -329,6 +339,13 @@ private data class DebugOutbox(
     val responseCode: Int?,
     val nextRetryAt: Long?,
     val updatedAt: Long,
+)
+
+private data class DashboardLeft(
+    val pending: Int,
+    val retryingCount: Int,
+    val lastSuccess: Long?,
+    val lastFailure: String?,
 )
 
 @Serializable

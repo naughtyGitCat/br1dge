@@ -38,7 +38,7 @@ class BridgeNotificationListenerService : NotificationListenerService() {
             val event = notificationParser.parse(this@BridgeNotificationListenerService, notification)
             when (handleIncomingNotificationUseCase(event)) {
                 is com.example.notifybridge.domain.usecase.HandleIncomingResult.Enqueued -> {
-                    deliveryWorkScheduler.enqueueNow()
+                    deliveryWorkScheduler.enqueueAutomatic()
                 }
                 is com.example.notifybridge.domain.usecase.HandleIncomingResult.Ignored -> Unit
             }

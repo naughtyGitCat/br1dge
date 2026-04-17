@@ -17,7 +17,15 @@ import javax.inject.Singleton
 class DeliveryWorkScheduler @Inject constructor(
     @ApplicationContext private val context: Context,
 ) {
-    fun enqueueNow() {
+    fun enqueueAutomatic() {
+        enqueue(policy = ExistingWorkPolicy.KEEP)
+    }
+
+    fun enqueueUserInitiated() {
+        enqueue(policy = ExistingWorkPolicy.APPEND_OR_REPLACE)
+    }
+
+    private fun enqueue(policy: ExistingWorkPolicy) {
         val request = OneTimeWorkRequestBuilder<DeliveryWorker>()
             .setConstraints(
                 Constraints.Builder()
@@ -29,7 +37,7 @@ class DeliveryWorkScheduler @Inject constructor(
 
         WorkManager.getInstance(context).enqueueUniqueWork(
             DeliveryWorker.UNIQUE_WORK_NAME,
-            ExistingWorkPolicy.APPEND,
+            policy,
             request,
         )
     }
