@@ -122,6 +122,7 @@ Settings 页面支持配置：
 
 - 默认 Bark Server URL：`https://api.day.app`
 - 也支持自建 Bark 服务地址
+- 为兼容局域网或自签环境下的自建 Bark，当前 Android 客户端允许明文 `http://` 地址；如无明确需要，仍建议优先使用 `https://`
 
 ## 如何测试
 
