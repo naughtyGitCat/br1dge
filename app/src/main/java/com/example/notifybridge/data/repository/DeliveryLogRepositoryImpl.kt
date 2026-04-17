@@ -50,7 +50,10 @@ class DeliveryLogRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getPendingEvents(limit: Int): List<NotificationEvent> {
-        return notificationEventDao.getPendingEvents(limit).map { entity ->
+        return notificationEventDao.getPendingEvents(
+            limit = limit,
+            now = System.currentTimeMillis(),
+        ).map { entity ->
             NotificationEvent(
                 eventId = entity.eventId,
                 packageName = entity.packageName,
@@ -67,6 +70,8 @@ class DeliveryLogRepositoryImpl @Inject constructor(
             )
         }
     }
+
+    override suspend fun getNextRetryAt(): Long? = outboxDao.getNextRetryAt()
 
     override suspend fun markSending(eventId: String) {
         outboxDao.updateStatus(

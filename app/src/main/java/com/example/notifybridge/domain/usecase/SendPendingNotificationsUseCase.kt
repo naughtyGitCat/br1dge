@@ -70,7 +70,12 @@ class SendPendingNotificationsUseCase @Inject constructor(
             }
         }
 
-        DeliveryRunSummary(success = success, retrying = retrying, failed = failed)
+        DeliveryRunSummary(
+            success = success,
+            retrying = retrying,
+            failed = failed,
+            nextRetryAt = deliveryLogRepository.getNextRetryAt(),
+        )
     }
 }
 
@@ -78,4 +83,5 @@ data class DeliveryRunSummary(
     val success: Int,
     val retrying: Int,
     val failed: Int,
+    val nextRetryAt: Long?,
 )

@@ -145,6 +145,9 @@ interface OutboxDao {
     @Query("SELECT MIN(nextRetryAt) FROM outbox WHERE status = 'RETRYING' AND nextRetryAt IS NOT NULL")
     fun observeNextRetryAt(): Flow<Long?>
 
+    @Query("SELECT MIN(nextRetryAt) FROM outbox WHERE status = 'RETRYING' AND nextRetryAt IS NOT NULL")
+    suspend fun getNextRetryAt(): Long?
+
     @Query("SELECT COUNT(*) FROM outbox WHERE status = 'SUCCESS' AND updatedAt >= :startOfDay")
     fun observeTodaySuccessCount(startOfDay: Long): Flow<Int>
 

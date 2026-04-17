@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.Flow
 interface DeliveryLogRepository {
     suspend fun enqueueNotification(event: NotificationEvent): Long
     suspend fun getPendingEvents(limit: Int = 20): List<NotificationEvent>
+    suspend fun getNextRetryAt(): Long?
     suspend fun markSending(eventId: String)
     suspend fun markDelivered(eventId: String)
     suspend fun markFailed(eventId: String, errorMessage: String, retrying: Boolean, responseCode: Int? = null)

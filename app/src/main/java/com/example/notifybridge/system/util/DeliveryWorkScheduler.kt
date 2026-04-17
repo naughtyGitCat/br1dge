@@ -9,6 +9,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.example.notifybridge.system.worker.DeliveryWorker
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlin.math.max
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -18,27 +19,53 @@ class DeliveryWorkScheduler @Inject constructor(
     @ApplicationContext private val context: Context,
 ) {
     fun enqueueAutomatic() {
-        enqueue(policy = ExistingWorkPolicy.KEEP)
+        enqueueImmediate(
+            uniqueWorkName = DeliveryWorker.IMMEDIATE_WORK_NAME,
+            policy = ExistingWorkPolicy.KEEP,
+        )
     }
 
     fun enqueueUserInitiated() {
-        enqueue(policy = ExistingWorkPolicy.APPEND_OR_REPLACE)
+        enqueueImmediate(
+            uniqueWorkName = DeliveryWorker.IMMEDIATE_WORK_NAME,
+            policy = ExistingWorkPolicy.APPEND_OR_REPLACE,
+        )
     }
 
-    private fun enqueue(policy: ExistingWorkPolicy) {
-        val request = OneTimeWorkRequestBuilder<DeliveryWorker>()
+    fun enqueueAutomaticRetry(nextRetryAt: Long) {
+        val delayMillis = max(0L, nextRetryAt - System.currentTimeMillis())
+        val request = newRequest(delayMillis = delayMillis)
+        WorkManager.getInstance(context).enqueueUniqueWork(
+            DeliveryWorker.RETRY_WORK_NAME,
+            ExistingWorkPolicy.REPLACE,
+            request,
+        )
+    }
+
+    fun cancelAutomaticRetry() {
+        WorkManager.getInstance(context).cancelUniqueWork(DeliveryWorker.RETRY_WORK_NAME)
+    }
+
+    private fun enqueueImmediate(
+        uniqueWorkName: String,
+        policy: ExistingWorkPolicy,
+    ) {
+        val request = newRequest(delayMillis = 0L)
+        WorkManager.getInstance(context).enqueueUniqueWork(
+            uniqueWorkName,
+            policy,
+            request,
+        )
+    }
+
+    private fun newRequest(delayMillis: Long) =
+        OneTimeWorkRequestBuilder<DeliveryWorker>()
             .setConstraints(
                 Constraints.Builder()
                     .setRequiredNetworkType(NetworkType.CONNECTED)
                     .build()
             )
+            .setInitialDelay(delayMillis, TimeUnit.MILLISECONDS)
             .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 30, TimeUnit.SECONDS)
             .build()
-
-        WorkManager.getInstance(context).enqueueUniqueWork(
-            DeliveryWorker.UNIQUE_WORK_NAME,
-            policy,
-            request,
-        )
-    }
 }

@@ -33,10 +33,14 @@ interface NotificationEventDao {
         """
         SELECT n.* FROM notification_events n
         INNER JOIN outbox o ON o.eventId = n.eventId
-        WHERE o.status IN ('PENDING', 'RETRYING')
+        WHERE o.status = 'PENDING'
+           OR (
+                o.status = 'RETRYING'
+                AND (o.nextRetryAt IS NULL OR o.nextRetryAt <= :now)
+           )
         ORDER BY o.updatedAt ASC
         LIMIT :limit
         """
     )
-    suspend fun getPendingEvents(limit: Int): List<NotificationEventEntity>
+    suspend fun getPendingEvents(limit: Int, now: Long): List<NotificationEventEntity>
 }
