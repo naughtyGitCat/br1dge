@@ -50,22 +50,39 @@ class LogsViewModel @Inject constructor(
 
     val uiState: StateFlow<LogsUiState> = combine(
         filterState,
-        filterState.flatMapLatest { filter -> deliveryLogRepository.observeLogs(filter.status) },
         queryState,
         visibleCountState,
         messageState,
-    ) { filter, records, query, visibleCount, message ->
-        val filteredRecords = records.filterByQuery(query)
-        val visibleRecords = filteredRecords.take(visibleCount)
-        val retryableCount = visibleRecords.count {
+        combine(
+            combine(filterState, queryState, visibleCountState) { filter, query, limit ->
+                Triple(filter, query, limit)
+            }.flatMapLatest { (filter, query, limit) ->
+                deliveryLogRepository.observeLogs(
+                    status = filter.status,
+                    query = query,
+                    limit = limit,
+                )
+            },
+            combine(filterState, queryState) { filter, query ->
+                filter to query
+            }.flatMapLatest { (filter, query) ->
+                deliveryLogRepository.observeLogCount(
+                    status = filter.status,
+                    query = query,
+                )
+            }
+        ) { records, totalCount -> records to totalCount }
+    ) { filter, query, _, message, payload ->
+        val (records, totalCount) = payload
+        val retryableCount = records.count {
             it.status == DeliveryStatus.FAILED || it.status == DeliveryStatus.RETRYING
         }
         LogsUiState(
             selectedFilter = filter,
-            records = visibleRecords,
+            records = records,
             searchQuery = query,
-            totalMatchedCount = filteredRecords.size,
-            canLoadMore = filteredRecords.size > visibleRecords.size,
+            totalMatchedCount = totalCount,
+            canLoadMore = totalCount > records.size,
             canBulkRetry = retryableCount > 1,
             message = message,
         )
@@ -111,23 +128,5 @@ class LogsViewModel @Inject constructor(
 
     companion object {
         private const val DEFAULT_PAGE_SIZE = 50
-    }
-}
-
-private fun List<DeliveryRecord>.filterByQuery(query: String): List<DeliveryRecord> {
-    val normalizedQuery = query.trim()
-    if (normalizedQuery.isEmpty()) return this
-    return filter { record ->
-        buildString {
-            append(record.appName)
-            append(' ')
-            append(record.title.orEmpty())
-            append(' ')
-            append(record.text.orEmpty())
-            append(' ')
-            append(record.errorMessage.orEmpty())
-            append(' ')
-            append(record.status.name)
-        }.contains(normalizedQuery, ignoreCase = true)
     }
 }

@@ -101,26 +101,35 @@ class DeliveryLogRepositoryImpl @Inject constructor(
         )
     }
 
-    override fun observeLogs(status: DeliveryStatus?): Flow<List<DeliveryRecord>> {
-        val source = if (status == null) outboxDao.observeAll() else outboxDao.observeByStatus(status)
-        return source.map { outboxes ->
-            outboxes.mapNotNull { outbox ->
-                val event = notificationEventDao.getById(outbox.eventId) ?: return@mapNotNull null
+    override fun observeLogs(status: DeliveryStatus?, query: String, limit: Int): Flow<List<DeliveryRecord>> {
+        return outboxDao.observeLogPage(
+            status = status?.name,
+            query = query.trim(),
+            limit = limit,
+        ).map { rows ->
+            rows.map { row ->
                 DeliveryRecord(
-                    eventId = outbox.eventId,
-                    appName = event.appName,
-                    title = event.title,
-                    text = event.text,
-                    status = outbox.status,
-                    attemptCount = outbox.attemptCount,
-                    errorMessage = outbox.errorMessage,
-                    createdAt = outbox.createdAt,
-                    updatedAt = outbox.updatedAt,
-                    payloadJson = outbox.payloadJson,
-                    responseCode = outbox.responseCode,
+                    eventId = row.eventId,
+                    appName = row.appName,
+                    title = row.title,
+                    text = row.text,
+                    status = DeliveryStatus.valueOf(row.status),
+                    attemptCount = row.attemptCount,
+                    errorMessage = row.errorMessage,
+                    createdAt = row.createdAt,
+                    updatedAt = row.updatedAt,
+                    payloadJson = row.payloadJson,
+                    responseCode = row.responseCode,
                 )
             }
         }
+    }
+
+    override fun observeLogCount(status: DeliveryStatus?, query: String): Flow<Int> {
+        return outboxDao.observeLogCount(
+            status = status?.name,
+            query = query.trim(),
+        )
     }
 
     override fun observeDetail(eventId: String): Flow<DeliveryRecord?> {

@@ -15,7 +15,8 @@ interface DeliveryLogRepository {
     suspend fun markFailed(eventId: String, errorMessage: String, retrying: Boolean, responseCode: Int? = null)
     suspend fun markPending(eventId: String)
     suspend fun appendAttempt(eventId: String, errorMessage: String?, responseCode: Int?, payloadJson: String)
-    fun observeLogs(status: DeliveryStatus?): Flow<List<DeliveryRecord>>
+    fun observeLogs(status: DeliveryStatus?, query: String, limit: Int): Flow<List<DeliveryRecord>>
+    fun observeLogCount(status: DeliveryStatus?, query: String): Flow<Int>
     fun observeDetail(eventId: String): Flow<DeliveryRecord?>
     fun observeNotificationEvent(eventId: String): Flow<NotificationEvent?>
     fun observeAttempts(eventId: String): Flow<List<DeliveryAttempt>>
