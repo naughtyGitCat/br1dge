@@ -58,7 +58,7 @@ app/src/main/java/com/example/notifybridge
 1. 用 Android Studio 打开项目根目录。
 2. 等待 Gradle Sync 完成。
 3. 使用 Android 8.0+ 真机运行，建议 Android 13/14。
-4. 首次运行后进入应用首页与设置页完成授权和 Webhook 配置。
+4. 首次运行后进入应用首页与设置页完成授权和 Bark 配置。
 
 命令行构建：
 
@@ -97,13 +97,13 @@ app/src/main/java/com/example/notifybridge
 - 后台运行白名单
 - 电池优化忽略名单
 
-## Webhook 配置
+## Bark 配置
 
 Settings 页面支持配置：
 
 - 启用转发总开关
-- Webhook URL
-- Bearer Token
+- Bark Server URL
+- Bark Device Key
 - 应用白名单/黑名单
 - 关键词白名单/黑名单
 - 排除系统通知
@@ -112,20 +112,25 @@ Settings 页面支持配置：
 - 去重秒数
 - 自动重试
 
-MVP 仅支持：
+当前实现按 Bark 官方教程的 JSON 方式发送：
 
-- 单一 endpoint
-- `POST`
-- `application/json`
+- `POST https://api.day.app/push`
+- `Content-Type: application/json`
+- 在请求体里传 `device_key`
+
+服务端兼容项：
+
+- 默认 Bark Server URL：`https://api.day.app`
+- 也支持自建 Bark 服务地址
 
 ## 如何测试
 
-1. 在 Settings 填入一个可用的 Webhook URL。
+1. 在 Settings 填入一个可用的 Bark Server URL 和 Bark Device Key。
 2. 打开“启用转发总开关”和“启用过滤规则”。
 3. 如需最简单验证，可先不配置白名单。
 4. Dashboard 点击“生成测试通知”。
 5. 观察 Logs 页面是否出现新记录。
-6. 也可以在 Settings 点击“测试发送”，验证网络链路本身。
+6. 也可以在 Settings 点击“测试发送”，验证 Bark 推送链路本身。
 
 ## GitHub Actions
 
@@ -194,7 +199,7 @@ Room migration 预留点：
 1. 通知访问权限是否仍开启
 2. 电池优化是否放开
 3. 自启动/后台白名单是否配置
-4. Webhook 是否可达
+4. Bark 服务地址和 Device Key 是否正确
 
 ## 后续扩展建议
 

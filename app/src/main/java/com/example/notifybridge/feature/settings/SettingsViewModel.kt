@@ -29,8 +29,8 @@ sealed class SettingsAction {
 
 data class SettingsDraft(
     val forwardingEnabled: Boolean,
-    val webhookUrl: String,
-    val bearerToken: String,
+    val barkServerUrl: String,
+    val barkDeviceKey: String,
     val allowedPackages: String,
     val blockedPackages: String,
     val keywordWhitelist: String,
@@ -44,11 +44,12 @@ data class SettingsDraft(
 )
 
 data class SettingsValidationState(
-    val webhookUrlError: String? = null,
+    val barkServerUrlError: String? = null,
+    val barkDeviceKeyError: String? = null,
     val dedupeSecondsError: String? = null,
 ) {
     val isValid: Boolean
-        get() = webhookUrlError == null && dedupeSecondsError == null
+        get() = barkServerUrlError == null && barkDeviceKeyError == null && dedupeSecondsError == null
 }
 
 sealed class TestSendState {
@@ -129,10 +130,10 @@ class SettingsViewModel @Inject constructor(
                         validation = validation,
                         testSendState = TestSendState.Running,
                     )
-                    val message = when (val result = forwardRepository.sendTestPayload(action.draft.toAppSettings())) {
+                        val message = when (val result = forwardRepository.sendTestPayload(action.draft.toAppSettings())) {
                         is ForwardResult.Success -> {
                             ephemeralState.value = ephemeralState.value.copy(
-                                testSendState = TestSendState.Success("Webhook 连通性正常"),
+                                testSendState = TestSendState.Success("Bark 连通性正常"),
                             )
                             "测试发送成功"
                         }
@@ -161,10 +162,14 @@ class SettingsViewModel @Inject constructor(
     }
 
     private fun validate(draft: SettingsDraft): SettingsValidationState {
-        val webhookUrl = draft.webhookUrl.trim()
-        val webhookUrlError = when {
-            webhookUrl.isBlank() -> "Webhook URL 不能为空"
-            !isValidHttpUrl(webhookUrl) -> "请输入有效的 http/https URL"
+        val barkServerUrl = draft.barkServerUrl.trim()
+        val barkServerUrlError = when {
+            barkServerUrl.isBlank() -> "Bark Server URL 不能为空"
+            !isValidHttpUrl(barkServerUrl) -> "请输入有效的 Bark Server URL"
+            else -> null
+        }
+        val barkDeviceKeyError = when {
+            draft.barkDeviceKey.trim().isBlank() -> "Bark Device Key 不能为空"
             else -> null
         }
         val dedupeSecondsError = when (draft.dedupeSeconds.toIntOrNull()) {
@@ -173,7 +178,8 @@ class SettingsViewModel @Inject constructor(
             else -> "去重秒数请填写 0 到 600"
         }
         return SettingsValidationState(
-            webhookUrlError = webhookUrlError,
+            barkServerUrlError = barkServerUrlError,
+            barkDeviceKeyError = barkDeviceKeyError,
             dedupeSecondsError = dedupeSecondsError,
         )
     }
@@ -188,8 +194,8 @@ class SettingsViewModel @Inject constructor(
 
 private fun SettingsDraft.toAppSettings(): AppSettings = AppSettings(
     forwardingEnabled = forwardingEnabled,
-    webhookUrl = webhookUrl.trim(),
-    bearerToken = bearerToken.trim(),
+    barkServerUrl = barkServerUrl.trim(),
+    barkDeviceKey = barkDeviceKey.trim(),
     filterRuleSet = FilterRuleSet(
         enabled = filtersEnabled,
         allowedPackages = allowedPackages.splitToSet(),

@@ -44,8 +44,8 @@ private fun SettingsScreen(
     uiState: SettingsUiState,
     onAction: (SettingsAction) -> Unit,
 ) {
-    var webhookUrl by remember(uiState.settings.webhookUrl) { mutableStateOf(uiState.settings.webhookUrl) }
-    var token by remember(uiState.settings.bearerToken) { mutableStateOf(uiState.settings.bearerToken) }
+    var barkServerUrl by remember(uiState.settings.barkServerUrl) { mutableStateOf(uiState.settings.barkServerUrl) }
+    var barkDeviceKey by remember(uiState.settings.barkDeviceKey) { mutableStateOf(uiState.settings.barkDeviceKey) }
     var allowedPackages by remember(uiState.settings.filterRuleSet.allowedPackages) {
         mutableStateOf(uiState.settings.filterRuleSet.allowedPackages.joinToString(","))
     }
@@ -63,8 +63,8 @@ private fun SettingsScreen(
     }
     val draft = SettingsDraft(
         forwardingEnabled = uiState.settings.forwardingEnabled,
-        webhookUrl = webhookUrl,
-        bearerToken = token,
+        barkServerUrl = barkServerUrl,
+        barkDeviceKey = barkDeviceKey,
         allowedPackages = allowedPackages,
         blockedPackages = blockedPackages,
         keywordWhitelist = whitelist,
@@ -95,8 +95,8 @@ private fun SettingsScreen(
                             save(
                                 current = uiState.settings,
                                 onAction = onAction,
-                                webhookUrl = webhookUrl,
-                                token = token,
+                                barkServerUrl = barkServerUrl,
+                                barkDeviceKey = barkDeviceKey,
                                 allowedPackages = allowedPackages,
                                 blockedPackages = blockedPackages,
                                 whitelist = whitelist,
@@ -113,8 +113,8 @@ private fun SettingsScreen(
                             save(
                                 current = uiState.settings,
                                 onAction = onAction,
-                                webhookUrl = webhookUrl,
-                                token = token,
+                                barkServerUrl = barkServerUrl,
+                                barkDeviceKey = barkDeviceKey,
                                 allowedPackages = allowedPackages,
                                 blockedPackages = blockedPackages,
                                 whitelist = whitelist,
@@ -124,11 +124,14 @@ private fun SettingsScreen(
                             )
                         }
                     )
-                    OutlinedTextField(value = webhookUrl, onValueChange = { webhookUrl = it }, label = { Text("Webhook URL") }, modifier = Modifier.fillMaxWidth())
-                    uiState.validation.webhookUrlError?.let {
+                    OutlinedTextField(value = barkServerUrl, onValueChange = { barkServerUrl = it }, label = { Text("Bark Server URL") }, modifier = Modifier.fillMaxWidth())
+                    uiState.validation.barkServerUrlError?.let {
                         Text(it, color = MaterialTheme.colorScheme.error)
                     }
-                    OutlinedTextField(value = token, onValueChange = { token = it }, label = { Text("Bearer Token") }, modifier = Modifier.fillMaxWidth())
+                    OutlinedTextField(value = barkDeviceKey, onValueChange = { barkDeviceKey = it }, label = { Text("Bark Device Key") }, modifier = Modifier.fillMaxWidth())
+                    uiState.validation.barkDeviceKeyError?.let {
+                        Text(it, color = MaterialTheme.colorScheme.error)
+                    }
                     OutlinedTextField(value = allowedPackages, onValueChange = { allowedPackages = it }, label = { Text("允许应用包名（逗号分隔）") }, modifier = Modifier.fillMaxWidth())
                     OutlinedTextField(value = blockedPackages, onValueChange = { blockedPackages = it }, label = { Text("黑名单应用包名（逗号分隔）") }, modifier = Modifier.fillMaxWidth())
                     OutlinedTextField(value = whitelist, onValueChange = { whitelist = it }, label = { Text("关键词白名单（逗号分隔）") }, modifier = Modifier.fillMaxWidth())
@@ -141,28 +144,28 @@ private fun SettingsScreen(
                         title = "排除系统通知",
                         checked = uiState.settings.filterRuleSet.excludeSystemNotifications,
                         onCheckedChange = {
-                            save(current = uiState.settings, onAction = onAction, webhookUrl = webhookUrl, token = token, allowedPackages = allowedPackages, blockedPackages = blockedPackages, whitelist = whitelist, blacklist = blacklist, dedupeSeconds = dedupeSeconds, excludeSystem = it)
+                            save(current = uiState.settings, onAction = onAction, barkServerUrl = barkServerUrl, barkDeviceKey = barkDeviceKey, allowedPackages = allowedPackages, blockedPackages = blockedPackages, whitelist = whitelist, blacklist = blacklist, dedupeSeconds = dedupeSeconds, excludeSystem = it)
                         }
                     )
                     SwitchRow(
                         title = "排除 ongoing 通知",
                         checked = uiState.settings.filterRuleSet.excludeOngoingNotifications,
                         onCheckedChange = {
-                            save(current = uiState.settings, onAction = onAction, webhookUrl = webhookUrl, token = token, allowedPackages = allowedPackages, blockedPackages = blockedPackages, whitelist = whitelist, blacklist = blacklist, dedupeSeconds = dedupeSeconds, excludeOngoing = it)
+                            save(current = uiState.settings, onAction = onAction, barkServerUrl = barkServerUrl, barkDeviceKey = barkDeviceKey, allowedPackages = allowedPackages, blockedPackages = blockedPackages, whitelist = whitelist, blacklist = blacklist, dedupeSeconds = dedupeSeconds, excludeOngoing = it)
                         }
                     )
                     SwitchRow(
                         title = "排除空正文",
                         checked = uiState.settings.filterRuleSet.excludeEmptyTextNotifications,
                         onCheckedChange = {
-                            save(current = uiState.settings, onAction = onAction, webhookUrl = webhookUrl, token = token, allowedPackages = allowedPackages, blockedPackages = blockedPackages, whitelist = whitelist, blacklist = blacklist, dedupeSeconds = dedupeSeconds, excludeEmpty = it)
+                            save(current = uiState.settings, onAction = onAction, barkServerUrl = barkServerUrl, barkDeviceKey = barkDeviceKey, allowedPackages = allowedPackages, blockedPackages = blockedPackages, whitelist = whitelist, blacklist = blacklist, dedupeSeconds = dedupeSeconds, excludeEmpty = it)
                         }
                     )
                     SwitchRow(
                         title = "自动重试",
                         checked = uiState.settings.filterRuleSet.autoRetryEnabled,
                         onCheckedChange = {
-                            save(current = uiState.settings, onAction = onAction, webhookUrl = webhookUrl, token = token, allowedPackages = allowedPackages, blockedPackages = blockedPackages, whitelist = whitelist, blacklist = blacklist, dedupeSeconds = dedupeSeconds, autoRetry = it)
+                            save(current = uiState.settings, onAction = onAction, barkServerUrl = barkServerUrl, barkDeviceKey = barkDeviceKey, allowedPackages = allowedPackages, blockedPackages = blockedPackages, whitelist = whitelist, blacklist = blacklist, dedupeSeconds = dedupeSeconds, autoRetry = it)
                         }
                     )
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
@@ -190,7 +193,7 @@ private fun SettingsScreen(
                     uiState.message?.let { Text(it) }
                     when (val state = uiState.testSendState) {
                         TestSendState.Idle -> Unit
-                        TestSendState.Running -> Text("正在请求当前表单配置对应的 Webhook...")
+                        TestSendState.Running -> Text("正在请求当前表单配置对应的 Bark 接口...")
                         is TestSendState.Success -> Text("连通性结果：${state.message}")
                         is TestSendState.Failure -> Text("连通性结果：${state.message}")
                     }
@@ -216,8 +219,8 @@ private fun SwitchRow(
 private fun save(
     current: AppSettings,
     onAction: (SettingsAction) -> Unit,
-    webhookUrl: String,
-    token: String,
+    barkServerUrl: String,
+    barkDeviceKey: String,
     allowedPackages: String,
     blockedPackages: String,
     whitelist: String,
@@ -233,8 +236,8 @@ private fun save(
     onAction(SettingsAction.Save(
         SettingsDraft(
             forwardingEnabled = forwardingEnabled,
-            webhookUrl = webhookUrl,
-            bearerToken = token,
+            barkServerUrl = barkServerUrl,
+            barkDeviceKey = barkDeviceKey,
             allowedPackages = allowedPackages,
             blockedPackages = blockedPackages,
             keywordWhitelist = whitelist,

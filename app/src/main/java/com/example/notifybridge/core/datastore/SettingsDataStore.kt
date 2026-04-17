@@ -22,8 +22,8 @@ class SettingsDataStore @Inject constructor(
 ) {
     private object Keys {
         val forwardingEnabled = booleanPreferencesKey("forwarding_enabled")
-        val webhookUrl = stringPreferencesKey("webhook_url")
-        val bearerToken = stringPreferencesKey("bearer_token")
+        val barkServerUrl = stringPreferencesKey("bark_server_url")
+        val barkDeviceKey = stringPreferencesKey("bark_device_key")
         val filtersEnabled = booleanPreferencesKey("filters_enabled")
         val allowedPackages = stringPreferencesKey("allowed_packages")
         val blockedPackages = stringPreferencesKey("blocked_packages")
@@ -41,8 +41,8 @@ class SettingsDataStore @Inject constructor(
     fun observeSettings(): Flow<AppSettings> = context.settingsDataStore.data.map { prefs ->
         AppSettings(
             forwardingEnabled = prefs[Keys.forwardingEnabled] ?: false,
-            webhookUrl = prefs[Keys.webhookUrl].orEmpty(),
-            bearerToken = prefs[Keys.bearerToken].orEmpty(),
+            barkServerUrl = prefs[Keys.barkServerUrl] ?: "https://api.day.app",
+            barkDeviceKey = prefs[Keys.barkDeviceKey].orEmpty(),
             filterRuleSet = FilterRuleSet(
                 enabled = prefs[Keys.filtersEnabled] ?: false,
                 allowedPackages = prefs[Keys.allowedPackages].toTokenSet(),
@@ -63,8 +63,8 @@ class SettingsDataStore @Inject constructor(
     suspend fun updateSettings(settings: AppSettings) {
         context.settingsDataStore.edit { prefs ->
             prefs[Keys.forwardingEnabled] = settings.forwardingEnabled
-            prefs[Keys.webhookUrl] = settings.webhookUrl
-            prefs[Keys.bearerToken] = settings.bearerToken
+            prefs[Keys.barkServerUrl] = settings.barkServerUrl
+            prefs[Keys.barkDeviceKey] = settings.barkDeviceKey
             prefs[Keys.filtersEnabled] = settings.filterRuleSet.enabled
             prefs[Keys.allowedPackages] = settings.filterRuleSet.allowedPackages.joinToString(",")
             prefs[Keys.blockedPackages] = settings.filterRuleSet.blockedPackages.joinToString(",")

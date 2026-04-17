@@ -4,7 +4,7 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import com.example.notifybridge.core.network.WebhookApi
-import com.example.notifybridge.core.network.dto.WebhookRequestDto
+import com.example.notifybridge.core.network.dto.BarkPushRequestDto
 import com.example.notifybridge.domain.model.ForwardError
 import com.example.notifybridge.domain.model.ForwardPayload
 import com.example.notifybridge.domain.model.ForwardResult
@@ -49,32 +49,27 @@ class ForwardRepositoryImpl @Inject constructor(
     }
 
     private suspend fun sendPayload(
-        payload: ForwardPayload,
+    payload: ForwardPayload,
         settings: com.example.notifybridge.domain.model.AppSettings,
     ): ForwardResult {
-        val endpoint = settings.webhookUrl.trim()
-        if (endpoint.isEmpty()) {
+        val serverUrl = settings.barkServerUrl.trim().trimEnd('/')
+        val deviceKey = settings.barkDeviceKey.trim()
+        if (serverUrl.isEmpty() || deviceKey.isEmpty()) {
             return ForwardResult.Failure(ForwardError.EndpointNotConfigured)
         }
         if (!isNetworkAvailable()) {
             return ForwardResult.Failure(ForwardError.NetworkUnavailable)
         }
-        val token = settings.bearerToken.takeIf { it.isNotBlank() }?.let { "Bearer $it" }
         return try {
-            val response = webhookApi.postWebhook(
-                url = endpoint,
-                body = WebhookRequestDto(
-                    appPackage = payload.appPackage,
-                    appName = payload.appName,
-                    title = payload.title,
-                    text = payload.text,
-                    subText = payload.subText,
-                    postTime = payload.postTime,
-                    receivedAt = payload.receivedAt,
-                    deviceModel = payload.deviceModel,
-                    androidVersion = payload.androidVersion,
+            val response = webhookApi.postBarkPush(
+                url = "$serverUrl/push",
+                body = BarkPushRequestDto(
+                    title = payload.title?.takeIf { it.isNotBlank() } ?: payload.appName,
+                    subtitle = payload.appName,
+                    body = buildBarkBody(payload),
+                    deviceKey = deviceKey,
+                    group = payload.appPackage,
                 ),
-                authorization = token,
             )
             if (response.isSuccessful) {
                 ForwardResult.Success
@@ -104,5 +99,21 @@ class ForwardRepositoryImpl @Inject constructor(
         val network = manager.activeNetwork ?: return false
         val capabilities = manager.getNetworkCapabilities(network) ?: return false
         return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+    }
+
+    private fun buildBarkBody(payload: ForwardPayload): String {
+        val content = listOfNotNull(
+            payload.text?.takeIf { it.isNotBlank() },
+            payload.subText?.takeIf { it.isNotBlank() },
+        ).joinToString("\n")
+
+        val fallbackContent = if (content.isBlank()) "(无正文)" else content
+        return buildString {
+            appendLine(fallbackContent)
+            appendLine()
+            appendLine("App: ${payload.appName}")
+            appendLine("Package: ${payload.appPackage}")
+            appendLine("Device: ${payload.deviceModel} / Android ${payload.androidVersion}")
+        }.trim()
     }
 }
