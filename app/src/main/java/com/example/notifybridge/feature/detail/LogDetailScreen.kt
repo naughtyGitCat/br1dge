@@ -80,6 +80,17 @@ private fun LogDetailScreen(
                 }
             }
         }
+        uiState.record?.toFailurePresentation()?.let { failure ->
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("失败诊断", style = MaterialTheme.typography.titleMedium)
+                    Text("分类：${failure.category}")
+                    Text("摘要：${failure.summary}")
+                    Text("建议：${failure.suggestion}")
+                    Text("是否适合重试：${if (failure.retryable) "是" else "否"}")
+                }
+            }
+        }
         uiState.notificationEvent?.let { event ->
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -105,6 +116,10 @@ private fun LogDetailScreen(
                                 Text("尝试时间：${attempt.createdAt.toFriendlyTime()}")
                                 Text("响应码：${attempt.responseCode?.toString() ?: "无"}")
                                 Text("错误信息：${attempt.errorMessage ?: "无"}")
+                                attempt.toFailurePresentation()?.let { failure ->
+                                    Text("失败分类：${failure.category}")
+                                    Text("处理建议：${failure.suggestion}")
+                                }
                                 Text("请求 Payload：")
                                 Text(attempt.payloadJson.ifBlank { "(空 payload)" })
                             }
