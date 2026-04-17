@@ -106,6 +106,8 @@ Settings 页面支持配置：
 - Bark Server URL
 - Bark Device Key
 - Bark Level / Action / Sound 下拉选择
+- Bark Group 支持模板下拉：
+  `{本应用名称}` / `{本设备名称}` / `{本应用名称}@{本设备名称}` / `{自定义}`
 - 应用白名单/黑名单
 - 关键词白名单/黑名单
 - 排除系统通知

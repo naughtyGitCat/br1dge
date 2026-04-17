@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.example.notifybridge.domain.model.AppSettings
+import com.example.notifybridge.domain.model.BarkGroupMode
 import com.example.notifybridge.domain.model.FilterRuleSet
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
@@ -36,6 +37,8 @@ class SettingsDataStore @Inject constructor(
         val barkIcon = stringPreferencesKey("bark_icon")
         val barkImage = stringPreferencesKey("bark_image")
         val barkGroup = stringPreferencesKey("bark_group")
+        val barkGroupMode = stringPreferencesKey("bark_group_mode")
+        val barkGroupCustom = stringPreferencesKey("bark_group_custom")
         val barkCiphertext = stringPreferencesKey("bark_ciphertext")
         val barkIsArchive = booleanPreferencesKey("bark_is_archive")
         val barkUrl = stringPreferencesKey("bark_url")
@@ -58,6 +61,10 @@ class SettingsDataStore @Inject constructor(
     }
 
     fun observeSettings(): Flow<AppSettings> = context.settingsDataStore.data.map { prefs ->
+        val legacyGroup = prefs[Keys.barkGroup].orEmpty()
+        val barkGroupMode = prefs[Keys.barkGroupMode]
+            ?.let { runCatching { BarkGroupMode.valueOf(it) }.getOrNull() }
+            ?: if (legacyGroup.isNotBlank()) BarkGroupMode.CUSTOM else BarkGroupMode.APP_NAME_AT_DEVICE_NAME
         AppSettings(
             forwardingEnabled = prefs[Keys.forwardingEnabled] ?: false,
             cancelNotificationOnSuccess = prefs[Keys.cancelNotificationOnSuccess] ?: false,
@@ -73,7 +80,8 @@ class SettingsDataStore @Inject constructor(
             barkSound = prefs[Keys.barkSound].orEmpty(),
             barkIcon = prefs[Keys.barkIcon].orEmpty(),
             barkImage = prefs[Keys.barkImage].orEmpty(),
-            barkGroup = prefs[Keys.barkGroup].orEmpty(),
+            barkGroupMode = barkGroupMode,
+            barkGroupCustom = prefs[Keys.barkGroupCustom] ?: legacyGroup,
             barkCiphertext = prefs[Keys.barkCiphertext].orEmpty(),
             barkIsArchive = prefs[Keys.barkIsArchive],
             barkUrl = prefs[Keys.barkUrl].orEmpty(),
@@ -114,7 +122,9 @@ class SettingsDataStore @Inject constructor(
             prefs[Keys.barkSound] = settings.barkSound
             prefs[Keys.barkIcon] = settings.barkIcon
             prefs[Keys.barkImage] = settings.barkImage
-            prefs[Keys.barkGroup] = settings.barkGroup
+            prefs[Keys.barkGroupMode] = settings.barkGroupMode.name
+            prefs[Keys.barkGroupCustom] = settings.barkGroupCustom
+            prefs[Keys.barkGroup] = settings.barkGroupCustom
             prefs[Keys.barkCiphertext] = settings.barkCiphertext
             settings.barkIsArchive?.let { prefs[Keys.barkIsArchive] = it } ?: prefs.remove(Keys.barkIsArchive)
             prefs[Keys.barkUrl] = settings.barkUrl

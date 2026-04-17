@@ -5,6 +5,7 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import com.example.notifybridge.core.network.WebhookApi
 import com.example.notifybridge.core.network.dto.BarkPushRequestDto
+import com.example.notifybridge.domain.model.BarkGroupMode
 import com.example.notifybridge.domain.model.ForwardError
 import com.example.notifybridge.domain.model.ForwardPayload
 import com.example.notifybridge.domain.model.ForwardResult
@@ -71,7 +72,7 @@ class ForwardRepositoryImpl @Inject constructor(
                     markdown = if (settings.barkUseMarkdown) bodyText else null,
                     deviceKey = deviceKey.takeIf { settings.barkDeviceKeys.isEmpty() },
                     deviceKeys = settings.barkDeviceKeys.takeIf { it.isNotEmpty() },
-                    group = settings.barkGroup.takeIf { it.isNotBlank() } ?: payload.appPackage,
+                    group = resolveBarkGroup(settings, payload),
                     url = settings.barkUrl.takeIf { it.isNotBlank() },
                     level = settings.barkLevel,
                     volume = settings.barkVolume,
@@ -133,6 +134,16 @@ class ForwardRepositoryImpl @Inject constructor(
             appendLine("Package: ${payload.appPackage}")
             appendLine("Device: ${payload.deviceModel} / Android ${payload.androidVersion}")
         }.trim()
+    }
+
+    private fun resolveBarkGroup(
+        settings: com.example.notifybridge.domain.model.AppSettings,
+        payload: ForwardPayload,
+    ): String = when (settings.barkGroupMode) {
+        BarkGroupMode.APP_NAME -> payload.appName
+        BarkGroupMode.DEVICE_NAME -> payload.deviceModel
+        BarkGroupMode.APP_NAME_AT_DEVICE_NAME -> "${payload.appName}@${payload.deviceModel}"
+        BarkGroupMode.CUSTOM -> settings.barkGroupCustom.takeIf { it.isNotBlank() } ?: payload.appPackage
     }
 
     private fun Boolean.toBarkFlag(): String? = if (this) "1" else null

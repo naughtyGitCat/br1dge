@@ -1,5 +1,12 @@
 package com.example.notifybridge.domain.model
 
+enum class BarkGroupMode {
+    APP_NAME,
+    DEVICE_NAME,
+    APP_NAME_AT_DEVICE_NAME,
+    CUSTOM,
+}
+
 data class AppSettings(
     val forwardingEnabled: Boolean = false,
     val cancelNotificationOnSuccess: Boolean = false,
@@ -15,7 +22,8 @@ data class AppSettings(
     val barkSound: String = "",
     val barkIcon: String = "",
     val barkImage: String = "",
-    val barkGroup: String = "",
+    val barkGroupMode: BarkGroupMode = BarkGroupMode.APP_NAME_AT_DEVICE_NAME,
+    val barkGroupCustom: String = "",
     val barkCiphertext: String = "",
     val barkIsArchive: Boolean? = null,
     val barkUrl: String = "",

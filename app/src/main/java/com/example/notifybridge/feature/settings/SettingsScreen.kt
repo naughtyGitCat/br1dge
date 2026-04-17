@@ -14,6 +14,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
@@ -28,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.notifybridge.domain.model.AppSettings
+import com.example.notifybridge.domain.model.BarkGroupMode
 
 private const val BarkSoundDefaultValue = ""
 
@@ -41,6 +43,13 @@ private val barkLevelOptions = listOf(
 private val barkActionOptions = listOf(
     "" to "不设置",
     "alert" to "alert",
+)
+
+private val barkGroupModeOptions = listOf(
+    BarkGroupMode.APP_NAME.name to "{本应用名称}",
+    BarkGroupMode.DEVICE_NAME.name to "{本设备名称}",
+    BarkGroupMode.APP_NAME_AT_DEVICE_NAME.name to "{本应用名称}@{本设备名称}",
+    BarkGroupMode.CUSTOM.name to "{自定义}",
 )
 
 private val barkSoundOptions = listOf(
@@ -110,7 +119,8 @@ private fun SettingsScreen(
     var barkSound by remember(uiState.settings.barkSound) { mutableStateOf(uiState.settings.barkSound) }
     var barkIcon by remember(uiState.settings.barkIcon) { mutableStateOf(uiState.settings.barkIcon) }
     var barkImage by remember(uiState.settings.barkImage) { mutableStateOf(uiState.settings.barkImage) }
-    var barkGroup by remember(uiState.settings.barkGroup) { mutableStateOf(uiState.settings.barkGroup) }
+    var barkGroupMode by remember(uiState.settings.barkGroupMode) { mutableStateOf(uiState.settings.barkGroupMode) }
+    var barkGroupCustom by remember(uiState.settings.barkGroupCustom) { mutableStateOf(uiState.settings.barkGroupCustom) }
     var barkCiphertext by remember(uiState.settings.barkCiphertext) { mutableStateOf(uiState.settings.barkCiphertext) }
     var barkIsArchive by remember(uiState.settings.barkIsArchive) { mutableStateOf(uiState.settings.barkIsArchive ?: true) }
     var barkUrl by remember(uiState.settings.barkUrl) { mutableStateOf(uiState.settings.barkUrl) }
@@ -148,7 +158,8 @@ private fun SettingsScreen(
         barkSound = barkSound,
         barkIcon = barkIcon,
         barkImage = barkImage,
-        barkGroup = barkGroup,
+        barkGroupMode = barkGroupMode,
+        barkGroupCustom = barkGroupCustom,
         barkCiphertext = barkCiphertext,
         barkIsArchive = barkIsArchive,
         barkUrl = barkUrl,
@@ -267,7 +278,22 @@ private fun SettingsScreen(
                             uiState.validation.barkIconError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
                             OutlinedTextField(value = barkImage, onValueChange = { barkImage = it }, label = { Text("Image URL（可选）") }, modifier = Modifier.fillMaxWidth())
                             uiState.validation.barkImageError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-                            OutlinedTextField(value = barkGroup, onValueChange = { barkGroup = it }, label = { Text("Group（可选）") }, modifier = Modifier.fillMaxWidth())
+                            SelectionField(
+                                label = "Group",
+                                value = barkGroupMode.name,
+                                options = barkGroupModeOptions,
+                                onValueSelected = {
+                                    barkGroupMode = BarkGroupMode.valueOf(it)
+                                },
+                            )
+                            if (barkGroupMode == BarkGroupMode.CUSTOM) {
+                                OutlinedTextField(
+                                    value = barkGroupCustom,
+                                    onValueChange = { barkGroupCustom = it },
+                                    label = { Text("自定义 Group") },
+                                    modifier = Modifier.fillMaxWidth(),
+                                )
+                            }
                             OutlinedTextField(value = barkCiphertext, onValueChange = { barkCiphertext = it }, label = { Text("Ciphertext（可选）") }, modifier = Modifier.fillMaxWidth())
                             OutlinedTextField(value = barkUrl, onValueChange = { barkUrl = it }, label = { Text("点击跳转 URL（可选）") }, modifier = Modifier.fillMaxWidth())
                             uiState.validation.barkUrlError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
@@ -379,7 +405,7 @@ private fun SelectionField(
             label = { Text(label) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier
-                .menuAnchor()
+                .menuAnchor(MenuAnchorType.PrimaryNotEditable, enabled = true)
                 .fillMaxWidth(),
         )
         ExposedDropdownMenu(
@@ -431,7 +457,8 @@ private fun save(
     barkSound: String = current.barkSound,
     barkIcon: String = current.barkIcon,
     barkImage: String = current.barkImage,
-    barkGroup: String = current.barkGroup,
+    barkGroupMode: BarkGroupMode = current.barkGroupMode,
+    barkGroupCustom: String = current.barkGroupCustom,
     barkCiphertext: String = current.barkCiphertext,
     barkIsArchive: Boolean = current.barkIsArchive ?: true,
     barkUrl: String = current.barkUrl,
@@ -468,7 +495,8 @@ private fun save(
             barkSound = barkSound,
             barkIcon = barkIcon,
             barkImage = barkImage,
-            barkGroup = barkGroup,
+            barkGroupMode = barkGroupMode,
+            barkGroupCustom = barkGroupCustom,
             barkCiphertext = barkCiphertext,
             barkIsArchive = barkIsArchive,
             barkUrl = barkUrl,

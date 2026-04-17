@@ -3,6 +3,7 @@ package com.example.notifybridge.feature.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.notifybridge.domain.model.AppSettings
+import com.example.notifybridge.domain.model.BarkGroupMode
 import com.example.notifybridge.domain.model.FilterRuleSet
 import com.example.notifybridge.domain.model.ForwardResult
 import com.example.notifybridge.domain.repository.DeliveryLogRepository
@@ -42,7 +43,8 @@ data class SettingsDraft(
     val barkSound: String,
     val barkIcon: String,
     val barkImage: String,
-    val barkGroup: String,
+    val barkGroupMode: BarkGroupMode,
+    val barkGroupCustom: String,
     val barkCiphertext: String,
     val barkIsArchive: Boolean,
     val barkUrl: String,
@@ -283,7 +285,8 @@ private fun SettingsDraft.toAppSettings(): AppSettings = AppSettings(
     barkSound = barkSound.trim(),
     barkIcon = barkIcon.trim(),
     barkImage = barkImage.trim(),
-    barkGroup = barkGroup.trim(),
+    barkGroupMode = barkGroupMode,
+    barkGroupCustom = barkGroupCustom.trim(),
     barkCiphertext = barkCiphertext.trim(),
     barkIsArchive = barkIsArchive,
     barkUrl = barkUrl.trim(),
