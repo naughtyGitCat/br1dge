@@ -49,7 +49,7 @@ class ForwardRepositoryImpl @Inject constructor(
     }
 
     private suspend fun sendPayload(
-    payload: ForwardPayload,
+        payload: ForwardPayload,
         settings: com.example.notifybridge.domain.model.AppSettings,
     ): ForwardResult {
         val serverUrl = settings.barkServerUrl.trim().trimEnd('/')
@@ -60,15 +60,33 @@ class ForwardRepositoryImpl @Inject constructor(
         if (!isNetworkAvailable()) {
             return ForwardResult.Failure(ForwardError.NetworkUnavailable)
         }
+        val bodyText = buildBarkBody(payload)
         return try {
             val response = webhookApi.postBarkPush(
                 url = "$serverUrl/push",
                 body = BarkPushRequestDto(
                     title = payload.title?.takeIf { it.isNotBlank() } ?: payload.appName,
                     subtitle = payload.appName,
-                    body = buildBarkBody(payload),
-                    deviceKey = deviceKey,
-                    group = payload.appPackage,
+                    body = if (settings.barkUseMarkdown) null else bodyText,
+                    markdown = if (settings.barkUseMarkdown) bodyText else null,
+                    deviceKey = deviceKey.takeIf { settings.barkDeviceKeys.isEmpty() },
+                    deviceKeys = settings.barkDeviceKeys.takeIf { it.isNotEmpty() },
+                    group = settings.barkGroup.takeIf { it.isNotBlank() } ?: payload.appPackage,
+                    url = settings.barkUrl.takeIf { it.isNotBlank() },
+                    level = settings.barkLevel,
+                    volume = settings.barkVolume,
+                    badge = settings.barkBadge,
+                    call = settings.barkCall.toBarkFlag(),
+                    autoCopy = settings.barkAutoCopy.toBarkFlag(),
+                    copy = settings.barkCopy.takeIf { it.isNotBlank() },
+                    sound = settings.barkSound.takeIf { it.isNotBlank() },
+                    icon = settings.barkIcon.takeIf { it.isNotBlank() },
+                    image = settings.barkImage.takeIf { it.isNotBlank() },
+                    ciphertext = settings.barkCiphertext.takeIf { it.isNotBlank() },
+                    isArchive = settings.barkIsArchive?.toBarkFlag(),
+                    action = settings.barkAction.takeIf { it.isNotBlank() },
+                    id = settings.barkNotificationId.takeIf { it.isNotBlank() },
+                    delete = settings.barkDelete.toBarkFlag(),
                 ),
             )
             if (response.isSuccessful) {
@@ -116,4 +134,6 @@ class ForwardRepositoryImpl @Inject constructor(
             appendLine("Device: ${payload.deviceModel} / Android ${payload.androidVersion}")
         }.trim()
     }
+
+    private fun Boolean.toBarkFlag(): String? = if (this) "1" else null
 }

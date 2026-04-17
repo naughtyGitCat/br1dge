@@ -31,6 +31,24 @@ data class SettingsDraft(
     val forwardingEnabled: Boolean,
     val barkServerUrl: String,
     val barkDeviceKey: String,
+    val barkDeviceKeys: String,
+    val barkLevel: String,
+    val barkVolume: String,
+    val barkBadge: String,
+    val barkCall: Boolean,
+    val barkAutoCopy: Boolean,
+    val barkCopy: String,
+    val barkSound: String,
+    val barkIcon: String,
+    val barkImage: String,
+    val barkGroup: String,
+    val barkCiphertext: String,
+    val barkIsArchive: Boolean,
+    val barkUrl: String,
+    val barkAction: String,
+    val barkNotificationId: String,
+    val barkDelete: Boolean,
+    val barkUseMarkdown: Boolean,
     val allowedPackages: String,
     val blockedPackages: String,
     val keywordWhitelist: String,
@@ -46,10 +64,24 @@ data class SettingsDraft(
 data class SettingsValidationState(
     val barkServerUrlError: String? = null,
     val barkDeviceKeyError: String? = null,
+    val barkLevelError: String? = null,
+    val barkVolumeError: String? = null,
+    val barkBadgeError: String? = null,
+    val barkUrlError: String? = null,
+    val barkIconError: String? = null,
+    val barkImageError: String? = null,
     val dedupeSecondsError: String? = null,
 ) {
     val isValid: Boolean
-        get() = barkServerUrlError == null && barkDeviceKeyError == null && dedupeSecondsError == null
+        get() = barkServerUrlError == null &&
+            barkDeviceKeyError == null &&
+            barkLevelError == null &&
+            barkVolumeError == null &&
+            barkBadgeError == null &&
+            barkUrlError == null &&
+            barkIconError == null &&
+            barkImageError == null &&
+            dedupeSecondsError == null
 }
 
 sealed class TestSendState {
@@ -169,9 +201,24 @@ class SettingsViewModel @Inject constructor(
             else -> null
         }
         val barkDeviceKeyError = when {
-            draft.barkDeviceKey.trim().isBlank() -> "Bark Device Key 不能为空"
+            draft.barkDeviceKey.trim().isBlank() && draft.barkDeviceKeys.splitToList().isEmpty() -> "Bark Device Key 或 Device Keys 至少填写一个"
             else -> null
         }
+        val barkLevelError = when (draft.barkLevel.trim()) {
+            "critical", "active", "timeSensitive", "passive" -> null
+            else -> "Bark Level 只能是 critical / active / timeSensitive / passive"
+        }
+        val barkVolumeError = when (val value = draft.barkVolume.trim()) {
+            "" -> null
+            else -> value.toIntOrNull()?.takeIf { it in 0..10 }?.let { null } ?: "音量需填写 0 到 10"
+        }
+        val barkBadgeError = when (val value = draft.barkBadge.trim()) {
+            "" -> null
+            else -> value.toIntOrNull()?.let { null } ?: "角标需填写整数"
+        }
+        val barkUrlError = validateOptionalHttpUrlOrScheme(draft.barkUrl)
+        val barkIconError = validateOptionalHttpUrl(draft.barkIcon, "Icon URL")
+        val barkImageError = validateOptionalHttpUrl(draft.barkImage, "Image URL")
         val dedupeSecondsError = when (draft.dedupeSeconds.toIntOrNull()) {
             null -> "去重秒数必须是整数"
             in 0..600 -> null
@@ -180,6 +227,12 @@ class SettingsViewModel @Inject constructor(
         return SettingsValidationState(
             barkServerUrlError = barkServerUrlError,
             barkDeviceKeyError = barkDeviceKeyError,
+            barkLevelError = barkLevelError,
+            barkVolumeError = barkVolumeError,
+            barkBadgeError = barkBadgeError,
+            barkUrlError = barkUrlError,
+            barkIconError = barkIconError,
+            barkImageError = barkImageError,
             dedupeSecondsError = dedupeSecondsError,
         )
     }
@@ -190,12 +243,45 @@ class SettingsViewModel @Inject constructor(
             (uri.scheme == "http" || uri.scheme == "https") && !uri.host.isNullOrBlank()
         }.getOrDefault(false)
     }
+
+    private fun validateOptionalHttpUrl(value: String, fieldName: String): String? {
+        val trimmed = value.trim()
+        if (trimmed.isEmpty()) return null
+        return if (isValidHttpUrl(trimmed)) null else "$fieldName 必须是有效的 http/https URL"
+    }
+
+    private fun validateOptionalHttpUrlOrScheme(value: String): String? {
+        val trimmed = value.trim()
+        if (trimmed.isEmpty()) return null
+        return runCatching {
+            val uri = URI(trimmed)
+            if (!uri.scheme.isNullOrBlank()) null else "跳转 URL 需要包含 scheme"
+        }.getOrElse { "跳转 URL 格式不正确" }
+    }
 }
 
 private fun SettingsDraft.toAppSettings(): AppSettings = AppSettings(
     forwardingEnabled = forwardingEnabled,
     barkServerUrl = barkServerUrl.trim(),
     barkDeviceKey = barkDeviceKey.trim(),
+    barkDeviceKeys = barkDeviceKeys.splitToList(),
+    barkLevel = barkLevel.trim(),
+    barkVolume = barkVolume.trim().toIntOrNull(),
+    barkBadge = barkBadge.trim().toIntOrNull(),
+    barkCall = barkCall,
+    barkAutoCopy = barkAutoCopy,
+    barkCopy = barkCopy.trim(),
+    barkSound = barkSound.trim(),
+    barkIcon = barkIcon.trim(),
+    barkImage = barkImage.trim(),
+    barkGroup = barkGroup.trim(),
+    barkCiphertext = barkCiphertext.trim(),
+    barkIsArchive = barkIsArchive,
+    barkUrl = barkUrl.trim(),
+    barkAction = barkAction.trim(),
+    barkNotificationId = barkNotificationId.trim(),
+    barkDelete = barkDelete,
+    barkUseMarkdown = barkUseMarkdown,
     filterRuleSet = FilterRuleSet(
         enabled = filtersEnabled,
         allowedPackages = allowedPackages.splitToSet(),
@@ -214,3 +300,7 @@ private fun String.splitToSet(): Set<String> = split(",")
     .map { it.trim() }
     .filter { it.isNotEmpty() }
     .toSet()
+
+private fun String.splitToList(): List<String> = split(",")
+    .map { it.trim() }
+    .filter { it.isNotEmpty() }

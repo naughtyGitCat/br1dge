@@ -46,6 +46,24 @@ private fun SettingsScreen(
 ) {
     var barkServerUrl by remember(uiState.settings.barkServerUrl) { mutableStateOf(uiState.settings.barkServerUrl) }
     var barkDeviceKey by remember(uiState.settings.barkDeviceKey) { mutableStateOf(uiState.settings.barkDeviceKey) }
+    var barkDeviceKeys by remember(uiState.settings.barkDeviceKeys) { mutableStateOf(uiState.settings.barkDeviceKeys.joinToString(",")) }
+    var barkLevel by remember(uiState.settings.barkLevel) { mutableStateOf(uiState.settings.barkLevel) }
+    var barkVolume by remember(uiState.settings.barkVolume) { mutableStateOf(uiState.settings.barkVolume?.toString().orEmpty()) }
+    var barkBadge by remember(uiState.settings.barkBadge) { mutableStateOf(uiState.settings.barkBadge?.toString().orEmpty()) }
+    var barkCall by remember(uiState.settings.barkCall) { mutableStateOf(uiState.settings.barkCall) }
+    var barkAutoCopy by remember(uiState.settings.barkAutoCopy) { mutableStateOf(uiState.settings.barkAutoCopy) }
+    var barkCopy by remember(uiState.settings.barkCopy) { mutableStateOf(uiState.settings.barkCopy) }
+    var barkSound by remember(uiState.settings.barkSound) { mutableStateOf(uiState.settings.barkSound) }
+    var barkIcon by remember(uiState.settings.barkIcon) { mutableStateOf(uiState.settings.barkIcon) }
+    var barkImage by remember(uiState.settings.barkImage) { mutableStateOf(uiState.settings.barkImage) }
+    var barkGroup by remember(uiState.settings.barkGroup) { mutableStateOf(uiState.settings.barkGroup) }
+    var barkCiphertext by remember(uiState.settings.barkCiphertext) { mutableStateOf(uiState.settings.barkCiphertext) }
+    var barkIsArchive by remember(uiState.settings.barkIsArchive) { mutableStateOf(uiState.settings.barkIsArchive ?: true) }
+    var barkUrl by remember(uiState.settings.barkUrl) { mutableStateOf(uiState.settings.barkUrl) }
+    var barkAction by remember(uiState.settings.barkAction) { mutableStateOf(uiState.settings.barkAction) }
+    var barkNotificationId by remember(uiState.settings.barkNotificationId) { mutableStateOf(uiState.settings.barkNotificationId) }
+    var barkDelete by remember(uiState.settings.barkDelete) { mutableStateOf(uiState.settings.barkDelete) }
+    var barkUseMarkdown by remember(uiState.settings.barkUseMarkdown) { mutableStateOf(uiState.settings.barkUseMarkdown) }
     var allowedPackages by remember(uiState.settings.filterRuleSet.allowedPackages) {
         mutableStateOf(uiState.settings.filterRuleSet.allowedPackages.joinToString(","))
     }
@@ -65,6 +83,24 @@ private fun SettingsScreen(
         forwardingEnabled = uiState.settings.forwardingEnabled,
         barkServerUrl = barkServerUrl,
         barkDeviceKey = barkDeviceKey,
+        barkDeviceKeys = barkDeviceKeys,
+        barkLevel = barkLevel,
+        barkVolume = barkVolume,
+        barkBadge = barkBadge,
+        barkCall = barkCall,
+        barkAutoCopy = barkAutoCopy,
+        barkCopy = barkCopy,
+        barkSound = barkSound,
+        barkIcon = barkIcon,
+        barkImage = barkImage,
+        barkGroup = barkGroup,
+        barkCiphertext = barkCiphertext,
+        barkIsArchive = barkIsArchive,
+        barkUrl = barkUrl,
+        barkAction = barkAction,
+        barkNotificationId = barkNotificationId,
+        barkDelete = barkDelete,
+        barkUseMarkdown = barkUseMarkdown,
         allowedPackages = allowedPackages,
         blockedPackages = blockedPackages,
         keywordWhitelist = whitelist,
@@ -131,6 +167,35 @@ private fun SettingsScreen(
                     OutlinedTextField(value = barkDeviceKey, onValueChange = { barkDeviceKey = it }, label = { Text("Bark Device Key") }, modifier = Modifier.fillMaxWidth())
                     uiState.validation.barkDeviceKeyError?.let {
                         Text(it, color = MaterialTheme.colorScheme.error)
+                    }
+                    Card(modifier = Modifier.fillMaxWidth()) {
+                        Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text("Bark 高级参数")
+                            OutlinedTextField(value = barkDeviceKeys, onValueChange = { barkDeviceKeys = it }, label = { Text("Device Keys（逗号分隔，可选）") }, modifier = Modifier.fillMaxWidth())
+                            OutlinedTextField(value = barkLevel, onValueChange = { barkLevel = it }, label = { Text("Level") }, modifier = Modifier.fillMaxWidth())
+                            uiState.validation.barkLevelError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                            OutlinedTextField(value = barkVolume, onValueChange = { barkVolume = it }, label = { Text("Volume（0-10，可选）") }, modifier = Modifier.fillMaxWidth())
+                            uiState.validation.barkVolumeError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                            OutlinedTextField(value = barkBadge, onValueChange = { barkBadge = it }, label = { Text("Badge（整数，可选）") }, modifier = Modifier.fillMaxWidth())
+                            uiState.validation.barkBadgeError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                            OutlinedTextField(value = barkCopy, onValueChange = { barkCopy = it }, label = { Text("Copy（可选）") }, modifier = Modifier.fillMaxWidth())
+                            OutlinedTextField(value = barkSound, onValueChange = { barkSound = it }, label = { Text("Sound（可选）") }, modifier = Modifier.fillMaxWidth())
+                            OutlinedTextField(value = barkIcon, onValueChange = { barkIcon = it }, label = { Text("Icon URL（可选）") }, modifier = Modifier.fillMaxWidth())
+                            uiState.validation.barkIconError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                            OutlinedTextField(value = barkImage, onValueChange = { barkImage = it }, label = { Text("Image URL（可选）") }, modifier = Modifier.fillMaxWidth())
+                            uiState.validation.barkImageError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                            OutlinedTextField(value = barkGroup, onValueChange = { barkGroup = it }, label = { Text("Group（可选）") }, modifier = Modifier.fillMaxWidth())
+                            OutlinedTextField(value = barkCiphertext, onValueChange = { barkCiphertext = it }, label = { Text("Ciphertext（可选）") }, modifier = Modifier.fillMaxWidth())
+                            OutlinedTextField(value = barkUrl, onValueChange = { barkUrl = it }, label = { Text("点击跳转 URL（可选）") }, modifier = Modifier.fillMaxWidth())
+                            uiState.validation.barkUrlError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                            OutlinedTextField(value = barkAction, onValueChange = { barkAction = it }, label = { Text("Action（可选）") }, modifier = Modifier.fillMaxWidth())
+                            OutlinedTextField(value = barkNotificationId, onValueChange = { barkNotificationId = it }, label = { Text("通知 ID（可选）") }, modifier = Modifier.fillMaxWidth())
+                            SwitchRow(title = "Call", checked = barkCall, onCheckedChange = { barkCall = it })
+                            SwitchRow(title = "AutoCopy", checked = barkAutoCopy, onCheckedChange = { barkAutoCopy = it })
+                            SwitchRow(title = "使用 Markdown 发送", checked = barkUseMarkdown, onCheckedChange = { barkUseMarkdown = it })
+                            SwitchRow(title = "保存到 Bark 历史", checked = barkIsArchive, onCheckedChange = { barkIsArchive = it })
+                            SwitchRow(title = "Delete（配合 ID 删除）", checked = barkDelete, onCheckedChange = { barkDelete = it })
+                        }
                     }
                     OutlinedTextField(value = allowedPackages, onValueChange = { allowedPackages = it }, label = { Text("允许应用包名（逗号分隔）") }, modifier = Modifier.fillMaxWidth())
                     OutlinedTextField(value = blockedPackages, onValueChange = { blockedPackages = it }, label = { Text("黑名单应用包名（逗号分隔）") }, modifier = Modifier.fillMaxWidth())
@@ -221,6 +286,24 @@ private fun save(
     onAction: (SettingsAction) -> Unit,
     barkServerUrl: String,
     barkDeviceKey: String,
+    barkDeviceKeys: String = current.barkDeviceKeys.joinToString(","),
+    barkLevel: String = current.barkLevel,
+    barkVolume: String = current.barkVolume?.toString().orEmpty(),
+    barkBadge: String = current.barkBadge?.toString().orEmpty(),
+    barkCall: Boolean = current.barkCall,
+    barkAutoCopy: Boolean = current.barkAutoCopy,
+    barkCopy: String = current.barkCopy,
+    barkSound: String = current.barkSound,
+    barkIcon: String = current.barkIcon,
+    barkImage: String = current.barkImage,
+    barkGroup: String = current.barkGroup,
+    barkCiphertext: String = current.barkCiphertext,
+    barkIsArchive: Boolean = current.barkIsArchive ?: true,
+    barkUrl: String = current.barkUrl,
+    barkAction: String = current.barkAction,
+    barkNotificationId: String = current.barkNotificationId,
+    barkDelete: Boolean = current.barkDelete,
+    barkUseMarkdown: Boolean = current.barkUseMarkdown,
     allowedPackages: String,
     blockedPackages: String,
     whitelist: String,
@@ -238,6 +321,24 @@ private fun save(
             forwardingEnabled = forwardingEnabled,
             barkServerUrl = barkServerUrl,
             barkDeviceKey = barkDeviceKey,
+            barkDeviceKeys = barkDeviceKeys,
+            barkLevel = barkLevel,
+            barkVolume = barkVolume,
+            barkBadge = barkBadge,
+            barkCall = barkCall,
+            barkAutoCopy = barkAutoCopy,
+            barkCopy = barkCopy,
+            barkSound = barkSound,
+            barkIcon = barkIcon,
+            barkImage = barkImage,
+            barkGroup = barkGroup,
+            barkCiphertext = barkCiphertext,
+            barkIsArchive = barkIsArchive,
+            barkUrl = barkUrl,
+            barkAction = barkAction,
+            barkNotificationId = barkNotificationId,
+            barkDelete = barkDelete,
+            barkUseMarkdown = barkUseMarkdown,
             allowedPackages = allowedPackages,
             blockedPackages = blockedPackages,
             keywordWhitelist = whitelist,
