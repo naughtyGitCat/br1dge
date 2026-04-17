@@ -68,7 +68,7 @@ app/src/main/java/com/example/notifybridge
 
 - `minSdk = 26`
 - `targetSdk = 35`
-- 包名：`com.example.notifybridge`
+- 包名：`uk.deprecated.notifybridge`
 
 ## 如何授予通知访问权限
 

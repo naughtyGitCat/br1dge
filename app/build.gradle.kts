@@ -7,11 +7,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.notifybridge"
+    namespace = "uk.deprecated.notifybridge"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.notifybridge"
+        applicationId = "uk.deprecated.notifybridge"
         minSdk = 26
         targetSdk = 35
         versionCode = 1

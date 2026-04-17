@@ -8,7 +8,7 @@
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 
     <application
-        android:name=".app.NotifyBridgeApplication"
+        android:name="com.example.notifybridge.app.NotifyBridgeApplication"
         android:allowBackup="true"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@drawable/ic_launcher_foreground"
@@ -18,7 +18,7 @@
         android:theme="@style/Theme.NotifyBridge">
 
         <activity
-            android:name=".app.MainActivity"
+            android:name="com.example.notifybridge.app.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.NotifyBridge">
             <intent-filter>
@@ -28,7 +28,7 @@
         </activity>
 
         <service
-            android:name=".system.service.BridgeNotificationListenerService"
+            android:name="com.example.notifybridge.system.service.BridgeNotificationListenerService"
             android:label="NotifyBridge Notification Access"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
             android:exported="false">
@@ -38,7 +38,7 @@
         </service>
 
         <receiver
-            android:name=".system.receiver.BootReceiver"
+            android:name="com.example.notifybridge.system.receiver.BootReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
