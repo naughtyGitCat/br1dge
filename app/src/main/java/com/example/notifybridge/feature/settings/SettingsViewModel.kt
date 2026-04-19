@@ -13,13 +13,17 @@ import com.example.notifybridge.domain.repository.ForwardRepository
 import com.example.notifybridge.domain.repository.SettingsRepository
 import com.example.notifybridge.domain.usecase.UpdateSettingsUseCase
 import com.example.notifybridge.system.util.DebugExportManager
+import com.example.notifybridge.system.util.InstalledAppInfo
+import com.example.notifybridge.system.util.InstalledAppsProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.net.URI
 import javax.inject.Inject
 
@@ -102,6 +106,7 @@ data class SettingsUiState(
     val settings: AppSettings = AppSettings(
         filterRuleSet = FilterRuleSet(enabled = true)
     ),
+    val installedApps: List<InstalledAppInfo> = emptyList(),
     val message: String? = null,
     val exportingPath: String? = null,
     val validation: SettingsValidationState = SettingsValidationState(),
@@ -116,16 +121,20 @@ class SettingsViewModel @Inject constructor(
     private val forwardRepository: ForwardRepository,
     private val deliveryLogRepository: DeliveryLogRepository,
     private val debugExportManager: DebugExportManager,
+    private val installedAppsProvider: InstalledAppsProvider,
 ) : ViewModel() {
 
     private val ephemeralState = MutableStateFlow(SettingsUiState())
+    private val installedAppsState = MutableStateFlow(emptyList<InstalledAppInfo>())
 
     val uiState: StateFlow<SettingsUiState> = combine(
         settingsRepository.observeSettings(),
+        installedAppsState,
         ephemeralState,
-    ) { settings, ephemeral ->
+    ) { settings, installedApps, ephemeral ->
         SettingsUiState(
             settings = settings,
+            installedApps = installedApps,
             message = ephemeral.message,
             exportingPath = ephemeral.exportingPath,
             validation = ephemeral.validation,
@@ -136,6 +145,14 @@ class SettingsViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = SettingsUiState(settings = AppSettings(filterRuleSet = FilterRuleSet(enabled = true))),
     )
+
+    init {
+        viewModelScope.launch {
+            installedAppsState.value = withContext(Dispatchers.IO) {
+                installedAppsProvider.getInstalledApps()
+            }
+        }
+    }
 
     fun onAction(action: SettingsAction) {
         viewModelScope.launch {

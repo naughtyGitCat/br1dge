@@ -121,6 +121,14 @@
     <string name="settings_bark_markdown">Send as Markdown</string>
     <string name="settings_bark_archive">Save to Bark history</string>
     <string name="settings_bark_delete">Delete (with ID)</string>
+    <string name="settings_app_rules">App forwarding rules</string>
+    <string name="settings_app_rules_summary">Forward: %1$d | Block: %2$d</string>
+    <string name="settings_app_search">Search installed apps</string>
+    <string name="settings_app_mode_forward">Forward</string>
+    <string name="settings_app_mode_block">Do not forward</string>
+    <string name="settings_app_mode_default">Default</string>
+    <string name="settings_app_system">System</string>
+    <string name="settings_manual_filters">Advanced filter fields</string>
     <string name="settings_allowed_packages">Allowed packages (comma separated)</string>
     <string name="settings_blocked_packages">Blocked packages (comma separated)</string>
     <string name="settings_keyword_whitelist">Keyword whitelist (comma separated)</string>

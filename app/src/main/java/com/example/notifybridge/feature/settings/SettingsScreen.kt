@@ -8,14 +8,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -29,9 +31,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import uk.deprecated.notifybridge.R
 import com.example.notifybridge.domain.model.AppSettings
 import com.example.notifybridge.domain.model.BarkGroupMode
+import com.example.notifybridge.system.util.InstalledAppInfo
+import uk.deprecated.notifybridge.R
 
 private const val BarkSoundDefaultValue = ""
 
@@ -90,6 +93,12 @@ private val barkSoundOptions = listOf(
     "update.caf" to "update.caf",
 )
 
+private enum class AppForwardMode {
+    DEFAULT,
+    FORWARD,
+    BLOCK,
+}
+
 @Composable
 fun SettingsScreenRoute(
     contentPadding: PaddingValues,
@@ -144,6 +153,21 @@ private fun SettingsScreen(
     }
     var dedupeSeconds by remember(uiState.settings.filterRuleSet.dedupeWindowSeconds) {
         mutableStateOf(uiState.settings.filterRuleSet.dedupeWindowSeconds.toString())
+    }
+    var appSearchQuery by remember { mutableStateOf("") }
+
+    val allowedPackageSet = remember(allowedPackages) { allowedPackages.splitToSet() }
+    val blockedPackageSet = remember(blockedPackages) { blockedPackages.splitToSet() }
+    val filteredApps = remember(uiState.installedApps, appSearchQuery) {
+        val query = appSearchQuery.trim()
+        if (query.isBlank()) {
+            uiState.installedApps
+        } else {
+            uiState.installedApps.filter { app ->
+                app.appName.contains(query, ignoreCase = true) ||
+                    app.packageName.contains(query, ignoreCase = true)
+            }
+        }
     }
     val draft = SettingsDraft(
         forwardingEnabled = uiState.settings.forwardingEnabled,
@@ -246,79 +270,208 @@ private fun SettingsScreen(
                             )
                         }
                     )
-                    OutlinedTextField(value = barkServerUrl, onValueChange = { barkServerUrl = it }, label = { Text(stringResource(R.string.settings_bark_server_url)) }, modifier = Modifier.fillMaxWidth())
+                    OutlinedTextField(
+                        value = barkServerUrl,
+                        onValueChange = { barkServerUrl = it },
+                        label = { Text(stringResource(R.string.settings_bark_server_url)) },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
                     uiState.validation.barkServerUrlError?.let {
                         Text(it, color = MaterialTheme.colorScheme.error)
                     }
-                    OutlinedTextField(value = barkDeviceKey, onValueChange = { barkDeviceKey = it }, label = { Text(stringResource(R.string.settings_bark_device_key)) }, modifier = Modifier.fillMaxWidth())
+                    OutlinedTextField(
+                        value = barkDeviceKey,
+                        onValueChange = { barkDeviceKey = it },
+                        label = { Text(stringResource(R.string.settings_bark_device_key)) },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
                     uiState.validation.barkDeviceKeyError?.let {
                         Text(it, color = MaterialTheme.colorScheme.error)
                     }
-                    Card(modifier = Modifier.fillMaxWidth()) {
-                        Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Text(stringResource(R.string.settings_bark_advanced))
-                            OutlinedTextField(value = barkDeviceKeys, onValueChange = { barkDeviceKeys = it }, label = { Text(stringResource(R.string.settings_bark_device_keys)) }, modifier = Modifier.fillMaxWidth())
-                            SelectionField(
-                                label = stringResource(R.string.settings_bark_level),
-                                value = barkLevel,
-                                options = barkLevelOptions,
-                                onValueSelected = { barkLevel = it },
-                            )
-                            uiState.validation.barkLevelError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-                            OutlinedTextField(value = barkVolume, onValueChange = { barkVolume = it }, label = { Text(stringResource(R.string.settings_bark_volume)) }, modifier = Modifier.fillMaxWidth())
-                            uiState.validation.barkVolumeError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-                            OutlinedTextField(value = barkBadge, onValueChange = { barkBadge = it }, label = { Text(stringResource(R.string.settings_bark_badge)) }, modifier = Modifier.fillMaxWidth())
-                            uiState.validation.barkBadgeError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-                            OutlinedTextField(value = barkCopy, onValueChange = { barkCopy = it }, label = { Text(stringResource(R.string.settings_bark_copy)) }, modifier = Modifier.fillMaxWidth())
-                            SelectionField(
-                                label = stringResource(R.string.settings_bark_sound),
-                                value = barkSound,
-                                options = barkSoundOptions.withCurrentValue(barkSound),
-                                onValueSelected = { barkSound = it },
-                            )
-                            OutlinedTextField(value = barkIcon, onValueChange = { barkIcon = it }, label = { Text(stringResource(R.string.settings_bark_icon)) }, modifier = Modifier.fillMaxWidth())
-                            uiState.validation.barkIconError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-                            OutlinedTextField(value = barkImage, onValueChange = { barkImage = it }, label = { Text(stringResource(R.string.settings_bark_image)) }, modifier = Modifier.fillMaxWidth())
-                            uiState.validation.barkImageError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-                            SelectionField(
-                                label = stringResource(R.string.settings_bark_group),
-                                value = barkGroupMode.name,
-                                options = barkGroupModeOptions,
-                                onValueSelected = {
-                                    barkGroupMode = BarkGroupMode.valueOf(it)
-                                },
-                            )
-                            if (barkGroupMode == BarkGroupMode.CUSTOM) {
-                                OutlinedTextField(
-                                    value = barkGroupCustom,
-                                    onValueChange = { barkGroupCustom = it },
-                                    label = { Text(stringResource(R.string.settings_bark_group_custom)) },
-                                    modifier = Modifier.fillMaxWidth(),
-                                )
-                            }
-                            OutlinedTextField(value = barkCiphertext, onValueChange = { barkCiphertext = it }, label = { Text(stringResource(R.string.settings_bark_ciphertext)) }, modifier = Modifier.fillMaxWidth())
-                            OutlinedTextField(value = barkUrl, onValueChange = { barkUrl = it }, label = { Text(stringResource(R.string.settings_bark_jump_url)) }, modifier = Modifier.fillMaxWidth())
-                            uiState.validation.barkUrlError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-                            SelectionField(
-                                label = stringResource(R.string.settings_bark_action),
-                                value = barkAction,
-                                options = barkActionOptions,
-                                onValueSelected = { barkAction = it },
-                            )
-                            uiState.validation.barkActionError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-                            OutlinedTextField(value = barkNotificationId, onValueChange = { barkNotificationId = it }, label = { Text(stringResource(R.string.settings_bark_notification_id)) }, modifier = Modifier.fillMaxWidth())
-                            SwitchRow(title = stringResource(R.string.settings_bark_call), checked = barkCall, onCheckedChange = { barkCall = it })
-                            SwitchRow(title = stringResource(R.string.settings_bark_auto_copy), checked = barkAutoCopy, onCheckedChange = { barkAutoCopy = it })
-                            SwitchRow(title = stringResource(R.string.settings_bark_markdown), checked = barkUseMarkdown, onCheckedChange = { barkUseMarkdown = it })
-                            SwitchRow(title = stringResource(R.string.settings_bark_archive), checked = barkIsArchive, onCheckedChange = { barkIsArchive = it })
-                            SwitchRow(title = stringResource(R.string.settings_bark_delete), checked = barkDelete, onCheckedChange = { barkDelete = it })
-                        }
+                }
+            }
+        }
+
+        item {
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text(stringResource(R.string.settings_app_rules))
+                    Text(
+                        text = stringResource(
+                            R.string.settings_app_rules_summary,
+                            allowedPackageSet.size,
+                            blockedPackageSet.size,
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    OutlinedTextField(
+                        value = appSearchQuery,
+                        onValueChange = { appSearchQuery = it },
+                        label = { Text(stringResource(R.string.settings_app_search)) },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+            }
+        }
+
+        items(filteredApps, key = { it.packageName }) { app ->
+            AppRuleCard(
+                app = app,
+                mode = app.forwardMode(allowedPackageSet, blockedPackageSet),
+                onModeSelected = { mode ->
+                    val (updatedAllowed, updatedBlocked) = updatePackageFilters(
+                        packageName = app.packageName,
+                        mode = mode,
+                        allowedPackages = allowedPackages,
+                        blockedPackages = blockedPackages,
+                    )
+                    allowedPackages = updatedAllowed
+                    blockedPackages = updatedBlocked
+                },
+            )
+        }
+
+        item {
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text(stringResource(R.string.settings_bark_advanced))
+                    OutlinedTextField(
+                        value = barkDeviceKeys,
+                        onValueChange = { barkDeviceKeys = it },
+                        label = { Text(stringResource(R.string.settings_bark_device_keys)) },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    SelectionField(
+                        label = stringResource(R.string.settings_bark_level),
+                        value = barkLevel,
+                        options = barkLevelOptions,
+                        onValueSelected = { barkLevel = it },
+                    )
+                    uiState.validation.barkLevelError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                    OutlinedTextField(
+                        value = barkVolume,
+                        onValueChange = { barkVolume = it },
+                        label = { Text(stringResource(R.string.settings_bark_volume)) },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    uiState.validation.barkVolumeError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                    OutlinedTextField(
+                        value = barkBadge,
+                        onValueChange = { barkBadge = it },
+                        label = { Text(stringResource(R.string.settings_bark_badge)) },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    uiState.validation.barkBadgeError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                    OutlinedTextField(
+                        value = barkCopy,
+                        onValueChange = { barkCopy = it },
+                        label = { Text(stringResource(R.string.settings_bark_copy)) },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    SelectionField(
+                        label = stringResource(R.string.settings_bark_sound),
+                        value = barkSound,
+                        options = barkSoundOptions.withCurrentValue(barkSound),
+                        onValueSelected = { barkSound = it },
+                    )
+                    OutlinedTextField(
+                        value = barkIcon,
+                        onValueChange = { barkIcon = it },
+                        label = { Text(stringResource(R.string.settings_bark_icon)) },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    uiState.validation.barkIconError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                    OutlinedTextField(
+                        value = barkImage,
+                        onValueChange = { barkImage = it },
+                        label = { Text(stringResource(R.string.settings_bark_image)) },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    uiState.validation.barkImageError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                    SelectionField(
+                        label = stringResource(R.string.settings_bark_group),
+                        value = barkGroupMode.name,
+                        options = barkGroupModeOptions,
+                        onValueSelected = { barkGroupMode = BarkGroupMode.valueOf(it) },
+                    )
+                    if (barkGroupMode == BarkGroupMode.CUSTOM) {
+                        OutlinedTextField(
+                            value = barkGroupCustom,
+                            onValueChange = { barkGroupCustom = it },
+                            label = { Text(stringResource(R.string.settings_bark_group_custom)) },
+                            modifier = Modifier.fillMaxWidth(),
+                        )
                     }
-                    OutlinedTextField(value = allowedPackages, onValueChange = { allowedPackages = it }, label = { Text(stringResource(R.string.settings_allowed_packages)) }, modifier = Modifier.fillMaxWidth())
-                    OutlinedTextField(value = blockedPackages, onValueChange = { blockedPackages = it }, label = { Text(stringResource(R.string.settings_blocked_packages)) }, modifier = Modifier.fillMaxWidth())
-                    OutlinedTextField(value = whitelist, onValueChange = { whitelist = it }, label = { Text(stringResource(R.string.settings_keyword_whitelist)) }, modifier = Modifier.fillMaxWidth())
-                    OutlinedTextField(value = blacklist, onValueChange = { blacklist = it }, label = { Text(stringResource(R.string.settings_keyword_blacklist)) }, modifier = Modifier.fillMaxWidth())
-                    OutlinedTextField(value = dedupeSeconds, onValueChange = { dedupeSeconds = it }, label = { Text(stringResource(R.string.settings_dedupe_seconds)) }, modifier = Modifier.fillMaxWidth())
+                    OutlinedTextField(
+                        value = barkCiphertext,
+                        onValueChange = { barkCiphertext = it },
+                        label = { Text(stringResource(R.string.settings_bark_ciphertext)) },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    OutlinedTextField(
+                        value = barkUrl,
+                        onValueChange = { barkUrl = it },
+                        label = { Text(stringResource(R.string.settings_bark_jump_url)) },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    uiState.validation.barkUrlError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                    SelectionField(
+                        label = stringResource(R.string.settings_bark_action),
+                        value = barkAction,
+                        options = barkActionOptions,
+                        onValueSelected = { barkAction = it },
+                    )
+                    uiState.validation.barkActionError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                    OutlinedTextField(
+                        value = barkNotificationId,
+                        onValueChange = { barkNotificationId = it },
+                        label = { Text(stringResource(R.string.settings_bark_notification_id)) },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    SwitchRow(title = stringResource(R.string.settings_bark_call), checked = barkCall, onCheckedChange = { barkCall = it })
+                    SwitchRow(title = stringResource(R.string.settings_bark_auto_copy), checked = barkAutoCopy, onCheckedChange = { barkAutoCopy = it })
+                    SwitchRow(title = stringResource(R.string.settings_bark_markdown), checked = barkUseMarkdown, onCheckedChange = { barkUseMarkdown = it })
+                    SwitchRow(title = stringResource(R.string.settings_bark_archive), checked = barkIsArchive, onCheckedChange = { barkIsArchive = it })
+                    SwitchRow(title = stringResource(R.string.settings_bark_delete), checked = barkDelete, onCheckedChange = { barkDelete = it })
+                }
+            }
+        }
+
+        item {
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text(stringResource(R.string.settings_manual_filters))
+                    OutlinedTextField(
+                        value = allowedPackages,
+                        onValueChange = { allowedPackages = it },
+                        label = { Text(stringResource(R.string.settings_allowed_packages)) },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    OutlinedTextField(
+                        value = blockedPackages,
+                        onValueChange = { blockedPackages = it },
+                        label = { Text(stringResource(R.string.settings_blocked_packages)) },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    OutlinedTextField(
+                        value = whitelist,
+                        onValueChange = { whitelist = it },
+                        label = { Text(stringResource(R.string.settings_keyword_whitelist)) },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    OutlinedTextField(
+                        value = blacklist,
+                        onValueChange = { blacklist = it },
+                        label = { Text(stringResource(R.string.settings_keyword_blacklist)) },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    OutlinedTextField(
+                        value = dedupeSeconds,
+                        onValueChange = { dedupeSeconds = it },
+                        label = { Text(stringResource(R.string.settings_dedupe_seconds)) },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
                     uiState.validation.dedupeSecondsError?.let {
                         Text(it, color = MaterialTheme.colorScheme.error)
                     }
@@ -326,34 +479,76 @@ private fun SettingsScreen(
                         title = stringResource(R.string.settings_exclude_system),
                         checked = uiState.settings.filterRuleSet.excludeSystemNotifications,
                         onCheckedChange = {
-                            save(current = uiState.settings, onAction = onAction, barkServerUrl = barkServerUrl, barkDeviceKey = barkDeviceKey, allowedPackages = allowedPackages, blockedPackages = blockedPackages, whitelist = whitelist, blacklist = blacklist, dedupeSeconds = dedupeSeconds, excludeSystem = it)
+                            save(
+                                current = uiState.settings,
+                                onAction = onAction,
+                                barkServerUrl = barkServerUrl,
+                                barkDeviceKey = barkDeviceKey,
+                                allowedPackages = allowedPackages,
+                                blockedPackages = blockedPackages,
+                                whitelist = whitelist,
+                                blacklist = blacklist,
+                                dedupeSeconds = dedupeSeconds,
+                                excludeSystem = it,
+                            )
                         }
                     )
                     SwitchRow(
                         title = stringResource(R.string.settings_exclude_ongoing),
                         checked = uiState.settings.filterRuleSet.excludeOngoingNotifications,
                         onCheckedChange = {
-                            save(current = uiState.settings, onAction = onAction, barkServerUrl = barkServerUrl, barkDeviceKey = barkDeviceKey, allowedPackages = allowedPackages, blockedPackages = blockedPackages, whitelist = whitelist, blacklist = blacklist, dedupeSeconds = dedupeSeconds, excludeOngoing = it)
+                            save(
+                                current = uiState.settings,
+                                onAction = onAction,
+                                barkServerUrl = barkServerUrl,
+                                barkDeviceKey = barkDeviceKey,
+                                allowedPackages = allowedPackages,
+                                blockedPackages = blockedPackages,
+                                whitelist = whitelist,
+                                blacklist = blacklist,
+                                dedupeSeconds = dedupeSeconds,
+                                excludeOngoing = it,
+                            )
                         }
                     )
                     SwitchRow(
                         title = stringResource(R.string.settings_exclude_empty),
                         checked = uiState.settings.filterRuleSet.excludeEmptyTextNotifications,
                         onCheckedChange = {
-                            save(current = uiState.settings, onAction = onAction, barkServerUrl = barkServerUrl, barkDeviceKey = barkDeviceKey, allowedPackages = allowedPackages, blockedPackages = blockedPackages, whitelist = whitelist, blacklist = blacklist, dedupeSeconds = dedupeSeconds, excludeEmpty = it)
+                            save(
+                                current = uiState.settings,
+                                onAction = onAction,
+                                barkServerUrl = barkServerUrl,
+                                barkDeviceKey = barkDeviceKey,
+                                allowedPackages = allowedPackages,
+                                blockedPackages = blockedPackages,
+                                whitelist = whitelist,
+                                blacklist = blacklist,
+                                dedupeSeconds = dedupeSeconds,
+                                excludeEmpty = it,
+                            )
                         }
                     )
                     SwitchRow(
                         title = stringResource(R.string.settings_auto_retry),
                         checked = uiState.settings.filterRuleSet.autoRetryEnabled,
                         onCheckedChange = {
-                            save(current = uiState.settings, onAction = onAction, barkServerUrl = barkServerUrl, barkDeviceKey = barkDeviceKey, allowedPackages = allowedPackages, blockedPackages = blockedPackages, whitelist = whitelist, blacklist = blacklist, dedupeSeconds = dedupeSeconds, autoRetry = it)
+                            save(
+                                current = uiState.settings,
+                                onAction = onAction,
+                                barkServerUrl = barkServerUrl,
+                                barkDeviceKey = barkDeviceKey,
+                                allowedPackages = allowedPackages,
+                                blockedPackages = blockedPackages,
+                                whitelist = whitelist,
+                                blacklist = blacklist,
+                                dedupeSeconds = dedupeSeconds,
+                                autoRetry = it,
+                            )
                         }
                     )
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-                        Button(onClick = {
-                            onAction(SettingsAction.Save(draft))
-                        }, modifier = Modifier.weight(1f)) {
+                        Button(onClick = { onAction(SettingsAction.Save(draft)) }, modifier = Modifier.weight(1f)) {
                             Text(stringResource(R.string.settings_save))
                         }
                         Button(
@@ -381,6 +576,52 @@ private fun SettingsScreen(
                     }
                     uiState.exportingPath?.let { Text(stringResource(R.string.settings_export_path, it)) }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AppRuleCard(
+    app: InstalledAppInfo,
+    mode: AppForwardMode,
+    onModeSelected: (AppForwardMode) -> Unit,
+) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(app.appName, style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        text = app.packageName,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                if (app.isSystemApp) {
+                    Text(
+                        text = stringResource(R.string.settings_app_system),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                FilterChip(
+                    selected = mode == AppForwardMode.FORWARD,
+                    onClick = { onModeSelected(AppForwardMode.FORWARD) },
+                    label = { Text(stringResource(R.string.settings_app_mode_forward)) },
+                )
+                FilterChip(
+                    selected = mode == AppForwardMode.BLOCK,
+                    onClick = { onModeSelected(AppForwardMode.BLOCK) },
+                    label = { Text(stringResource(R.string.settings_app_mode_block)) },
+                )
+                FilterChip(
+                    selected = mode == AppForwardMode.DEFAULT,
+                    onClick = { onModeSelected(AppForwardMode.DEFAULT) },
+                    label = { Text(stringResource(R.string.settings_app_mode_default)) },
+                )
             }
         }
     }
@@ -439,6 +680,38 @@ private fun SwitchRow(
     }
 }
 
+private fun InstalledAppInfo.forwardMode(
+    allowedPackages: Set<String>,
+    blockedPackages: Set<String>,
+): AppForwardMode = when {
+    packageName in blockedPackages -> AppForwardMode.BLOCK
+    packageName in allowedPackages -> AppForwardMode.FORWARD
+    else -> AppForwardMode.DEFAULT
+}
+
+private fun updatePackageFilters(
+    packageName: String,
+    mode: AppForwardMode,
+    allowedPackages: String,
+    blockedPackages: String,
+): Pair<String, String> {
+    val allowed = allowedPackages.splitToSet().toMutableSet()
+    val blocked = blockedPackages.splitToSet().toMutableSet()
+    allowed.remove(packageName)
+    blocked.remove(packageName)
+    when (mode) {
+        AppForwardMode.DEFAULT -> Unit
+        AppForwardMode.FORWARD -> allowed += packageName
+        AppForwardMode.BLOCK -> blocked += packageName
+    }
+    return allowed.joinToString(",") to blocked.joinToString(",")
+}
+
+private fun String.splitToSet(): Set<String> = split(",")
+    .map { it.trim() }
+    .filter { it.isNotEmpty() }
+    .toSet()
+
 private fun List<Pair<String, String>>.withCurrentValue(current: String): List<Pair<String, String>> {
     if (current.isBlank() || any { it.first == current }) return this
     return this + listOf(current to current)
@@ -492,41 +765,43 @@ private fun save(
     excludeEmpty: Boolean = current.filterRuleSet.excludeEmptyTextNotifications,
     autoRetry: Boolean = current.filterRuleSet.autoRetryEnabled,
 ) {
-    onAction(SettingsAction.Save(
-        SettingsDraft(
-            forwardingEnabled = forwardingEnabled,
-            cancelNotificationOnSuccess = cancelNotificationOnSuccess,
-            barkServerUrl = barkServerUrl,
-            barkDeviceKey = barkDeviceKey,
-            barkDeviceKeys = barkDeviceKeys,
-            barkLevel = barkLevel,
-            barkVolume = barkVolume,
-            barkBadge = barkBadge,
-            barkCall = barkCall,
-            barkAutoCopy = barkAutoCopy,
-            barkCopy = barkCopy,
-            barkSound = barkSound,
-            barkIcon = barkIcon,
-            barkImage = barkImage,
-            barkGroupMode = barkGroupMode,
-            barkGroupCustom = barkGroupCustom,
-            barkCiphertext = barkCiphertext,
-            barkIsArchive = barkIsArchive,
-            barkUrl = barkUrl,
-            barkAction = barkAction,
-            barkNotificationId = barkNotificationId,
-            barkDelete = barkDelete,
-            barkUseMarkdown = barkUseMarkdown,
-            allowedPackages = allowedPackages,
-            blockedPackages = blockedPackages,
-            keywordWhitelist = whitelist,
-            keywordBlacklist = blacklist,
-            dedupeSeconds = dedupeSeconds,
-            filtersEnabled = filtersEnabled,
-            excludeSystem = excludeSystem,
-            excludeOngoing = excludeOngoing,
-            excludeEmpty = excludeEmpty,
-            autoRetry = autoRetry,
+    onAction(
+        SettingsAction.Save(
+            SettingsDraft(
+                forwardingEnabled = forwardingEnabled,
+                cancelNotificationOnSuccess = cancelNotificationOnSuccess,
+                barkServerUrl = barkServerUrl,
+                barkDeviceKey = barkDeviceKey,
+                barkDeviceKeys = barkDeviceKeys,
+                barkLevel = barkLevel,
+                barkVolume = barkVolume,
+                barkBadge = barkBadge,
+                barkCall = barkCall,
+                barkAutoCopy = barkAutoCopy,
+                barkCopy = barkCopy,
+                barkSound = barkSound,
+                barkIcon = barkIcon,
+                barkImage = barkImage,
+                barkGroupMode = barkGroupMode,
+                barkGroupCustom = barkGroupCustom,
+                barkCiphertext = barkCiphertext,
+                barkIsArchive = barkIsArchive,
+                barkUrl = barkUrl,
+                barkAction = barkAction,
+                barkNotificationId = barkNotificationId,
+                barkDelete = barkDelete,
+                barkUseMarkdown = barkUseMarkdown,
+                allowedPackages = allowedPackages,
+                blockedPackages = blockedPackages,
+                keywordWhitelist = whitelist,
+                keywordBlacklist = blacklist,
+                dedupeSeconds = dedupeSeconds,
+                filtersEnabled = filtersEnabled,
+                excludeSystem = excludeSystem,
+                excludeOngoing = excludeOngoing,
+                excludeEmpty = excludeEmpty,
+                autoRetry = autoRetry,
+            )
         )
-    ))
+    )
 }
