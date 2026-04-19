@@ -4,6 +4,29 @@
     <string name="nav_dashboard">状态</string>
     <string name="nav_logs">日志</string>
     <string name="nav_settings">设置</string>
+    <string name="privacy_policy_title">隐私政策</string>
+    <string name="privacy_disclosure_title">启用转发前请确认</string>
+    <string name="privacy_disclosure_body">NotifyBridge 在你授予“通知使用权”后，可以读取实时通知；为了做按应用过滤，也会读取设备上的应用名称和包名；并会把命中的通知内容转发到你配置的 Bark、Telegram、Slack 或 Email。根据你的设置，转发内容可能包含应用名、包名、标题、正文、subText、设备型号、Android 版本和渠道路由信息。</string>
+    <string name="privacy_disclosure_points_title">你将同意以下事项</string>
+    <string name="privacy_disclosure_point_notifications">在你授权通知访问后，读取实时通知内容。</string>
+    <string name="privacy_disclosure_point_apps">读取已安装应用名称和包名，以便你选择哪些应用允许转发或禁止转发。</string>
+    <string name="privacy_disclosure_point_transfer">按照你的配置，把选中的通知内容发送到 Bark、Telegram、Slack 或 Email。</string>
+    <string name="privacy_disclosure_point_control">你可以随时关闭转发、撤销通知访问权限，或清空本地日志。</string>
+    <string name="privacy_disclosure_agree">我已了解并同意</string>
+    <string name="privacy_disclosure_policy">查看隐私政策</string>
+    <string name="privacy_policy_summary">NotifyBridge 主要在本机处理通知内容，并仅将当前渠道所需的数据转发到你配置的目标服务。</string>
+    <string name="privacy_policy_section_data_title">处理的数据</string>
+    <string name="privacy_policy_section_data_body">应用可能处理通知元数据和内容，包括应用名、包名、标题、正文、subText、发送时间和设备信息。如果你启用了按应用过滤，应用还会读取设备上的应用名称和包名列表。</string>
+    <string name="privacy_policy_section_usage_title">数据用途</string>
+    <string name="privacy_policy_section_usage_body">这些数据仅用于通知过滤、本机日志展示，以及把命中的通知发送到你配置的目标渠道。</string>
+    <string name="privacy_policy_section_sharing_title">第三方共享</string>
+    <string name="privacy_policy_section_sharing_body">启用转发后，NotifyBridge 会把选中的通知数据发送到你选择的第三方服务，例如 Bark、Telegram、Slack 或邮件服务。第三方对数据的处理受它们自己的政策约束。</string>
+    <string name="privacy_policy_section_storage_title">本地存储</string>
+    <string name="privacy_policy_section_storage_body">应用设置、投递历史和失败队列会保存在设备本地。Bot Token、Webhook、SMTP 凭据等为了自动转发也会保存在本地。</string>
+    <string name="privacy_policy_section_controls_title">用户控制</string>
+    <string name="privacy_policy_section_controls_body">你可以随时关闭转发、删除渠道凭据、在系统设置中撤销通知访问权限，或在应用内清空日志与导出调试数据。</string>
+    <string name="privacy_policy_section_contact_title">发布前说明</string>
+    <string name="privacy_policy_section_contact_body">正式发布到 Google Play 前，请把这里替换为公开可访问的隐私政策链接、开发者联系方式，以及各渠道对应的数据保留说明。</string>
 
     <string name="dashboard_title">NotifyBridge 状态总览</string>
     <string name="dashboard_listener_enabled">通知监听权限：已开启</string>
@@ -179,6 +202,7 @@
     <string name="settings_testing">测试中...</string>
     <string name="settings_clear_logs">清空日志</string>
     <string name="settings_export_debug">导出调试信息</string>
+    <string name="settings_open_privacy_policy">查看隐私政策</string>
     <string name="settings_testing_message">正在请求当前表单配置对应的 Bark 接口...</string>
     <string name="settings_connectivity_result">连通性结果：%1$s</string>
     <string name="settings_export_path">导出文件(JSON)：%1$s</string>

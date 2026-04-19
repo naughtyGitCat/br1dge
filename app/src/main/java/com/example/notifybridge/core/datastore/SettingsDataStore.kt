@@ -24,6 +24,7 @@ class SettingsDataStore @Inject constructor(
     @ApplicationContext private val context: Context,
 ) {
     private object Keys {
+        val prominentDisclosureAccepted = booleanPreferencesKey("prominent_disclosure_accepted")
         val forwardingEnabled = booleanPreferencesKey("forwarding_enabled")
         val cancelNotificationOnSuccess = booleanPreferencesKey("cancel_notification_on_success")
         val preventChannelLoop = booleanPreferencesKey("prevent_channel_loop")
@@ -86,6 +87,7 @@ class SettingsDataStore @Inject constructor(
             ?.let { runCatching { BarkGroupMode.valueOf(it) }.getOrNull() }
             ?: if (legacyGroup.isNotBlank()) BarkGroupMode.CUSTOM else BarkGroupMode.APP_NAME_AT_DEVICE_NAME
         AppSettings(
+            prominentDisclosureAccepted = prefs[Keys.prominentDisclosureAccepted] ?: false,
             forwardingEnabled = prefs[Keys.forwardingEnabled] ?: false,
             cancelNotificationOnSuccess = prefs[Keys.cancelNotificationOnSuccess] ?: false,
             preventChannelLoop = prefs[Keys.preventChannelLoop] ?: true,
@@ -150,6 +152,7 @@ class SettingsDataStore @Inject constructor(
 
     suspend fun updateSettings(settings: AppSettings) {
         context.settingsDataStore.edit { prefs ->
+            prefs[Keys.prominentDisclosureAccepted] = settings.prominentDisclosureAccepted
             prefs[Keys.forwardingEnabled] = settings.forwardingEnabled
             prefs[Keys.cancelNotificationOnSuccess] = settings.cancelNotificationOnSuccess
             prefs[Keys.preventChannelLoop] = settings.preventChannelLoop

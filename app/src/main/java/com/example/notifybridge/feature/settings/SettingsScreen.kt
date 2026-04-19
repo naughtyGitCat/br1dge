@@ -23,6 +23,7 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -124,6 +125,7 @@ private enum class AppForwardMode {
 @Composable
 fun SettingsScreenRoute(
     contentPadding: PaddingValues,
+    onOpenPrivacyPolicy: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -131,6 +133,7 @@ fun SettingsScreenRoute(
         contentPadding = contentPadding,
         uiState = uiState,
         onAction = viewModel::onAction,
+        onOpenPrivacyPolicy = onOpenPrivacyPolicy,
     )
 }
 
@@ -139,6 +142,7 @@ private fun SettingsScreen(
     contentPadding: PaddingValues,
     uiState: SettingsUiState,
     onAction: (SettingsAction) -> Unit,
+    onOpenPrivacyPolicy: () -> Unit,
 ) {
     var deliveryChannel by remember(uiState.settings.deliveryChannel) { mutableStateOf(uiState.settings.deliveryChannel) }
     var preventChannelLoop by remember(uiState.settings.preventChannelLoop) { mutableStateOf(uiState.settings.preventChannelLoop) }
@@ -605,6 +609,12 @@ private fun SettingsScreen(
                     Button(onClick = { onAction(SettingsAction.ExportDebug) }, modifier = Modifier.weight(1f)) {
                         Text(stringResource(R.string.settings_export_debug))
                     }
+                }
+                OutlinedButton(
+                    onClick = onOpenPrivacyPolicy,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(stringResource(R.string.settings_open_privacy_policy))
                 }
                 uiState.message?.let { Text(it) }
                 when (val state = uiState.testSendState) {

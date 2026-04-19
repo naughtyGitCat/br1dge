@@ -1,6 +1,6 @@
 # NotifyBridge
 
-NotifyBridge 是一个 Android 原生通知转发桥接应用。它通过 `NotificationListenerService` 监听设备收到的系统通知，将符合规则的通知入库、写入 Outbox，再通过 `WorkManager` 异步转发到远端 Webhook。
+NotifyBridge 是一个 Android 原生通知转发桥接应用。它通过 `NotificationListenerService` 监听设备收到的系统通知，将符合规则的通知入库、写入 Outbox，再通过 `WorkManager` 异步转发到 Bark、Telegram、Slack 或 Email。
 
 ## 总体方案
 
@@ -59,6 +59,7 @@ app/src/main/java/com/example/notifybridge
 2. 等待 Gradle Sync 完成。
 3. 使用 Android 8.0+ 真机运行，建议 Android 13/14。
 4. 首次运行后进入应用首页与设置页完成授权和转发渠道配置。
+5. 首次进入应用时，会先看到显著披露与隐私政策入口；同意后才会请求通知权限并进入主界面。
 
 命令行构建：
 
@@ -70,6 +71,24 @@ app/src/main/java/com/example/notifybridge
 - `targetSdk = 35`
 - 包名：`uk.deprecated.notifybridge`
 - 语言：默认跟随系统语言，当前提供 `中文(简体)` 与 `English`
+
+## 上架准备
+
+- Google Play 上架整改清单：`docs/GOOGLE_PLAY_RELEASE_CHECKLIST.md`
+- 隐私政策模板：`docs/PRIVACY_POLICY_TEMPLATE.md`
+
+当前工程已经包含：
+
+- 首启显著披露与同意
+- 应用内隐私政策入口
+- 多语言文案
+
+正式上架前仍建议补齐：
+
+- 公开 HTTPS 隐私政策 URL
+- 加密存储渠道密钥与 SMTP 凭据
+- Release AAB 签名与 Play App Signing
+- 面向公开版的网络安全策略审查
 
 ## 如何授予通知访问权限
 
@@ -225,13 +244,17 @@ Settings 页面支持配置：
 
 ## GitHub Actions
 
-仓库内置了 APK 打包工作流：
+仓库内置了 Android 产物打包工作流：
 
 - 文件位置：`.github/workflows/build-apk.yml`
 - 触发方式：`push main`、`pull_request`、手动 `workflow_dispatch`
-- 当前产物：`Debug APK`
-- 产物下载：GitHub Actions 页面中的 `notifybridge-debug-apk`
-- CI 构建入口：`./gradlew :app:assembleDebug`
+- 当前产物：
+  - `Debug APK`
+  - `Release AAB`
+- 产物下载：
+  - `notifybridge-debug-apk`
+  - `notifybridge-release-aab`
+- CI 构建入口：`./gradlew :app:assembleDebug :app:bundleRelease`
 
 ## 状态定义
 

@@ -1,4 +1,4 @@
-name: Build APK
+name: Build Android Artifacts
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-debug-apk:
+  build-artifacts:
     runs-on: ubuntu-latest
 
     steps:
@@ -30,12 +30,19 @@ jobs:
       - name: Create local.properties
         run: echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
 
-      - name: Build Debug APK
-        run: ./gradlew :app:assembleDebug
+      - name: Build Debug APK and Release Bundle
+        run: ./gradlew :app:assembleDebug :app:bundleRelease
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
           name: notifybridge-debug-apk
           path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+
+      - name: Upload Release AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: notifybridge-release-aab
+          path: app/build/outputs/bundle/release/*.aab
           if-no-files-found: error

@@ -21,6 +21,7 @@ enum class BarkGroupMode {
 }
 
 data class AppSettings(
+    val prominentDisclosureAccepted: Boolean = false,
     val forwardingEnabled: Boolean = false,
     val cancelNotificationOnSuccess: Boolean = false,
     val preventChannelLoop: Boolean = true,
