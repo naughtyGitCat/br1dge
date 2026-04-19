@@ -10,6 +10,7 @@ object LocalizedText {
     fun ongoingExcluded() = if (zh()) "ongoing 通知已排除" else "Ongoing notifications are excluded"
     fun emptyBodyExcluded() = if (zh()) "空正文通知已排除" else "Empty-body notifications are excluded"
     fun packageBlacklistHit() = if (zh()) "命中包名黑名单" else "Matched blocked package list"
+    fun channelLoopPrevented(channelName: String) = if (zh()) "已阻止 $channelName 渠道回环通知" else "Blocked $channelName channel loop notification"
     fun packageWhitelistMiss() = if (zh()) "未命中包名白名单" else "Did not match allowed package list"
     fun keywordBlacklistHit() = if (zh()) "命中关键词黑名单" else "Matched keyword blacklist"
     fun keywordWhitelistMiss() = if (zh()) "未命中关键词白名单" else "Did not match keyword whitelist"

@@ -162,6 +162,7 @@ Settings 页面支持配置：
 
 - 可选开启“静默发送”
 - 可选开启 Telegram Markdown
+- 为避免回环，当当前转发渠道为 Telegram 时，应用会自动忽略 Telegram 客户端自身通知
 
 ### Slack 配置
 
@@ -177,6 +178,10 @@ Settings 页面支持配置：
    - `Slack Webhook URL`
    - 可选 `Slack display name`
    - 可选 `Slack icon emoji`
+
+说明：
+
+- 为避免回环，当当前转发渠道为 Slack 时，应用会自动忽略 Slack 客户端自身通知
 
 ### Email 配置
 

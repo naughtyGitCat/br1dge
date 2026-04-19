@@ -2,6 +2,7 @@ package com.example.notifybridge.domain.usecase
 
 import com.example.notifybridge.core.common.LocalizedText
 import com.example.notifybridge.domain.model.AppSettings
+import com.example.notifybridge.domain.model.DeliveryChannel
 import com.example.notifybridge.domain.model.NotificationEvent
 import javax.inject.Inject
 
@@ -12,6 +13,16 @@ sealed class FilterDecision {
 
 class ShouldForwardNotificationUseCase @Inject constructor() {
 
+    private val telegramPackages = setOf(
+        "org.telegram.messenger",
+        "org.telegram.messenger.web",
+        "org.telegram.plus",
+    )
+
+    private val slackPackages = setOf(
+        "com.Slack",
+    )
+
     operator fun invoke(
         event: NotificationEvent,
         settings: AppSettings,
@@ -19,6 +30,10 @@ class ShouldForwardNotificationUseCase @Inject constructor() {
     ): FilterDecision {
         if (!settings.forwardingEnabled) {
             return FilterDecision.Blocked(LocalizedText.forwardingDisabled())
+        }
+
+        detectChannelLoop(event.packageName, settings.deliveryChannel)?.let { reason ->
+            return FilterDecision.Blocked(reason)
         }
 
         val ruleSet = settings.filterRuleSet
@@ -63,5 +78,18 @@ class ShouldForwardNotificationUseCase @Inject constructor() {
             return FilterDecision.Blocked(LocalizedText.dedupeWindowHit())
         }
         return FilterDecision.Allowed
+    }
+
+    private fun detectChannelLoop(
+        packageName: String,
+        deliveryChannel: DeliveryChannel,
+    ): String? = when (deliveryChannel) {
+        DeliveryChannel.TELEGRAM ->
+            packageName.takeIf { it in telegramPackages }?.let { LocalizedText.channelLoopPrevented("Telegram") }
+        DeliveryChannel.SLACK ->
+            packageName.takeIf { it in slackPackages }?.let { LocalizedText.channelLoopPrevented("Slack") }
+        DeliveryChannel.BARK,
+        DeliveryChannel.EMAIL,
+            -> null
     }
 }
