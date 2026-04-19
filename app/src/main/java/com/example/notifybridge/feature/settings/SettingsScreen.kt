@@ -343,6 +343,7 @@ private fun SettingsScreen(
                     summary = stringResource(R.string.settings_section_collapsed_hint),
                     initiallyExpanded = true,
                 ) {
+                    Text(stringResource(R.string.settings_channel_bark_help), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     OutlinedTextField(
                         value = barkServerUrl,
                         onValueChange = { barkServerUrl = it },
@@ -416,6 +417,7 @@ private fun SettingsScreen(
                     summary = stringResource(R.string.settings_section_collapsed_hint),
                     initiallyExpanded = true,
                 ) {
+                    Text(stringResource(R.string.settings_channel_telegram_help), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     OutlinedTextField(value = telegramBotToken, onValueChange = { telegramBotToken = it }, label = { Text(stringResource(R.string.settings_telegram_bot_token)) }, modifier = Modifier.fillMaxWidth())
                     uiState.validation.telegramBotTokenError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
                     OutlinedTextField(value = telegramChatId, onValueChange = { telegramChatId = it }, label = { Text(stringResource(R.string.settings_telegram_chat_id)) }, modifier = Modifier.fillMaxWidth())
@@ -429,6 +431,7 @@ private fun SettingsScreen(
                     summary = stringResource(R.string.settings_section_collapsed_hint),
                     initiallyExpanded = true,
                 ) {
+                    Text(stringResource(R.string.settings_channel_slack_help), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     OutlinedTextField(value = slackWebhookUrl, onValueChange = { slackWebhookUrl = it }, label = { Text(stringResource(R.string.settings_slack_webhook_url)) }, modifier = Modifier.fillMaxWidth())
                     uiState.validation.slackWebhookUrlError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
                     OutlinedTextField(value = slackUsername, onValueChange = { slackUsername = it }, label = { Text(stringResource(R.string.settings_slack_username)) }, modifier = Modifier.fillMaxWidth())
@@ -439,6 +442,7 @@ private fun SettingsScreen(
                     summary = stringResource(R.string.settings_section_collapsed_hint),
                     initiallyExpanded = true,
                 ) {
+                    Text(stringResource(R.string.settings_channel_email_help), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     OutlinedTextField(value = emailSmtpHost, onValueChange = { emailSmtpHost = it }, label = { Text(stringResource(R.string.settings_email_smtp_host)) }, modifier = Modifier.fillMaxWidth())
                     uiState.validation.emailSmtpHostError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
                     OutlinedTextField(value = emailSmtpPort, onValueChange = { emailSmtpPort = it }, label = { Text(stringResource(R.string.settings_email_smtp_port)) }, modifier = Modifier.fillMaxWidth())

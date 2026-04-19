@@ -104,6 +104,10 @@
     <string name="settings_channel_telegram">Telegram</string>
     <string name="settings_channel_slack">Slack</string>
     <string name="settings_channel_email">Email</string>
+    <string name="settings_channel_bark_help">填写 Bark 服务地址和设备 Key，兼容官方 Bark 与自建 Bark。</string>
+    <string name="settings_channel_telegram_help">先用 BotFather 创建机器人，再填写 Bot Token 和目标 Chat ID。</string>
+    <string name="settings_channel_slack_help">先在 Slack 创建 Incoming Webhook，然后把 webhook URL 填到这里。</string>
+    <string name="settings_channel_email_help">填写 SMTP 服务地址、登录账号、发件箱和收件箱。</string>
     <string name="settings_bark_server_url">Bark Server URL</string>
     <string name="settings_bark_device_key">Bark Device Key</string>
     <string name="settings_bark_advanced">Bark 高级参数</string>

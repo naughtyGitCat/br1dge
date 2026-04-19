@@ -104,6 +104,10 @@
     <string name="settings_channel_telegram">Telegram</string>
     <string name="settings_channel_slack">Slack</string>
     <string name="settings_channel_email">Email</string>
+    <string name="settings_channel_bark_help">Fill in Bark server URL and device key. Supports official Bark and self-hosted Bark.</string>
+    <string name="settings_channel_telegram_help">Create a Telegram bot with BotFather, then fill in Bot Token and target Chat ID.</string>
+    <string name="settings_channel_slack_help">Create an Incoming Webhook in Slack and paste the webhook URL here.</string>
+    <string name="settings_channel_email_help">Configure an SMTP server, login account, sender, and recipient mailbox.</string>
     <string name="settings_bark_server_url">Bark Server URL</string>
     <string name="settings_bark_device_key">Bark Device Key</string>
     <string name="settings_bark_advanced">Bark advanced options</string>

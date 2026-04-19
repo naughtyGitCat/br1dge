@@ -58,7 +58,7 @@ app/src/main/java/com/example/notifybridge
 1. 用 Android Studio 打开项目根目录。
 2. 等待 Gradle Sync 完成。
 3. 使用 Android 8.0+ 真机运行，建议 Android 13/14。
-4. 首次运行后进入应用首页与设置页完成授权和 Bark 配置。
+4. 首次运行后进入应用首页与设置页完成授权和转发渠道配置。
 
 命令行构建：
 
@@ -98,7 +98,18 @@ app/src/main/java/com/example/notifybridge
 - 后台运行白名单
 - 电池优化忽略名单
 
-## Bark 配置
+## 转发渠道配置
+
+当前版本一次只启用一个转发渠道。可选：
+
+- Bark
+- Telegram
+- Slack
+- Email
+
+在 `Settings -> 基础设置 -> 转发渠道` 中切换。
+
+### Bark 配置
 
 Settings 页面支持配置：
 
@@ -129,14 +140,77 @@ Settings 页面支持配置：
 - 也支持自建 Bark 服务地址
 - 为兼容局域网或自签环境下的自建 Bark，当前 Android 客户端允许明文 `http://` 地址；如无明确需要，仍建议优先使用 `https://`
 
+### Telegram 配置
+
+需要准备：
+
+- Telegram Bot Token
+- Chat ID
+
+推荐步骤：
+
+1. 在 Telegram 中找到 `@BotFather`
+2. 发送 `/newbot` 创建机器人，拿到 `Bot Token`
+3. 把机器人拉进你的目标聊天，或者直接给机器人发一条消息
+4. 通过 Telegram Bot API 获取 `Chat ID`
+5. 在 NotifyBridge 里填写：
+   - `Telegram Bot Token`
+   - `Telegram Chat ID`
+   - 如有论坛/话题，再填写 `Telegram Thread ID`
+
+说明：
+
+- 可选开启“静默发送”
+- 可选开启 Telegram Markdown
+
+### Slack 配置
+
+需要准备：
+
+- Slack Incoming Webhook URL
+
+推荐步骤：
+
+1. 在 Slack App 配置里启用 `Incoming Webhooks`
+2. 为目标频道生成一个 Webhook URL
+3. 在 NotifyBridge 里填写：
+   - `Slack Webhook URL`
+   - 可选 `Slack display name`
+   - 可选 `Slack icon emoji`
+
+### Email 配置
+
+需要准备：
+
+- SMTP Host / Port
+- SMTP 用户名与密码
+- 发件地址与收件地址
+
+常见建议：
+
+- 587 + STARTTLS：最常见
+- 465 + SSL/TLS：一些服务商使用
+- 很多邮箱服务商要求“应用专用密码”，不是网页登录密码
+
+在 NotifyBridge 里填写：
+
+- `SMTP host`
+- `SMTP port`
+- `Security mode`
+- `SMTP username`
+- `SMTP password`
+- `From address`
+- `To address`
+- 可选 `Subject prefix`
+
 ## 如何测试
 
-1. 在 Settings 填入一个可用的 Bark Server URL 和 Bark Device Key。
+1. 在 Settings 里选择一个转发渠道并完成该渠道配置。
 2. 打开“启用转发总开关”和“启用过滤规则”。
 3. 如需最简单验证，可先不配置白名单。
 4. Dashboard 点击“生成测试通知”。
 5. 观察 Logs 页面是否出现新记录。
-6. 也可以在 Settings 点击“测试发送”，验证 Bark 推送链路本身。
+6. 也可以在 Settings 点击“测试发送”，验证当前渠道链路本身。
 
 如果开启“转发成功后清除本机原通知”：
 
