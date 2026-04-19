@@ -18,12 +18,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import uk.deprecated.notifybridge.R
+import com.example.notifybridge.core.common.NotifyBridgeStrings
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -72,20 +75,20 @@ private fun DashboardScreen(
         item {
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("NotifyBridge 状态总览", style = MaterialTheme.typography.titleLarge)
-                    Text("通知监听权限：${if (uiState.listenerEnabled) "已开启" else "未开启"}")
-                    Text("待发送队列：${uiState.dashboardState.pendingCount}")
-                    Text("自动重试中：${uiState.dashboardState.retryingCount}")
-                    Text("今日成功：${uiState.dashboardState.todaySuccessCount}")
-                    Text("今日失败：${uiState.dashboardState.todayFailureCount}")
-                    Text("最近一次成功：${uiState.dashboardState.lastSuccessAt?.toFriendlyTime() ?: "暂无"}")
-                    Text("最近一次失败：${uiState.dashboardState.lastFailureReason ?: "暂无"}")
+                    Text(stringResource(R.string.dashboard_title), style = MaterialTheme.typography.titleLarge)
+                    Text(stringResource(if (uiState.listenerEnabled) R.string.dashboard_listener_enabled else R.string.dashboard_listener_disabled))
+                    Text(stringResource(R.string.dashboard_pending_count, uiState.dashboardState.pendingCount))
+                    Text(stringResource(R.string.dashboard_retrying_count, uiState.dashboardState.retryingCount))
+                    Text(stringResource(R.string.dashboard_today_success, uiState.dashboardState.todaySuccessCount))
+                    Text(stringResource(R.string.dashboard_today_failure, uiState.dashboardState.todayFailureCount))
+                    Text(stringResource(R.string.dashboard_last_success, uiState.dashboardState.lastSuccessAt?.toFriendlyTime() ?: stringResource(R.string.common_none)))
+                    Text(stringResource(R.string.dashboard_last_failure, uiState.dashboardState.lastFailureReason ?: stringResource(R.string.common_none)))
                     Text(
-                        "下一次自动重试：${
+                        stringResource(R.string.dashboard_next_retry,
                             uiState.dashboardState.nextRetryAt?.let {
-                                "${it.toFriendlyTime()}（${it.toRelativeRetryText()}）"
-                            } ?: "暂无"
-                        }"
+                                "${it.toFriendlyTime()} (${it.toRelativeRetryText()})"
+                            } ?: stringResource(R.string.common_none)
+                        )
                     )
                     uiState.lastActionMessage?.let { Text(it, color = MaterialTheme.colorScheme.primary) }
                 }
@@ -94,20 +97,20 @@ private fun DashboardScreen(
         item {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Button(onClick = { onAction(DashboardAction.OpenNotificationAccess) }, modifier = Modifier.weight(1f)) {
-                    Text("通知访问设置")
+                    Text(stringResource(R.string.dashboard_open_notification_access))
                 }
                 Button(onClick = { onAction(DashboardAction.OpenBatteryOptimization) }, modifier = Modifier.weight(1f)) {
-                    Text("电池优化设置")
+                    Text(stringResource(R.string.dashboard_open_battery_optimization))
                 }
             }
         }
         item {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Button(onClick = { onAction(DashboardAction.SendTestNotification) }, modifier = Modifier.weight(1f)) {
-                    Text("生成测试通知")
+                    Text(stringResource(R.string.dashboard_send_test_notification))
                 }
                 Button(onClick = onNavigateToSettings, modifier = Modifier.weight(1f)) {
-                    Text("前往设置")
+                    Text(stringResource(R.string.dashboard_go_settings))
                 }
             }
         }
@@ -124,13 +127,13 @@ private fun Long.toFriendlyTime(): String {
 
 private fun Long.toRelativeRetryText(now: Long = System.currentTimeMillis()): String {
     val delta = this - now
-    if (delta <= 0) return "即将执行"
+    if (delta <= 0) return NotifyBridgeStrings.commonDueSoon()
     val totalSeconds = delta / 1000
     val minutes = totalSeconds / 60
     val seconds = totalSeconds % 60
     return when {
-        minutes > 0 && seconds > 0 -> "${minutes}分${seconds}秒后"
-        minutes > 0 -> "${minutes}分钟后"
-        else -> "${seconds}秒后"
+        minutes > 0 && seconds > 0 -> NotifyBridgeStrings.afterMinSec(minutes, seconds)
+        minutes > 0 -> NotifyBridgeStrings.afterMinutes(minutes)
+        else -> NotifyBridgeStrings.afterSeconds(seconds)
     }
 }

@@ -1,5 +1,6 @@
 package com.example.notifybridge.domain.usecase
 
+import com.example.notifybridge.core.common.LocalizedText
 import com.example.notifybridge.domain.model.AppSettings
 import com.example.notifybridge.domain.model.NotificationEvent
 import javax.inject.Inject
@@ -17,7 +18,7 @@ class ShouldForwardNotificationUseCase @Inject constructor() {
         lastAcceptedAt: Long?,
     ): FilterDecision {
         if (!settings.forwardingEnabled) {
-            return FilterDecision.Blocked("转发总开关未开启")
+            return FilterDecision.Blocked(LocalizedText.forwardingDisabled())
         }
 
         val ruleSet = settings.filterRuleSet
@@ -25,19 +26,19 @@ class ShouldForwardNotificationUseCase @Inject constructor() {
             return FilterDecision.Allowed
         }
         if (ruleSet.excludeSystemNotifications && event.isSystemNotification) {
-            return FilterDecision.Blocked("系统通知已排除")
+            return FilterDecision.Blocked(LocalizedText.systemExcluded())
         }
         if (ruleSet.excludeOngoingNotifications && event.ongoing) {
-            return FilterDecision.Blocked("ongoing 通知已排除")
+            return FilterDecision.Blocked(LocalizedText.ongoingExcluded())
         }
         if (ruleSet.excludeEmptyTextNotifications && event.title.isNullOrBlank() && event.text.isNullOrBlank()) {
-            return FilterDecision.Blocked("空正文通知已排除")
+            return FilterDecision.Blocked(LocalizedText.emptyBodyExcluded())
         }
         if (ruleSet.blockedPackages.contains(event.packageName)) {
-            return FilterDecision.Blocked("命中包名黑名单")
+            return FilterDecision.Blocked(LocalizedText.packageBlacklistHit())
         }
         if (ruleSet.allowedPackages.isNotEmpty() && !ruleSet.allowedPackages.contains(event.packageName)) {
-            return FilterDecision.Blocked("未命中包名白名单")
+            return FilterDecision.Blocked(LocalizedText.packageWhitelistMiss())
         }
 
         val searchableText = buildString {
@@ -49,17 +50,17 @@ class ShouldForwardNotificationUseCase @Inject constructor() {
         }.trim()
 
         if (ruleSet.keywordBlacklist.any { keyword -> searchableText.contains(keyword, ignoreCase = true) }) {
-            return FilterDecision.Blocked("命中关键词黑名单")
+            return FilterDecision.Blocked(LocalizedText.keywordBlacklistHit())
         }
         if (ruleSet.keywordWhitelist.isNotEmpty() &&
             ruleSet.keywordWhitelist.none { keyword -> searchableText.contains(keyword, ignoreCase = true) }
         ) {
-            return FilterDecision.Blocked("未命中关键词白名单")
+            return FilterDecision.Blocked(LocalizedText.keywordWhitelistMiss())
         }
 
         val dedupeWindowMillis = ruleSet.dedupeWindowSeconds * 1000L
         if (lastAcceptedAt != null && event.receivedAt - lastAcceptedAt < dedupeWindowMillis) {
-            return FilterDecision.Blocked("命中去重时间窗口")
+            return FilterDecision.Blocked(LocalizedText.dedupeWindowHit())
         }
         return FilterDecision.Allowed
     }

@@ -2,6 +2,8 @@ package com.example.notifybridge.feature.dashboard
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import uk.deprecated.notifybridge.R
+import com.example.notifybridge.core.common.StringsProvider
 import com.example.notifybridge.domain.model.DashboardState
 import com.example.notifybridge.domain.usecase.GetDashboardStateUseCase
 import com.example.notifybridge.system.util.NotificationAccessManager
@@ -31,6 +33,7 @@ data class DashboardUiState(
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
     getDashboardStateUseCase: GetDashboardStateUseCase,
+    private val stringsProvider: StringsProvider,
     private val notificationAccessManager: NotificationAccessManager,
     private val systemSettingsNavigator: SystemSettingsNavigator,
     private val notificationTestManager: NotificationTestManager,
@@ -59,19 +62,19 @@ class DashboardViewModel @Inject constructor(
         viewModelScope.launch {
             val message = when (action) {
                 DashboardAction.OpenNotificationAccess -> if (systemSettingsNavigator.openNotificationAccessSettings()) {
-                    "已打开通知访问设置"
+                    stringsProvider.get(R.string.dashboard_msg_notification_access_opened)
                 } else {
-                    "无法打开通知访问设置"
+                    stringsProvider.get(R.string.dashboard_msg_notification_access_failed)
                 }
                 DashboardAction.OpenBatteryOptimization -> if (systemSettingsNavigator.openBatteryOptimizationSettings()) {
-                    "已尝试打开电池优化设置"
+                    stringsProvider.get(R.string.dashboard_msg_battery_opened)
                 } else {
-                    "无法打开电池优化设置"
+                    stringsProvider.get(R.string.dashboard_msg_battery_failed)
                 }
                 DashboardAction.SendTestNotification -> if (notificationTestManager.sendLocalTestNotification()) {
-                    "已发送本地测试通知"
+                    stringsProvider.get(R.string.dashboard_msg_test_sent)
                 } else {
-                    "测试通知发送失败，请确认通知权限"
+                    stringsProvider.get(R.string.dashboard_msg_test_failed)
                 }
             }
             actionMessage.value = message

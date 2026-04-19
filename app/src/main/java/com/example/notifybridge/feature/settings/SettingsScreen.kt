@@ -25,9 +25,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import uk.deprecated.notifybridge.R
 import com.example.notifybridge.domain.model.AppSettings
 import com.example.notifybridge.domain.model.BarkGroupMode
 
@@ -41,19 +43,19 @@ private val barkLevelOptions = listOf(
 )
 
 private val barkActionOptions = listOf(
-    "" to "不设置",
+    "" to "settings_option_none",
     "alert" to "alert",
 )
 
 private val barkGroupModeOptions = listOf(
-    BarkGroupMode.APP_NAME.name to "{本应用名称}",
-    BarkGroupMode.DEVICE_NAME.name to "{本设备名称}",
-    BarkGroupMode.APP_NAME_AT_DEVICE_NAME.name to "{本应用名称}@{本设备名称}",
-    BarkGroupMode.CUSTOM.name to "{自定义}",
+    BarkGroupMode.APP_NAME.name to "settings_group_app_name",
+    BarkGroupMode.DEVICE_NAME.name to "settings_group_device_name",
+    BarkGroupMode.APP_NAME_AT_DEVICE_NAME.name to "settings_group_app_at_device",
+    BarkGroupMode.CUSTOM.name to "settings_group_custom",
 )
 
 private val barkSoundOptions = listOf(
-    BarkSoundDefaultValue to "跟随 Bark 默认",
+    BarkSoundDefaultValue to "settings_sound_default",
     "alarm.caf" to "alarm.caf",
     "anticipate.caf" to "anticipate.caf",
     "bell.caf" to "bell.caf",
@@ -189,9 +191,9 @@ private fun SettingsScreen(
         item {
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text("基础设置")
+                    Text(stringResource(R.string.settings_basic))
                     SwitchRow(
-                        title = "启用转发总开关",
+                        title = stringResource(R.string.settings_forwarding_enabled),
                         checked = uiState.settings.forwardingEnabled,
                         onCheckedChange = {
                             save(
@@ -209,7 +211,7 @@ private fun SettingsScreen(
                         }
                     )
                     SwitchRow(
-                        title = "启用过滤规则",
+                        title = stringResource(R.string.settings_filters_enabled),
                         checked = uiState.settings.filterRuleSet.enabled,
                         onCheckedChange = {
                             save(
@@ -227,7 +229,7 @@ private fun SettingsScreen(
                         }
                     )
                     SwitchRow(
-                        title = "转发成功后清除本机原通知",
+                        title = stringResource(R.string.settings_clear_after_success),
                         checked = uiState.settings.cancelNotificationOnSuccess,
                         onCheckedChange = {
                             save(
@@ -244,42 +246,42 @@ private fun SettingsScreen(
                             )
                         }
                     )
-                    OutlinedTextField(value = barkServerUrl, onValueChange = { barkServerUrl = it }, label = { Text("Bark Server URL") }, modifier = Modifier.fillMaxWidth())
+                    OutlinedTextField(value = barkServerUrl, onValueChange = { barkServerUrl = it }, label = { Text(stringResource(R.string.settings_bark_server_url)) }, modifier = Modifier.fillMaxWidth())
                     uiState.validation.barkServerUrlError?.let {
                         Text(it, color = MaterialTheme.colorScheme.error)
                     }
-                    OutlinedTextField(value = barkDeviceKey, onValueChange = { barkDeviceKey = it }, label = { Text("Bark Device Key") }, modifier = Modifier.fillMaxWidth())
+                    OutlinedTextField(value = barkDeviceKey, onValueChange = { barkDeviceKey = it }, label = { Text(stringResource(R.string.settings_bark_device_key)) }, modifier = Modifier.fillMaxWidth())
                     uiState.validation.barkDeviceKeyError?.let {
                         Text(it, color = MaterialTheme.colorScheme.error)
                     }
                     Card(modifier = Modifier.fillMaxWidth()) {
                         Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Text("Bark 高级参数")
-                            OutlinedTextField(value = barkDeviceKeys, onValueChange = { barkDeviceKeys = it }, label = { Text("Device Keys（逗号分隔，可选）") }, modifier = Modifier.fillMaxWidth())
+                            Text(stringResource(R.string.settings_bark_advanced))
+                            OutlinedTextField(value = barkDeviceKeys, onValueChange = { barkDeviceKeys = it }, label = { Text(stringResource(R.string.settings_bark_device_keys)) }, modifier = Modifier.fillMaxWidth())
                             SelectionField(
-                                label = "Level",
+                                label = stringResource(R.string.settings_bark_level),
                                 value = barkLevel,
                                 options = barkLevelOptions,
                                 onValueSelected = { barkLevel = it },
                             )
                             uiState.validation.barkLevelError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-                            OutlinedTextField(value = barkVolume, onValueChange = { barkVolume = it }, label = { Text("Volume（0-10，可选）") }, modifier = Modifier.fillMaxWidth())
+                            OutlinedTextField(value = barkVolume, onValueChange = { barkVolume = it }, label = { Text(stringResource(R.string.settings_bark_volume)) }, modifier = Modifier.fillMaxWidth())
                             uiState.validation.barkVolumeError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-                            OutlinedTextField(value = barkBadge, onValueChange = { barkBadge = it }, label = { Text("Badge（整数，可选）") }, modifier = Modifier.fillMaxWidth())
+                            OutlinedTextField(value = barkBadge, onValueChange = { barkBadge = it }, label = { Text(stringResource(R.string.settings_bark_badge)) }, modifier = Modifier.fillMaxWidth())
                             uiState.validation.barkBadgeError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-                            OutlinedTextField(value = barkCopy, onValueChange = { barkCopy = it }, label = { Text("Copy（可选）") }, modifier = Modifier.fillMaxWidth())
+                            OutlinedTextField(value = barkCopy, onValueChange = { barkCopy = it }, label = { Text(stringResource(R.string.settings_bark_copy)) }, modifier = Modifier.fillMaxWidth())
                             SelectionField(
-                                label = "Sound",
+                                label = stringResource(R.string.settings_bark_sound),
                                 value = barkSound,
                                 options = barkSoundOptions.withCurrentValue(barkSound),
                                 onValueSelected = { barkSound = it },
                             )
-                            OutlinedTextField(value = barkIcon, onValueChange = { barkIcon = it }, label = { Text("Icon URL（可选）") }, modifier = Modifier.fillMaxWidth())
+                            OutlinedTextField(value = barkIcon, onValueChange = { barkIcon = it }, label = { Text(stringResource(R.string.settings_bark_icon)) }, modifier = Modifier.fillMaxWidth())
                             uiState.validation.barkIconError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-                            OutlinedTextField(value = barkImage, onValueChange = { barkImage = it }, label = { Text("Image URL（可选）") }, modifier = Modifier.fillMaxWidth())
+                            OutlinedTextField(value = barkImage, onValueChange = { barkImage = it }, label = { Text(stringResource(R.string.settings_bark_image)) }, modifier = Modifier.fillMaxWidth())
                             uiState.validation.barkImageError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
                             SelectionField(
-                                label = "Group",
+                                label = stringResource(R.string.settings_bark_group),
                                 value = barkGroupMode.name,
                                 options = barkGroupModeOptions,
                                 onValueSelected = {
@@ -290,59 +292,59 @@ private fun SettingsScreen(
                                 OutlinedTextField(
                                     value = barkGroupCustom,
                                     onValueChange = { barkGroupCustom = it },
-                                    label = { Text("自定义 Group") },
+                                    label = { Text(stringResource(R.string.settings_bark_group_custom)) },
                                     modifier = Modifier.fillMaxWidth(),
                                 )
                             }
-                            OutlinedTextField(value = barkCiphertext, onValueChange = { barkCiphertext = it }, label = { Text("Ciphertext（可选）") }, modifier = Modifier.fillMaxWidth())
-                            OutlinedTextField(value = barkUrl, onValueChange = { barkUrl = it }, label = { Text("点击跳转 URL（可选）") }, modifier = Modifier.fillMaxWidth())
+                            OutlinedTextField(value = barkCiphertext, onValueChange = { barkCiphertext = it }, label = { Text(stringResource(R.string.settings_bark_ciphertext)) }, modifier = Modifier.fillMaxWidth())
+                            OutlinedTextField(value = barkUrl, onValueChange = { barkUrl = it }, label = { Text(stringResource(R.string.settings_bark_jump_url)) }, modifier = Modifier.fillMaxWidth())
                             uiState.validation.barkUrlError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
                             SelectionField(
-                                label = "Action",
+                                label = stringResource(R.string.settings_bark_action),
                                 value = barkAction,
                                 options = barkActionOptions,
                                 onValueSelected = { barkAction = it },
                             )
                             uiState.validation.barkActionError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-                            OutlinedTextField(value = barkNotificationId, onValueChange = { barkNotificationId = it }, label = { Text("通知 ID（可选）") }, modifier = Modifier.fillMaxWidth())
-                            SwitchRow(title = "Call", checked = barkCall, onCheckedChange = { barkCall = it })
-                            SwitchRow(title = "AutoCopy", checked = barkAutoCopy, onCheckedChange = { barkAutoCopy = it })
-                            SwitchRow(title = "使用 Markdown 发送", checked = barkUseMarkdown, onCheckedChange = { barkUseMarkdown = it })
-                            SwitchRow(title = "保存到 Bark 历史", checked = barkIsArchive, onCheckedChange = { barkIsArchive = it })
-                            SwitchRow(title = "Delete（配合 ID 删除）", checked = barkDelete, onCheckedChange = { barkDelete = it })
+                            OutlinedTextField(value = barkNotificationId, onValueChange = { barkNotificationId = it }, label = { Text(stringResource(R.string.settings_bark_notification_id)) }, modifier = Modifier.fillMaxWidth())
+                            SwitchRow(title = stringResource(R.string.settings_bark_call), checked = barkCall, onCheckedChange = { barkCall = it })
+                            SwitchRow(title = stringResource(R.string.settings_bark_auto_copy), checked = barkAutoCopy, onCheckedChange = { barkAutoCopy = it })
+                            SwitchRow(title = stringResource(R.string.settings_bark_markdown), checked = barkUseMarkdown, onCheckedChange = { barkUseMarkdown = it })
+                            SwitchRow(title = stringResource(R.string.settings_bark_archive), checked = barkIsArchive, onCheckedChange = { barkIsArchive = it })
+                            SwitchRow(title = stringResource(R.string.settings_bark_delete), checked = barkDelete, onCheckedChange = { barkDelete = it })
                         }
                     }
-                    OutlinedTextField(value = allowedPackages, onValueChange = { allowedPackages = it }, label = { Text("允许应用包名（逗号分隔）") }, modifier = Modifier.fillMaxWidth())
-                    OutlinedTextField(value = blockedPackages, onValueChange = { blockedPackages = it }, label = { Text("黑名单应用包名（逗号分隔）") }, modifier = Modifier.fillMaxWidth())
-                    OutlinedTextField(value = whitelist, onValueChange = { whitelist = it }, label = { Text("关键词白名单（逗号分隔）") }, modifier = Modifier.fillMaxWidth())
-                    OutlinedTextField(value = blacklist, onValueChange = { blacklist = it }, label = { Text("关键词黑名单（逗号分隔）") }, modifier = Modifier.fillMaxWidth())
-                    OutlinedTextField(value = dedupeSeconds, onValueChange = { dedupeSeconds = it }, label = { Text("去重秒数") }, modifier = Modifier.fillMaxWidth())
+                    OutlinedTextField(value = allowedPackages, onValueChange = { allowedPackages = it }, label = { Text(stringResource(R.string.settings_allowed_packages)) }, modifier = Modifier.fillMaxWidth())
+                    OutlinedTextField(value = blockedPackages, onValueChange = { blockedPackages = it }, label = { Text(stringResource(R.string.settings_blocked_packages)) }, modifier = Modifier.fillMaxWidth())
+                    OutlinedTextField(value = whitelist, onValueChange = { whitelist = it }, label = { Text(stringResource(R.string.settings_keyword_whitelist)) }, modifier = Modifier.fillMaxWidth())
+                    OutlinedTextField(value = blacklist, onValueChange = { blacklist = it }, label = { Text(stringResource(R.string.settings_keyword_blacklist)) }, modifier = Modifier.fillMaxWidth())
+                    OutlinedTextField(value = dedupeSeconds, onValueChange = { dedupeSeconds = it }, label = { Text(stringResource(R.string.settings_dedupe_seconds)) }, modifier = Modifier.fillMaxWidth())
                     uiState.validation.dedupeSecondsError?.let {
                         Text(it, color = MaterialTheme.colorScheme.error)
                     }
                     SwitchRow(
-                        title = "排除系统通知",
+                        title = stringResource(R.string.settings_exclude_system),
                         checked = uiState.settings.filterRuleSet.excludeSystemNotifications,
                         onCheckedChange = {
                             save(current = uiState.settings, onAction = onAction, barkServerUrl = barkServerUrl, barkDeviceKey = barkDeviceKey, allowedPackages = allowedPackages, blockedPackages = blockedPackages, whitelist = whitelist, blacklist = blacklist, dedupeSeconds = dedupeSeconds, excludeSystem = it)
                         }
                     )
                     SwitchRow(
-                        title = "排除 ongoing 通知",
+                        title = stringResource(R.string.settings_exclude_ongoing),
                         checked = uiState.settings.filterRuleSet.excludeOngoingNotifications,
                         onCheckedChange = {
                             save(current = uiState.settings, onAction = onAction, barkServerUrl = barkServerUrl, barkDeviceKey = barkDeviceKey, allowedPackages = allowedPackages, blockedPackages = blockedPackages, whitelist = whitelist, blacklist = blacklist, dedupeSeconds = dedupeSeconds, excludeOngoing = it)
                         }
                     )
                     SwitchRow(
-                        title = "排除空正文",
+                        title = stringResource(R.string.settings_exclude_empty),
                         checked = uiState.settings.filterRuleSet.excludeEmptyTextNotifications,
                         onCheckedChange = {
                             save(current = uiState.settings, onAction = onAction, barkServerUrl = barkServerUrl, barkDeviceKey = barkDeviceKey, allowedPackages = allowedPackages, blockedPackages = blockedPackages, whitelist = whitelist, blacklist = blacklist, dedupeSeconds = dedupeSeconds, excludeEmpty = it)
                         }
                     )
                     SwitchRow(
-                        title = "自动重试",
+                        title = stringResource(R.string.settings_auto_retry),
                         checked = uiState.settings.filterRuleSet.autoRetryEnabled,
                         onCheckedChange = {
                             save(current = uiState.settings, onAction = onAction, barkServerUrl = barkServerUrl, barkDeviceKey = barkDeviceKey, allowedPackages = allowedPackages, blockedPackages = blockedPackages, whitelist = whitelist, blacklist = blacklist, dedupeSeconds = dedupeSeconds, autoRetry = it)
@@ -352,32 +354,32 @@ private fun SettingsScreen(
                         Button(onClick = {
                             onAction(SettingsAction.Save(draft))
                         }, modifier = Modifier.weight(1f)) {
-                            Text("保存设置")
+                            Text(stringResource(R.string.settings_save))
                         }
                         Button(
                             onClick = { onAction(SettingsAction.TestSend(draft)) },
                             modifier = Modifier.weight(1f),
                             enabled = uiState.testSendState !is TestSendState.Running,
                         ) {
-                            Text(if (uiState.testSendState is TestSendState.Running) "测试中..." else "测试发送")
+                            Text(stringResource(if (uiState.testSendState is TestSendState.Running) R.string.settings_testing else R.string.settings_test_send))
                         }
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
                         Button(onClick = { onAction(SettingsAction.ClearLogs) }, modifier = Modifier.weight(1f)) {
-                            Text("清空日志")
+                            Text(stringResource(R.string.settings_clear_logs))
                         }
                         Button(onClick = { onAction(SettingsAction.ExportDebug) }, modifier = Modifier.weight(1f)) {
-                            Text("导出调试信息")
+                            Text(stringResource(R.string.settings_export_debug))
                         }
                     }
                     uiState.message?.let { Text(it) }
                     when (val state = uiState.testSendState) {
                         TestSendState.Idle -> Unit
-                        TestSendState.Running -> Text("正在请求当前表单配置对应的 Bark 接口...")
-                        is TestSendState.Success -> Text("连通性结果：${state.message}")
-                        is TestSendState.Failure -> Text("连通性结果：${state.message}")
+                        TestSendState.Running -> Text(stringResource(R.string.settings_testing_message))
+                        is TestSendState.Success -> Text(stringResource(R.string.settings_connectivity_result, state.message))
+                        is TestSendState.Failure -> Text(stringResource(R.string.settings_connectivity_result, state.message))
                     }
-                    uiState.exportingPath?.let { Text("导出文件(JSON)：$it") }
+                    uiState.exportingPath?.let { Text(stringResource(R.string.settings_export_path, it)) }
                 }
             }
         }
@@ -393,7 +395,7 @@ private fun SelectionField(
     onValueSelected: (String) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val selectedLabel = options.firstOrNull { it.first == value }?.second ?: value
+    val selectedLabel = (options.firstOrNull { it.first == value }?.second ?: value).asLocalizedOption()
     ExposedDropdownMenuBox(
         expanded = expanded,
         onExpandedChange = { expanded = !expanded },
@@ -414,7 +416,7 @@ private fun SelectionField(
         ) {
             options.forEach { (optionValue, optionLabel) ->
                 DropdownMenuItem(
-                    text = { Text(optionLabel) },
+                    text = { Text(optionLabel.asLocalizedOption()) },
                     onClick = {
                         onValueSelected(optionValue)
                         expanded = false
@@ -440,6 +442,17 @@ private fun SwitchRow(
 private fun List<Pair<String, String>>.withCurrentValue(current: String): List<Pair<String, String>> {
     if (current.isBlank() || any { it.first == current }) return this
     return this + listOf(current to current)
+}
+
+@Composable
+private fun String.asLocalizedOption(): String = when (this) {
+    "settings_option_none" -> stringResource(R.string.settings_option_none)
+    "settings_group_app_name" -> stringResource(R.string.settings_group_app_name)
+    "settings_group_device_name" -> stringResource(R.string.settings_group_device_name)
+    "settings_group_app_at_device" -> stringResource(R.string.settings_group_app_at_device)
+    "settings_group_custom" -> stringResource(R.string.settings_group_custom)
+    "settings_sound_default" -> stringResource(R.string.settings_sound_default)
+    else -> this
 }
 
 private fun save(

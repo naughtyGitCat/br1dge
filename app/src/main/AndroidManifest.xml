@@ -13,7 +13,8 @@
         android:allowBackup="true"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
-        android:label="NotifyBridge"
+        android:label="@string/app_name"
+        android:localeConfig="@xml/locales_config"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.NotifyBridge"
@@ -42,7 +43,7 @@
 
         <service
             android:name="com.example.notifybridge.system.service.BridgeNotificationListenerService"
-            android:label="NotifyBridge Notification Access"
+            android:label="@string/app_name"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
             android:exported="false">
             <intent-filter>

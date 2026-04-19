@@ -19,9 +19,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import uk.deprecated.notifybridge.R
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -69,7 +71,7 @@ private fun LogsScreen(
                     FilterChip(
                         onClick = { onFilterSelected(filter) },
                         selected = uiState.selectedFilter == filter,
-                        label = { Text(filter.name) }
+                        label = { Text(filter.toLabel()) }
                     )
                 }
             }
@@ -79,17 +81,17 @@ private fun LogsScreen(
                 value = uiState.searchQuery,
                 onValueChange = onSearchQueryChanged,
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text("搜索 app / 标题 / 正文 / 错误") },
+                label = { Text(stringResource(R.string.logs_search_label)) },
                 singleLine = true,
             )
         }
         item {
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("匹配记录：${uiState.totalMatchedCount}")
+                    Text(stringResource(R.string.logs_matched_count, uiState.totalMatchedCount))
                     if (uiState.canBulkRetry) {
                         Button(onClick = onRetryVisible) {
-                            Text("批量重试当前结果")
+                            Text(stringResource(R.string.logs_bulk_retry))
                         }
                     }
                     uiState.message?.let { Text(it) }
@@ -100,8 +102,8 @@ private fun LogsScreen(
             item {
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Text("暂无匹配日志")
-                        Text("可以调整状态筛选或搜索关键字，或等待新的通知进入队列。")
+                        Text(stringResource(R.string.logs_empty_title))
+                        Text(stringResource(R.string.logs_empty_body))
                     }
                 }
             }
@@ -114,12 +116,12 @@ private fun LogsScreen(
             ) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(record.appName)
-                    Text(record.title ?: "(无标题)")
-                    Text(record.text ?: "(无正文)")
-                    Text("状态：${record.status.name} | 重试：${record.attemptCount}")
-                    record.errorMessage?.let { Text("错误：$it") }
+                    Text(record.title ?: stringResource(R.string.logs_no_title))
+                    Text(record.text ?: stringResource(R.string.logs_no_body))
+                    Text(stringResource(R.string.logs_status_retry, record.status.name, record.attemptCount))
+                    record.errorMessage?.let { Text(stringResource(R.string.logs_error, it)) }
                     record.nextRetryAt?.let {
-                        Text("预计重试：${SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date(it))}")
+                        Text(stringResource(R.string.logs_next_retry, SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date(it))))
                     }
                     Text(SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date(record.updatedAt)))
                     if (record.status == com.example.notifybridge.domain.model.DeliveryStatus.FAILED ||
@@ -127,11 +129,11 @@ private fun LogsScreen(
                     ) {
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             Button(onClick = { onRetry(record.eventId) }) {
-                                Text("重新入队")
+                                Text(stringResource(R.string.logs_retry_button))
                             }
                             AssistChip(
                                 onClick = { onOpenDetail(record.eventId) },
-                                label = { Text("查看详情") }
+                                label = { Text(stringResource(R.string.logs_detail_button)) }
                             )
                         }
                     }
@@ -144,9 +146,18 @@ private fun LogsScreen(
                     onClick = onLoadMore,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Text("加载更多")
+                    Text(stringResource(R.string.logs_load_more))
                 }
             }
         }
     }
+}
+
+@Composable
+private fun LogStatusFilter.toLabel(): String = when (this) {
+    LogStatusFilter.ALL -> stringResource(R.string.filter_all)
+    LogStatusFilter.SUCCESS -> stringResource(R.string.filter_success)
+    LogStatusFilter.FAILED -> stringResource(R.string.filter_failed)
+    LogStatusFilter.RETRYING -> stringResource(R.string.filter_retrying)
+    LogStatusFilter.PENDING -> stringResource(R.string.filter_pending)
 }

@@ -14,12 +14,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import uk.deprecated.notifybridge.R
 import com.example.notifybridge.core.ui.NotifyBridgeTheme
 import com.example.notifybridge.feature.dashboard.DashboardScreenRoute
 import com.example.notifybridge.feature.detail.LogDetailScreenRoute
@@ -28,12 +30,12 @@ import com.example.notifybridge.feature.settings.SettingsScreenRoute
 
 private sealed class TopLevelDestination(
     val route: String,
-    val label: String,
+    val labelRes: Int,
     val icon: @Composable () -> Unit,
 ) {
-    data object Dashboard : TopLevelDestination("dashboard", "状态", { Icon(Icons.Outlined.Dashboard, null) })
-    data object Logs : TopLevelDestination("logs", "日志", { Icon(Icons.AutoMirrored.Outlined.List, null) })
-    data object Settings : TopLevelDestination("settings", "设置", { Icon(Icons.Outlined.Settings, null) })
+    data object Dashboard : TopLevelDestination("dashboard", R.string.nav_dashboard, { Icon(Icons.Outlined.Dashboard, null) })
+    data object Logs : TopLevelDestination("logs", R.string.nav_logs, { Icon(Icons.AutoMirrored.Outlined.List, null) })
+    data object Settings : TopLevelDestination("settings", R.string.nav_settings, { Icon(Icons.Outlined.Settings, null) })
 }
 
 @Composable
@@ -74,7 +76,7 @@ private fun BottomBar(navController: NavHostController) {
                     }
                 },
                 icon = destination.icon,
-                label = { Text(destination.label) }
+                label = { Text(stringResource(destination.labelRes)) }
             )
         }
     }

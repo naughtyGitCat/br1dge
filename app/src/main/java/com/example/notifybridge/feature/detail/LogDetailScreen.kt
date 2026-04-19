@@ -15,9 +15,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import uk.deprecated.notifybridge.R
+import com.example.notifybridge.core.common.NotifyBridgeStrings
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -56,76 +59,76 @@ private fun LogDetailScreen(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Button(onClick = onBack) {
-            Text("返回")
+            Text(stringResource(R.string.detail_back))
         }
         Button(onClick = onRetry) {
-            Text("重新入队并重试")
+            Text(stringResource(R.string.detail_retry))
         }
         Card(modifier = Modifier.fillMaxWidth()) {
             Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("当前投递状态", style = MaterialTheme.typography.titleMedium)
-                Text("事件 ID：$eventId")
+                Text(stringResource(R.string.detail_current_status), style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.detail_event_id, eventId))
                 val record = uiState.record
                 if (record == null) {
-                    Text("暂无详情")
+                    Text(stringResource(R.string.detail_empty))
                 } else {
-                    Text("App：${record.appName}")
-                    Text("状态：${record.status}")
+                    Text(stringResource(R.string.detail_app, record.appName))
+                    Text(stringResource(R.string.detail_status, record.status.toString()))
                     record.nextRetryAt?.let {
-                        Text("预计下次重试：${it.toFriendlyTime()}（${it.toRelativeRetryText()}）")
+                        Text(stringResource(R.string.detail_next_retry, it.toFriendlyTime(), it.toRelativeRetryText()))
                     }
-                    Text("已尝试次数：${record.attemptCount}")
-                    Text("标题：${record.title ?: "(无标题)"}")
-                    Text("正文：${record.text ?: "(无正文)"}")
-                    Text("错误：${record.errorMessage ?: "无"}")
-                    Text("响应码：${record.responseCode?.toString() ?: "无"}")
-                    Text("Payload JSON：")
-                    Text(record.payloadJson.ifBlank { "(无 payload)" })
+                    Text(stringResource(R.string.detail_attempt_count, record.attemptCount))
+                    Text(stringResource(R.string.detail_title, record.title ?: stringResource(R.string.logs_no_title)))
+                    Text(stringResource(R.string.detail_body, record.text ?: stringResource(R.string.logs_no_body)))
+                    Text(stringResource(R.string.detail_error, record.errorMessage ?: stringResource(R.string.detail_empty_value)))
+                    Text(stringResource(R.string.detail_response_code, record.responseCode?.toString() ?: stringResource(R.string.detail_empty_value)))
+                    Text(stringResource(R.string.detail_payload_json))
+                    Text(record.payloadJson.ifBlank { stringResource(R.string.detail_no_payload) })
                 }
             }
         }
         uiState.record?.toFailurePresentation()?.let { failure ->
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("失败诊断", style = MaterialTheme.typography.titleMedium)
-                    Text("分类：${failure.category}")
-                    Text("摘要：${failure.summary}")
-                    Text("建议：${failure.suggestion}")
-                    Text("是否适合重试：${if (failure.retryable) "是" else "否"}")
+                    Text(stringResource(R.string.detail_failure_diag), style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.detail_failure_category, failure.category))
+                    Text(stringResource(R.string.detail_failure_summary, failure.summary))
+                    Text(stringResource(R.string.detail_failure_suggestion, failure.suggestion))
+                    Text(stringResource(R.string.detail_failure_retryable, stringResource(if (failure.retryable) R.string.detail_yes else R.string.detail_no)))
                 }
             }
         }
         uiState.notificationEvent?.let { event ->
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("原始通知元数据", style = MaterialTheme.typography.titleMedium)
-                    Text("来源包名：${event.packageName}")
-                    Text("通知键：${event.notificationKey}")
-                    Text("接收时间：${event.receivedAt.toFriendlyTime()}")
-                    Text("发送时间：${event.postTime.toFriendlyTime()}")
-                    Text("SubText：${event.subText ?: "(无)"}")
-                    Text("ongoing：${if (event.ongoing) "是" else "否"}")
-                    Text("clearable：${if (event.clearable) "是" else "否"}")
-                    Text("系统通知：${if (event.isSystemNotification) "是" else "否"}")
+                    Text(stringResource(R.string.detail_raw_notification), style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.detail_package_name, event.packageName))
+                    Text(stringResource(R.string.detail_notification_key, event.notificationKey))
+                    Text(stringResource(R.string.detail_received_at, event.receivedAt.toFriendlyTime()))
+                    Text(stringResource(R.string.detail_post_time, event.postTime.toFriendlyTime()))
+                    Text(stringResource(R.string.detail_subtext, event.subText ?: stringResource(R.string.detail_empty_value)))
+                    Text(stringResource(R.string.detail_ongoing, stringResource(if (event.ongoing) R.string.detail_yes else R.string.detail_no)))
+                    Text(stringResource(R.string.detail_clearable, stringResource(if (event.clearable) R.string.detail_yes else R.string.detail_no)))
+                    Text(stringResource(R.string.detail_system_notification, stringResource(if (event.isSystemNotification) R.string.detail_yes else R.string.detail_no)))
                 }
             }
         }
         if (uiState.attempts.isNotEmpty()) {
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("投递尝试历史", style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.detail_attempt_history), style = MaterialTheme.typography.titleMedium)
                     uiState.attempts.forEach { attempt ->
                         Card(modifier = Modifier.fillMaxWidth()) {
                             Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                                Text("尝试时间：${attempt.createdAt.toFriendlyTime()}")
-                                Text("响应码：${attempt.responseCode?.toString() ?: "无"}")
-                                Text("错误信息：${attempt.errorMessage ?: "无"}")
+                                Text(stringResource(R.string.detail_attempt_time, attempt.createdAt.toFriendlyTime()))
+                                Text(stringResource(R.string.detail_attempt_response, attempt.responseCode?.toString() ?: stringResource(R.string.detail_empty_value)))
+                                Text(stringResource(R.string.detail_attempt_error, attempt.errorMessage ?: stringResource(R.string.detail_empty_value)))
                                 attempt.toFailurePresentation()?.let { failure ->
-                                    Text("失败分类：${failure.category}")
-                                    Text("处理建议：${failure.suggestion}")
+                                    Text(stringResource(R.string.detail_failure_class, failure.category))
+                                    Text(stringResource(R.string.detail_failure_advice, failure.suggestion))
                                 }
-                                Text("请求 Payload：")
-                                Text(attempt.payloadJson.ifBlank { "(空 payload)" })
+                                Text(stringResource(R.string.detail_request_payload))
+                                Text(attempt.payloadJson.ifBlank { stringResource(R.string.detail_empty_payload) })
                             }
                         }
                     }
@@ -141,13 +144,13 @@ private fun Long.toFriendlyTime(): String {
 
 private fun Long.toRelativeRetryText(now: Long = System.currentTimeMillis()): String {
     val delta = this - now
-    if (delta <= 0) return "即将执行"
+    if (delta <= 0) return NotifyBridgeStrings.commonDueSoon()
     val totalSeconds = delta / 1000
     val minutes = totalSeconds / 60
     val seconds = totalSeconds % 60
     return when {
-        minutes > 0 && seconds > 0 -> "${minutes}分${seconds}秒后"
-        minutes > 0 -> "${minutes}分钟后"
-        else -> "${seconds}秒后"
+        minutes > 0 && seconds > 0 -> NotifyBridgeStrings.afterMinSec(minutes, seconds)
+        minutes > 0 -> NotifyBridgeStrings.afterMinutes(minutes)
+        else -> NotifyBridgeStrings.afterSeconds(seconds)
     }
 }

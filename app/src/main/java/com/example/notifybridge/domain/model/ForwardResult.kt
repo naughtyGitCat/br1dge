@@ -1,5 +1,7 @@
 package com.example.notifybridge.domain.model
 
+import com.example.notifybridge.core.common.LocalizedText
+
 sealed class ForwardResult {
     data object Success : ForwardResult()
     data class Failure(val error: ForwardError) : ForwardResult()
@@ -9,8 +11,8 @@ sealed class ForwardError(
     open val message: String,
     open val retryable: Boolean,
 ) {
-    data object EndpointNotConfigured : ForwardError("未配置 Webhook 地址", false)
-    data object NetworkUnavailable : ForwardError("网络不可用", true)
+    class EndpointNotConfigured : ForwardError(LocalizedText.endpointNotConfigured(), false)
+    class NetworkUnavailable : ForwardError(LocalizedText.networkUnavailable(), true)
     data class ConnectionFailure(override val message: String) : ForwardError(message, true)
     data class Timeout(override val message: String) : ForwardError(message, true)
     data class HttpError(val code: Int, override val message: String) : ForwardError(

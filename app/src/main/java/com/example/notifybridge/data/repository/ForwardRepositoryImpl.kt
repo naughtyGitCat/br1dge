@@ -3,6 +3,7 @@ package com.example.notifybridge.data.repository
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import com.example.notifybridge.core.common.LocalizedText
 import com.example.notifybridge.core.network.WebhookApi
 import com.example.notifybridge.core.network.dto.BarkPushRequestDto
 import com.example.notifybridge.domain.model.BarkGroupMode
@@ -56,10 +57,10 @@ class ForwardRepositoryImpl @Inject constructor(
         val serverUrl = settings.barkServerUrl.trim().trimEnd('/')
         val deviceKey = settings.barkDeviceKey.trim()
         if (serverUrl.isEmpty() || deviceKey.isEmpty()) {
-            return ForwardResult.Failure(ForwardError.EndpointNotConfigured)
+            return ForwardResult.Failure(ForwardError.EndpointNotConfigured())
         }
         if (!isNetworkAvailable()) {
-            return ForwardResult.Failure(ForwardError.NetworkUnavailable)
+            return ForwardResult.Failure(ForwardError.NetworkUnavailable())
         }
         val bodyText = buildBarkBody(payload)
         return try {
@@ -101,15 +102,15 @@ class ForwardRepositoryImpl @Inject constructor(
                 )
             }
         } catch (e: SocketTimeoutException) {
-            ForwardResult.Failure(ForwardError.Timeout(e.message ?: "请求超时"))
+            ForwardResult.Failure(ForwardError.Timeout(e.message ?: LocalizedText.timeout()))
         } catch (e: SerializationException) {
-            ForwardResult.Failure(ForwardError.SerializationError(e.message ?: "序列化失败"))
+            ForwardResult.Failure(ForwardError.SerializationError(e.message ?: LocalizedText.serializationFailed()))
         } catch (e: HttpException) {
             ForwardResult.Failure(ForwardError.HttpError(e.code(), e.message()))
         } catch (e: IOException) {
-            ForwardResult.Failure(ForwardError.ConnectionFailure(e.message ?: "连接失败"))
+            ForwardResult.Failure(ForwardError.ConnectionFailure(e.message ?: LocalizedText.connectionFailed()))
         } catch (e: Exception) {
-            ForwardResult.Failure(ForwardError.Unknown(e.message ?: "未知错误"))
+            ForwardResult.Failure(ForwardError.Unknown(e.message ?: LocalizedText.unknownError()))
         }
     }
 
@@ -126,7 +127,7 @@ class ForwardRepositoryImpl @Inject constructor(
             payload.subText?.takeIf { it.isNotBlank() },
         ).joinToString("\n")
 
-        val fallbackContent = if (content.isBlank()) "(无正文)" else content
+        val fallbackContent = if (content.isBlank()) LocalizedText.noBody() else content
         return buildString {
             appendLine(fallbackContent)
             appendLine()

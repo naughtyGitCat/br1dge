@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
+import uk.deprecated.notifybridge.R
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -25,12 +26,16 @@ class NotificationTestManager @Inject constructor(
         val manager = ContextCompat.getSystemService(context, NotificationManager::class.java) ?: return false
         val channelId = "notifybridge_test"
         manager.createNotificationChannel(
-            NotificationChannel(channelId, "NotifyBridge Test", NotificationManager.IMPORTANCE_DEFAULT)
+            NotificationChannel(
+                channelId,
+                context.getString(R.string.test_notification_channel),
+                NotificationManager.IMPORTANCE_DEFAULT,
+            )
         )
         val notification = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentTitle("NotifyBridge Test")
-            .setContentText("这是一条本地测试通知，用于验证监听链路。")
+            .setContentTitle(context.getString(R.string.test_notification_title))
+            .setContentText(context.getString(R.string.test_notification_text))
             .setAutoCancel(true)
             .build()
         manager.notify(1001, notification)

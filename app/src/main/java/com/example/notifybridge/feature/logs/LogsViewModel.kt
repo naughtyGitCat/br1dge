@@ -2,6 +2,8 @@ package com.example.notifybridge.feature.logs
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import uk.deprecated.notifybridge.R
+import com.example.notifybridge.core.common.StringsProvider
 import com.example.notifybridge.domain.model.DeliveryRecord
 import com.example.notifybridge.domain.model.DeliveryStatus
 import com.example.notifybridge.domain.repository.DeliveryLogRepository
@@ -41,6 +43,7 @@ data class LogsUiState(
 class LogsViewModel @Inject constructor(
     private val deliveryLogRepository: DeliveryLogRepository,
     private val deliveryWorkScheduler: DeliveryWorkScheduler,
+    private val stringsProvider: StringsProvider,
 ) : ViewModel() {
 
     private val filterState = MutableStateFlow(LogStatusFilter.ALL)
@@ -106,7 +109,7 @@ class LogsViewModel @Inject constructor(
         viewModelScope.launch {
             deliveryLogRepository.markPending(eventId)
             deliveryWorkScheduler.enqueueUserInitiated()
-            messageState.value = "已重新入队 1 条记录"
+            messageState.value = stringsProvider.get(R.string.logs_retry_one)
         }
     }
 
@@ -116,13 +119,13 @@ class LogsViewModel @Inject constructor(
             .map { it.eventId }
             .distinct()
         if (retryableIds.isEmpty()) {
-            messageState.value = "当前没有可重试记录"
+            messageState.value = stringsProvider.get(R.string.logs_retry_none)
             return
         }
         viewModelScope.launch {
             retryableIds.forEach { deliveryLogRepository.markPending(it) }
             deliveryWorkScheduler.enqueueUserInitiated()
-            messageState.value = "已重新入队 ${retryableIds.size} 条记录"
+            messageState.value = stringsProvider.get(R.string.logs_retry_many, retryableIds.size)
         }
     }
 
