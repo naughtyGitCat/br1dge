@@ -99,6 +99,7 @@
     <string name="settings_forwarding_enabled">Enable forwarding</string>
     <string name="settings_filters_enabled">Enable filters</string>
     <string name="settings_clear_after_success">Clear local notification after successful forward</string>
+    <string name="settings_prevent_channel_loop">Prevent channel loop notifications</string>
     <string name="settings_delivery_channel">Delivery channel</string>
     <string name="settings_channel_bark">Bark</string>
     <string name="settings_channel_telegram">Telegram</string>

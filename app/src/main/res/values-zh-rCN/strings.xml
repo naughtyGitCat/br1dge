@@ -99,6 +99,7 @@
     <string name="settings_forwarding_enabled">启用转发总开关</string>
     <string name="settings_filters_enabled">启用过滤规则</string>
     <string name="settings_clear_after_success">转发成功后清除本机原通知</string>
+    <string name="settings_prevent_channel_loop">防止渠道通知回环</string>
     <string name="settings_delivery_channel">转发渠道</string>
     <string name="settings_channel_bark">Bark</string>
     <string name="settings_channel_telegram">Telegram</string>

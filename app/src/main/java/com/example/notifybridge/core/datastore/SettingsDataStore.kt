@@ -26,6 +26,7 @@ class SettingsDataStore @Inject constructor(
     private object Keys {
         val forwardingEnabled = booleanPreferencesKey("forwarding_enabled")
         val cancelNotificationOnSuccess = booleanPreferencesKey("cancel_notification_on_success")
+        val preventChannelLoop = booleanPreferencesKey("prevent_channel_loop")
         val deliveryChannel = stringPreferencesKey("delivery_channel")
         val barkServerUrl = stringPreferencesKey("bark_server_url")
         val barkDeviceKey = stringPreferencesKey("bark_device_key")
@@ -87,6 +88,7 @@ class SettingsDataStore @Inject constructor(
         AppSettings(
             forwardingEnabled = prefs[Keys.forwardingEnabled] ?: false,
             cancelNotificationOnSuccess = prefs[Keys.cancelNotificationOnSuccess] ?: false,
+            preventChannelLoop = prefs[Keys.preventChannelLoop] ?: true,
             deliveryChannel = prefs[Keys.deliveryChannel]
                 ?.let { runCatching { DeliveryChannel.valueOf(it) }.getOrNull() }
                 ?: DeliveryChannel.BARK,
@@ -150,6 +152,7 @@ class SettingsDataStore @Inject constructor(
         context.settingsDataStore.edit { prefs ->
             prefs[Keys.forwardingEnabled] = settings.forwardingEnabled
             prefs[Keys.cancelNotificationOnSuccess] = settings.cancelNotificationOnSuccess
+            prefs[Keys.preventChannelLoop] = settings.preventChannelLoop
             prefs[Keys.deliveryChannel] = settings.deliveryChannel.name
             prefs[Keys.barkServerUrl] = settings.barkServerUrl
             prefs[Keys.barkDeviceKey] = settings.barkDeviceKey

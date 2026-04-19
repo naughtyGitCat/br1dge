@@ -140,6 +140,7 @@ private fun SettingsScreen(
     onAction: (SettingsAction) -> Unit,
 ) {
     var deliveryChannel by remember(uiState.settings.deliveryChannel) { mutableStateOf(uiState.settings.deliveryChannel) }
+    var preventChannelLoop by remember(uiState.settings.preventChannelLoop) { mutableStateOf(uiState.settings.preventChannelLoop) }
     var barkServerUrl by remember(uiState.settings.barkServerUrl) { mutableStateOf(uiState.settings.barkServerUrl) }
     var barkDeviceKey by remember(uiState.settings.barkDeviceKey) { mutableStateOf(uiState.settings.barkDeviceKey) }
     var barkDeviceKeys by remember(uiState.settings.barkDeviceKeys) { mutableStateOf(uiState.settings.barkDeviceKeys.joinToString(",")) }
@@ -210,6 +211,7 @@ private fun SettingsScreen(
     val draft = SettingsDraft(
         forwardingEnabled = uiState.settings.forwardingEnabled,
         cancelNotificationOnSuccess = uiState.settings.cancelNotificationOnSuccess,
+        preventChannelLoop = preventChannelLoop,
         deliveryChannel = deliveryChannel,
         barkServerUrl = barkServerUrl,
         barkDeviceKey = barkDeviceKey,
@@ -285,6 +287,11 @@ private fun SettingsScreen(
                         title = stringResource(R.string.settings_clear_after_success),
                         checked = uiState.settings.cancelNotificationOnSuccess,
                         onCheckedChange = { onAction(SettingsAction.Save(draft.copy(cancelNotificationOnSuccess = it))) }
+                    )
+                    SwitchRow(
+                        title = stringResource(R.string.settings_prevent_channel_loop),
+                        checked = preventChannelLoop,
+                        onCheckedChange = { preventChannelLoop = it }
                     )
                     SelectionField(
                         label = stringResource(R.string.settings_delivery_channel),

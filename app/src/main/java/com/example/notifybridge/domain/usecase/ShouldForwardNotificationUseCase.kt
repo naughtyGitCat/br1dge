@@ -32,8 +32,10 @@ class ShouldForwardNotificationUseCase @Inject constructor() {
             return FilterDecision.Blocked(LocalizedText.forwardingDisabled())
         }
 
-        detectChannelLoop(event.packageName, settings.deliveryChannel)?.let { reason ->
-            return FilterDecision.Blocked(reason)
+        if (settings.preventChannelLoop) {
+            detectChannelLoop(event.packageName, settings.deliveryChannel)?.let { reason ->
+                return FilterDecision.Blocked(reason)
+            }
         }
 
         val ruleSet = settings.filterRuleSet
