@@ -124,11 +124,17 @@
     <string name="settings_app_rules">App forwarding rules</string>
     <string name="settings_app_rules_summary">Forward: %1$d | Block: %2$d</string>
     <string name="settings_app_search">Search installed apps</string>
+    <string name="settings_app_search_result">Visible apps: %1$d</string>
     <string name="settings_app_mode_forward">Forward</string>
     <string name="settings_app_mode_block">Do not forward</string>
     <string name="settings_app_mode_default">Default</string>
     <string name="settings_app_system">System</string>
     <string name="settings_manual_filters">Advanced filter fields</string>
+    <string name="settings_actions">Actions and diagnostics</string>
+    <string name="settings_actions_summary">Save, test, clear logs, and export debug data</string>
+    <string name="settings_section_expand">Expand</string>
+    <string name="settings_section_collapse">Collapse</string>
+    <string name="settings_section_collapsed_hint">Collapsed. Tap to view details.</string>
     <string name="settings_allowed_packages">Allowed packages (comma separated)</string>
     <string name="settings_blocked_packages">Blocked packages (comma separated)</string>
     <string name="settings_keyword_whitelist">Keyword whitelist (comma separated)</string>

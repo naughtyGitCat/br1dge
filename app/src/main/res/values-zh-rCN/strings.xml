@@ -124,11 +124,17 @@
     <string name="settings_app_rules">应用转发规则</string>
     <string name="settings_app_rules_summary">允许转发：%1$d | 禁止转发：%2$d</string>
     <string name="settings_app_search">搜索已安装应用</string>
+    <string name="settings_app_search_result">当前显示应用：%1$d</string>
     <string name="settings_app_mode_forward">转发</string>
     <string name="settings_app_mode_block">不转发</string>
     <string name="settings_app_mode_default">默认</string>
     <string name="settings_app_system">系统</string>
     <string name="settings_manual_filters">高级过滤字段</string>
+    <string name="settings_actions">操作与诊断</string>
+    <string name="settings_actions_summary">保存、测试发送、清空日志和导出调试信息</string>
+    <string name="settings_section_expand">展开</string>
+    <string name="settings_section_collapse">收起</string>
+    <string name="settings_section_collapsed_hint">已折叠，点按查看详情。</string>
     <string name="settings_allowed_packages">允许应用包名（逗号分隔）</string>
     <string name="settings_blocked_packages">黑名单应用包名（逗号分隔）</string>
     <string name="settings_keyword_whitelist">关键词白名单（逗号分隔）</string>
