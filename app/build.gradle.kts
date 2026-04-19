@@ -54,6 +54,8 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            pickFirsts += "META-INF/LICENSE.md"
+            pickFirsts += "META-INF/NOTICE.md"
         }
     }
 }
@@ -94,6 +96,8 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+    implementation("com.sun.mail:jakarta.mail:2.0.1")
+    implementation("com.sun.activation:jakarta.activation:2.0.1")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
     androidTestImplementation("androidx.test:runner:1.6.1")

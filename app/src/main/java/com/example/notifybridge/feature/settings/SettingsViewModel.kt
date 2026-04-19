@@ -6,6 +6,8 @@ import uk.deprecated.notifybridge.R
 import com.example.notifybridge.core.common.StringsProvider
 import com.example.notifybridge.domain.model.AppSettings
 import com.example.notifybridge.domain.model.BarkGroupMode
+import com.example.notifybridge.domain.model.DeliveryChannel
+import com.example.notifybridge.domain.model.EmailSecurityMode
 import com.example.notifybridge.domain.model.FilterRuleSet
 import com.example.notifybridge.domain.model.ForwardResult
 import com.example.notifybridge.domain.repository.DeliveryLogRepository
@@ -37,6 +39,7 @@ sealed class SettingsAction {
 data class SettingsDraft(
     val forwardingEnabled: Boolean,
     val cancelNotificationOnSuccess: Boolean,
+    val deliveryChannel: DeliveryChannel,
     val barkServerUrl: String,
     val barkDeviceKey: String,
     val barkDeviceKeys: String,
@@ -58,6 +61,22 @@ data class SettingsDraft(
     val barkNotificationId: String,
     val barkDelete: Boolean,
     val barkUseMarkdown: Boolean,
+    val telegramBotToken: String,
+    val telegramChatId: String,
+    val telegramMessageThreadId: String,
+    val telegramDisableNotification: Boolean,
+    val telegramUseMarkdown: Boolean,
+    val slackWebhookUrl: String,
+    val slackUsername: String,
+    val slackIconEmoji: String,
+    val emailSmtpHost: String,
+    val emailSmtpPort: String,
+    val emailSecurityMode: EmailSecurityMode,
+    val emailUsername: String,
+    val emailPassword: String,
+    val emailFromAddress: String,
+    val emailToAddress: String,
+    val emailSubjectPrefix: String,
     val allowedPackages: String,
     val blockedPackages: String,
     val keywordWhitelist: String,
@@ -80,6 +99,15 @@ data class SettingsValidationState(
     val barkUrlError: String? = null,
     val barkIconError: String? = null,
     val barkImageError: String? = null,
+    val telegramBotTokenError: String? = null,
+    val telegramChatIdError: String? = null,
+    val slackWebhookUrlError: String? = null,
+    val emailSmtpHostError: String? = null,
+    val emailSmtpPortError: String? = null,
+    val emailUsernameError: String? = null,
+    val emailPasswordError: String? = null,
+    val emailFromAddressError: String? = null,
+    val emailToAddressError: String? = null,
     val dedupeSecondsError: String? = null,
 ) {
     val isValid: Boolean
@@ -92,6 +120,15 @@ data class SettingsValidationState(
             barkUrlError == null &&
             barkIconError == null &&
             barkImageError == null &&
+            telegramBotTokenError == null &&
+            telegramChatIdError == null &&
+            slackWebhookUrlError == null &&
+            emailSmtpHostError == null &&
+            emailSmtpPortError == null &&
+            emailUsernameError == null &&
+            emailPasswordError == null &&
+            emailFromAddressError == null &&
+            emailToAddressError == null &&
             dedupeSecondsError == null
 }
 
@@ -221,33 +258,93 @@ class SettingsViewModel @Inject constructor(
     private fun validate(draft: SettingsDraft): SettingsValidationState {
         val barkServerUrl = draft.barkServerUrl.trim()
         val barkServerUrlError = when {
+            draft.deliveryChannel != DeliveryChannel.BARK -> null
             barkServerUrl.isBlank() -> stringsProvider.get(R.string.settings_error_server_empty)
             !isValidHttpUrl(barkServerUrl) -> stringsProvider.get(R.string.settings_error_server_invalid)
             else -> null
         }
         val barkDeviceKeyError = when {
-            draft.barkDeviceKey.trim().isBlank() && draft.barkDeviceKeys.splitToList().isEmpty() -> stringsProvider.get(R.string.settings_error_device_key_required)
+            draft.deliveryChannel != DeliveryChannel.BARK -> null
+            draft.barkDeviceKey.trim().isBlank() && draft.barkDeviceKeys.splitToList().isEmpty() ->
+                stringsProvider.get(R.string.settings_error_device_key_required)
             else -> null
         }
-        val barkLevelError = when (draft.barkLevel.trim()) {
-            "critical", "active", "timeSensitive", "passive" -> null
+        val barkLevelError = when {
+            draft.deliveryChannel != DeliveryChannel.BARK -> null
+            draft.barkLevel.trim() in listOf("critical", "active", "timeSensitive", "passive") -> null
             else -> stringsProvider.get(R.string.settings_error_level_invalid)
         }
-        val barkVolumeError = when (val value = draft.barkVolume.trim()) {
-            "" -> null
-            else -> value.toIntOrNull()?.takeIf { it in 0..10 }?.let { null } ?: stringsProvider.get(R.string.settings_error_volume_invalid)
+        val barkVolumeError = if (draft.deliveryChannel != DeliveryChannel.BARK) {
+            null
+        } else {
+            when (val value = draft.barkVolume.trim()) {
+                "" -> null
+                else -> value.toIntOrNull()?.takeIf { it in 0..10 }?.let { null }
+                    ?: stringsProvider.get(R.string.settings_error_volume_invalid)
+            }
         }
-        val barkBadgeError = when (val value = draft.barkBadge.trim()) {
-            "" -> null
-            else -> value.toIntOrNull()?.let { null } ?: stringsProvider.get(R.string.settings_error_badge_invalid)
+        val barkBadgeError = if (draft.deliveryChannel != DeliveryChannel.BARK) {
+            null
+        } else {
+            when (val value = draft.barkBadge.trim()) {
+                "" -> null
+                else -> value.toIntOrNull()?.let { null } ?: stringsProvider.get(R.string.settings_error_badge_invalid)
+            }
         }
-        val barkActionError = when (draft.barkAction.trim()) {
-            "", "alert" -> null
+        val barkActionError = when {
+            draft.deliveryChannel != DeliveryChannel.BARK -> null
+            draft.barkAction.trim() in listOf("", "alert") -> null
             else -> stringsProvider.get(R.string.settings_error_action_invalid)
         }
-        val barkUrlError = validateOptionalHttpUrlOrScheme(draft.barkUrl)
-        val barkIconError = validateOptionalHttpUrl(draft.barkIcon, "Icon URL")
-        val barkImageError = validateOptionalHttpUrl(draft.barkImage, "Image URL")
+        val barkUrlError = if (draft.deliveryChannel == DeliveryChannel.BARK) validateOptionalHttpUrlOrScheme(draft.barkUrl) else null
+        val barkIconError = if (draft.deliveryChannel == DeliveryChannel.BARK) validateOptionalHttpUrl(draft.barkIcon, "Icon URL") else null
+        val barkImageError = if (draft.deliveryChannel == DeliveryChannel.BARK) validateOptionalHttpUrl(draft.barkImage, "Image URL") else null
+        val telegramBotTokenError = when {
+            draft.deliveryChannel != DeliveryChannel.TELEGRAM -> null
+            draft.telegramBotToken.trim().isBlank() -> stringsProvider.get(R.string.settings_error_telegram_token_required)
+            else -> null
+        }
+        val telegramChatIdError = when {
+            draft.deliveryChannel != DeliveryChannel.TELEGRAM -> null
+            draft.telegramChatId.trim().isBlank() -> stringsProvider.get(R.string.settings_error_telegram_chat_id_required)
+            else -> null
+        }
+        val slackWebhookUrlError = when {
+            draft.deliveryChannel != DeliveryChannel.SLACK -> null
+            draft.slackWebhookUrl.trim().isBlank() -> stringsProvider.get(R.string.settings_error_slack_webhook_required)
+            !isValidHttpUrl(draft.slackWebhookUrl.trim()) -> stringsProvider.get(R.string.settings_error_slack_webhook_invalid)
+            else -> null
+        }
+        val emailSmtpHostError = when {
+            draft.deliveryChannel != DeliveryChannel.EMAIL -> null
+            draft.emailSmtpHost.trim().isBlank() -> stringsProvider.get(R.string.settings_error_email_host_required)
+            else -> null
+        }
+        val emailSmtpPortError = when {
+            draft.deliveryChannel != DeliveryChannel.EMAIL -> null
+            draft.emailSmtpPort.trim().toIntOrNull() == null -> stringsProvider.get(R.string.settings_error_email_port_invalid)
+            else -> null
+        }
+        val emailUsernameError = when {
+            draft.deliveryChannel != DeliveryChannel.EMAIL -> null
+            draft.emailUsername.trim().isBlank() -> stringsProvider.get(R.string.settings_error_email_username_required)
+            else -> null
+        }
+        val emailPasswordError = when {
+            draft.deliveryChannel != DeliveryChannel.EMAIL -> null
+            draft.emailPassword.isBlank() -> stringsProvider.get(R.string.settings_error_email_password_required)
+            else -> null
+        }
+        val emailFromAddressError = when {
+            draft.deliveryChannel != DeliveryChannel.EMAIL -> null
+            !isValidEmail(draft.emailFromAddress.trim()) -> stringsProvider.get(R.string.settings_error_email_from_invalid)
+            else -> null
+        }
+        val emailToAddressError = when {
+            draft.deliveryChannel != DeliveryChannel.EMAIL -> null
+            !isValidEmail(draft.emailToAddress.trim()) -> stringsProvider.get(R.string.settings_error_email_to_invalid)
+            else -> null
+        }
         val dedupeSecondsError = when (draft.dedupeSeconds.toIntOrNull()) {
             null -> stringsProvider.get(R.string.settings_error_dedupe_invalid)
             in 0..600 -> null
@@ -263,6 +360,15 @@ class SettingsViewModel @Inject constructor(
             barkUrlError = barkUrlError,
             barkIconError = barkIconError,
             barkImageError = barkImageError,
+            telegramBotTokenError = telegramBotTokenError,
+            telegramChatIdError = telegramChatIdError,
+            slackWebhookUrlError = slackWebhookUrlError,
+            emailSmtpHostError = emailSmtpHostError,
+            emailSmtpPortError = emailSmtpPortError,
+            emailUsernameError = emailUsernameError,
+            emailPasswordError = emailPasswordError,
+            emailFromAddressError = emailFromAddressError,
+            emailToAddressError = emailToAddressError,
             dedupeSecondsError = dedupeSecondsError,
         )
     }
@@ -288,11 +394,16 @@ class SettingsViewModel @Inject constructor(
             if (!uri.scheme.isNullOrBlank()) null else stringsProvider.get(R.string.settings_error_jump_scheme)
         }.getOrElse { stringsProvider.get(R.string.settings_error_jump_invalid) }
     }
+
+    private fun isValidEmail(value: String): Boolean {
+        return value.contains('@') && value.substringAfter('@').contains('.')
+    }
 }
 
 private fun SettingsDraft.toAppSettings(): AppSettings = AppSettings(
     forwardingEnabled = forwardingEnabled,
     cancelNotificationOnSuccess = cancelNotificationOnSuccess,
+    deliveryChannel = deliveryChannel,
     barkServerUrl = barkServerUrl.trim(),
     barkDeviceKey = barkDeviceKey.trim(),
     barkDeviceKeys = barkDeviceKeys.splitToList(),
@@ -314,6 +425,22 @@ private fun SettingsDraft.toAppSettings(): AppSettings = AppSettings(
     barkNotificationId = barkNotificationId.trim(),
     barkDelete = barkDelete,
     barkUseMarkdown = barkUseMarkdown,
+    telegramBotToken = telegramBotToken.trim(),
+    telegramChatId = telegramChatId.trim(),
+    telegramMessageThreadId = telegramMessageThreadId.trim(),
+    telegramDisableNotification = telegramDisableNotification,
+    telegramUseMarkdown = telegramUseMarkdown,
+    slackWebhookUrl = slackWebhookUrl.trim(),
+    slackUsername = slackUsername.trim(),
+    slackIconEmoji = slackIconEmoji.trim(),
+    emailSmtpHost = emailSmtpHost.trim(),
+    emailSmtpPort = emailSmtpPort.trim().toIntOrNull() ?: 587,
+    emailSecurityMode = emailSecurityMode,
+    emailUsername = emailUsername.trim(),
+    emailPassword = emailPassword,
+    emailFromAddress = emailFromAddress.trim(),
+    emailToAddress = emailToAddress.trim(),
+    emailSubjectPrefix = emailSubjectPrefix.trim(),
     filterRuleSet = FilterRuleSet(
         enabled = filtersEnabled,
         allowedPackages = allowedPackages.splitToSet(),

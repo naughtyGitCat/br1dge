@@ -15,7 +15,7 @@ object LocalizedText {
     fun keywordWhitelistMiss() = if (zh()) "未命中关键词白名单" else "Did not match keyword whitelist"
     fun dedupeWindowHit() = if (zh()) "命中去重时间窗口" else "Matched dedupe window"
 
-    fun endpointNotConfigured() = if (zh()) "未配置 Bark 地址" else "Bark endpoint is not configured"
+    fun endpointNotConfigured() = if (zh()) "当前转发渠道未配置完整" else "The current delivery channel is not fully configured"
     fun networkUnavailable() = if (zh()) "网络不可用" else "Network unavailable"
     fun timeout() = if (zh()) "请求超时" else "Request timed out"
     fun serializationFailed() = if (zh()) "序列化失败" else "Serialization failed"

@@ -39,6 +39,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.notifybridge.domain.model.AppSettings
 import com.example.notifybridge.domain.model.BarkGroupMode
+import com.example.notifybridge.domain.model.DeliveryChannel
+import com.example.notifybridge.domain.model.EmailSecurityMode
 import com.example.notifybridge.system.util.InstalledAppInfo
 import uk.deprecated.notifybridge.R
 
@@ -54,6 +56,19 @@ private val barkLevelOptions = listOf(
 private val barkActionOptions = listOf(
     "" to "settings_option_none",
     "alert" to "alert",
+)
+
+private val deliveryChannelOptions = listOf(
+    DeliveryChannel.BARK.name to "settings_channel_bark",
+    DeliveryChannel.TELEGRAM.name to "settings_channel_telegram",
+    DeliveryChannel.SLACK.name to "settings_channel_slack",
+    DeliveryChannel.EMAIL.name to "settings_channel_email",
+)
+
+private val emailSecurityOptions = listOf(
+    EmailSecurityMode.NONE.name to "settings_email_security_none",
+    EmailSecurityMode.STARTTLS.name to "settings_email_security_starttls",
+    EmailSecurityMode.SSL_TLS.name to "settings_email_security_ssl_tls",
 )
 
 private val barkGroupModeOptions = listOf(
@@ -124,6 +139,7 @@ private fun SettingsScreen(
     uiState: SettingsUiState,
     onAction: (SettingsAction) -> Unit,
 ) {
+    var deliveryChannel by remember(uiState.settings.deliveryChannel) { mutableStateOf(uiState.settings.deliveryChannel) }
     var barkServerUrl by remember(uiState.settings.barkServerUrl) { mutableStateOf(uiState.settings.barkServerUrl) }
     var barkDeviceKey by remember(uiState.settings.barkDeviceKey) { mutableStateOf(uiState.settings.barkDeviceKey) }
     var barkDeviceKeys by remember(uiState.settings.barkDeviceKeys) { mutableStateOf(uiState.settings.barkDeviceKeys.joinToString(",")) }
@@ -145,6 +161,22 @@ private fun SettingsScreen(
     var barkNotificationId by remember(uiState.settings.barkNotificationId) { mutableStateOf(uiState.settings.barkNotificationId) }
     var barkDelete by remember(uiState.settings.barkDelete) { mutableStateOf(uiState.settings.barkDelete) }
     var barkUseMarkdown by remember(uiState.settings.barkUseMarkdown) { mutableStateOf(uiState.settings.barkUseMarkdown) }
+    var telegramBotToken by remember(uiState.settings.telegramBotToken) { mutableStateOf(uiState.settings.telegramBotToken) }
+    var telegramChatId by remember(uiState.settings.telegramChatId) { mutableStateOf(uiState.settings.telegramChatId) }
+    var telegramMessageThreadId by remember(uiState.settings.telegramMessageThreadId) { mutableStateOf(uiState.settings.telegramMessageThreadId) }
+    var telegramDisableNotification by remember(uiState.settings.telegramDisableNotification) { mutableStateOf(uiState.settings.telegramDisableNotification) }
+    var telegramUseMarkdown by remember(uiState.settings.telegramUseMarkdown) { mutableStateOf(uiState.settings.telegramUseMarkdown) }
+    var slackWebhookUrl by remember(uiState.settings.slackWebhookUrl) { mutableStateOf(uiState.settings.slackWebhookUrl) }
+    var slackUsername by remember(uiState.settings.slackUsername) { mutableStateOf(uiState.settings.slackUsername) }
+    var slackIconEmoji by remember(uiState.settings.slackIconEmoji) { mutableStateOf(uiState.settings.slackIconEmoji) }
+    var emailSmtpHost by remember(uiState.settings.emailSmtpHost) { mutableStateOf(uiState.settings.emailSmtpHost) }
+    var emailSmtpPort by remember(uiState.settings.emailSmtpPort) { mutableStateOf(uiState.settings.emailSmtpPort.toString()) }
+    var emailSecurityMode by remember(uiState.settings.emailSecurityMode) { mutableStateOf(uiState.settings.emailSecurityMode) }
+    var emailUsername by remember(uiState.settings.emailUsername) { mutableStateOf(uiState.settings.emailUsername) }
+    var emailPassword by remember(uiState.settings.emailPassword) { mutableStateOf(uiState.settings.emailPassword) }
+    var emailFromAddress by remember(uiState.settings.emailFromAddress) { mutableStateOf(uiState.settings.emailFromAddress) }
+    var emailToAddress by remember(uiState.settings.emailToAddress) { mutableStateOf(uiState.settings.emailToAddress) }
+    var emailSubjectPrefix by remember(uiState.settings.emailSubjectPrefix) { mutableStateOf(uiState.settings.emailSubjectPrefix) }
     var allowedPackages by remember(uiState.settings.filterRuleSet.allowedPackages) {
         mutableStateOf(uiState.settings.filterRuleSet.allowedPackages.joinToString(","))
     }
@@ -178,6 +210,7 @@ private fun SettingsScreen(
     val draft = SettingsDraft(
         forwardingEnabled = uiState.settings.forwardingEnabled,
         cancelNotificationOnSuccess = uiState.settings.cancelNotificationOnSuccess,
+        deliveryChannel = deliveryChannel,
         barkServerUrl = barkServerUrl,
         barkDeviceKey = barkDeviceKey,
         barkDeviceKeys = barkDeviceKeys,
@@ -199,6 +232,22 @@ private fun SettingsScreen(
         barkNotificationId = barkNotificationId,
         barkDelete = barkDelete,
         barkUseMarkdown = barkUseMarkdown,
+        telegramBotToken = telegramBotToken,
+        telegramChatId = telegramChatId,
+        telegramMessageThreadId = telegramMessageThreadId,
+        telegramDisableNotification = telegramDisableNotification,
+        telegramUseMarkdown = telegramUseMarkdown,
+        slackWebhookUrl = slackWebhookUrl,
+        slackUsername = slackUsername,
+        slackIconEmoji = slackIconEmoji,
+        emailSmtpHost = emailSmtpHost,
+        emailSmtpPort = emailSmtpPort,
+        emailSecurityMode = emailSecurityMode,
+        emailUsername = emailUsername,
+        emailPassword = emailPassword,
+        emailFromAddress = emailFromAddress,
+        emailToAddress = emailToAddress,
+        emailSubjectPrefix = emailSubjectPrefix,
         allowedPackages = allowedPackages,
         blockedPackages = blockedPackages,
         keywordWhitelist = whitelist,
@@ -225,75 +274,24 @@ private fun SettingsScreen(
                     SwitchRow(
                         title = stringResource(R.string.settings_forwarding_enabled),
                         checked = uiState.settings.forwardingEnabled,
-                        onCheckedChange = {
-                            save(
-                                current = uiState.settings,
-                                onAction = onAction,
-                                barkServerUrl = barkServerUrl,
-                                barkDeviceKey = barkDeviceKey,
-                                allowedPackages = allowedPackages,
-                                blockedPackages = blockedPackages,
-                                whitelist = whitelist,
-                                blacklist = blacklist,
-                                dedupeSeconds = dedupeSeconds,
-                                forwardingEnabled = it,
-                            )
-                        }
+                        onCheckedChange = { onAction(SettingsAction.Save(draft.copy(forwardingEnabled = it))) }
                     )
                     SwitchRow(
                         title = stringResource(R.string.settings_filters_enabled),
                         checked = uiState.settings.filterRuleSet.enabled,
-                        onCheckedChange = {
-                            save(
-                                current = uiState.settings,
-                                onAction = onAction,
-                                barkServerUrl = barkServerUrl,
-                                barkDeviceKey = barkDeviceKey,
-                                allowedPackages = allowedPackages,
-                                blockedPackages = blockedPackages,
-                                whitelist = whitelist,
-                                blacklist = blacklist,
-                                dedupeSeconds = dedupeSeconds,
-                                filtersEnabled = it,
-                            )
-                        }
+                        onCheckedChange = { onAction(SettingsAction.Save(draft.copy(filtersEnabled = it))) }
                     )
                     SwitchRow(
                         title = stringResource(R.string.settings_clear_after_success),
                         checked = uiState.settings.cancelNotificationOnSuccess,
-                        onCheckedChange = {
-                            save(
-                                current = uiState.settings,
-                                onAction = onAction,
-                                barkServerUrl = barkServerUrl,
-                                barkDeviceKey = barkDeviceKey,
-                                allowedPackages = allowedPackages,
-                                blockedPackages = blockedPackages,
-                                whitelist = whitelist,
-                                blacklist = blacklist,
-                                dedupeSeconds = dedupeSeconds,
-                                cancelNotificationOnSuccess = it,
-                            )
-                        }
+                        onCheckedChange = { onAction(SettingsAction.Save(draft.copy(cancelNotificationOnSuccess = it))) }
                     )
-                    OutlinedTextField(
-                        value = barkServerUrl,
-                        onValueChange = { barkServerUrl = it },
-                        label = { Text(stringResource(R.string.settings_bark_server_url)) },
-                        modifier = Modifier.fillMaxWidth(),
+                    SelectionField(
+                        label = stringResource(R.string.settings_delivery_channel),
+                        value = deliveryChannel.name,
+                        options = deliveryChannelOptions,
+                        onValueSelected = { deliveryChannel = DeliveryChannel.valueOf(it) },
                     )
-                    uiState.validation.barkServerUrlError?.let {
-                        Text(it, color = MaterialTheme.colorScheme.error)
-                    }
-                    OutlinedTextField(
-                        value = barkDeviceKey,
-                        onValueChange = { barkDeviceKey = it },
-                        label = { Text(stringResource(R.string.settings_bark_device_key)) },
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    uiState.validation.barkDeviceKeyError?.let {
-                        Text(it, color = MaterialTheme.colorScheme.error)
-                    }
                 }
             }
         }
@@ -339,109 +337,128 @@ private fun SettingsScreen(
         }
 
         item {
-            ExpandableSection(
-                title = stringResource(R.string.settings_bark_advanced),
-                summary = stringResource(R.string.settings_section_collapsed_hint),
-                initiallyExpanded = false,
-            ) {
-                OutlinedTextField(
-                    value = barkDeviceKeys,
-                    onValueChange = { barkDeviceKeys = it },
-                    label = { Text(stringResource(R.string.settings_bark_device_keys)) },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                SelectionField(
-                    label = stringResource(R.string.settings_bark_level),
-                    value = barkLevel,
-                    options = barkLevelOptions,
-                    onValueSelected = { barkLevel = it },
-                )
-                uiState.validation.barkLevelError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-                OutlinedTextField(
-                    value = barkVolume,
-                    onValueChange = { barkVolume = it },
-                    label = { Text(stringResource(R.string.settings_bark_volume)) },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                uiState.validation.barkVolumeError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-                OutlinedTextField(
-                    value = barkBadge,
-                    onValueChange = { barkBadge = it },
-                    label = { Text(stringResource(R.string.settings_bark_badge)) },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                uiState.validation.barkBadgeError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-                OutlinedTextField(
-                    value = barkCopy,
-                    onValueChange = { barkCopy = it },
-                    label = { Text(stringResource(R.string.settings_bark_copy)) },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                SelectionField(
-                    label = stringResource(R.string.settings_bark_sound),
-                    value = barkSound,
-                    options = barkSoundOptions.withCurrentValue(barkSound),
-                    onValueSelected = { barkSound = it },
-                )
-                OutlinedTextField(
-                    value = barkIcon,
-                    onValueChange = { barkIcon = it },
-                    label = { Text(stringResource(R.string.settings_bark_icon)) },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                uiState.validation.barkIconError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-                OutlinedTextField(
-                    value = barkImage,
-                    onValueChange = { barkImage = it },
-                    label = { Text(stringResource(R.string.settings_bark_image)) },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                uiState.validation.barkImageError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-                SelectionField(
-                    label = stringResource(R.string.settings_bark_group),
-                    value = barkGroupMode.name,
-                    options = barkGroupModeOptions,
-                    onValueSelected = { barkGroupMode = BarkGroupMode.valueOf(it) },
-                )
-                if (barkGroupMode == BarkGroupMode.CUSTOM) {
+            when (deliveryChannel) {
+                DeliveryChannel.BARK -> ExpandableSection(
+                    title = stringResource(R.string.settings_channel_bark),
+                    summary = stringResource(R.string.settings_section_collapsed_hint),
+                    initiallyExpanded = true,
+                ) {
                     OutlinedTextField(
-                        value = barkGroupCustom,
-                        onValueChange = { barkGroupCustom = it },
-                        label = { Text(stringResource(R.string.settings_bark_group_custom)) },
+                        value = barkServerUrl,
+                        onValueChange = { barkServerUrl = it },
+                        label = { Text(stringResource(R.string.settings_bark_server_url)) },
                         modifier = Modifier.fillMaxWidth(),
                     )
+                    uiState.validation.barkServerUrlError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                    OutlinedTextField(
+                        value = barkDeviceKey,
+                        onValueChange = { barkDeviceKey = it },
+                        label = { Text(stringResource(R.string.settings_bark_device_key)) },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    uiState.validation.barkDeviceKeyError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                    OutlinedTextField(
+                        value = barkDeviceKeys,
+                        onValueChange = { barkDeviceKeys = it },
+                        label = { Text(stringResource(R.string.settings_bark_device_keys)) },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    SelectionField(
+                        label = stringResource(R.string.settings_bark_level),
+                        value = barkLevel,
+                        options = barkLevelOptions,
+                        onValueSelected = { barkLevel = it },
+                    )
+                    uiState.validation.barkLevelError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                    OutlinedTextField(value = barkVolume, onValueChange = { barkVolume = it }, label = { Text(stringResource(R.string.settings_bark_volume)) }, modifier = Modifier.fillMaxWidth())
+                    uiState.validation.barkVolumeError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                    OutlinedTextField(value = barkBadge, onValueChange = { barkBadge = it }, label = { Text(stringResource(R.string.settings_bark_badge)) }, modifier = Modifier.fillMaxWidth())
+                    uiState.validation.barkBadgeError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                    OutlinedTextField(value = barkCopy, onValueChange = { barkCopy = it }, label = { Text(stringResource(R.string.settings_bark_copy)) }, modifier = Modifier.fillMaxWidth())
+                    SelectionField(
+                        label = stringResource(R.string.settings_bark_sound),
+                        value = barkSound,
+                        options = barkSoundOptions.withCurrentValue(barkSound),
+                        onValueSelected = { barkSound = it },
+                    )
+                    OutlinedTextField(value = barkIcon, onValueChange = { barkIcon = it }, label = { Text(stringResource(R.string.settings_bark_icon)) }, modifier = Modifier.fillMaxWidth())
+                    uiState.validation.barkIconError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                    OutlinedTextField(value = barkImage, onValueChange = { barkImage = it }, label = { Text(stringResource(R.string.settings_bark_image)) }, modifier = Modifier.fillMaxWidth())
+                    uiState.validation.barkImageError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                    SelectionField(
+                        label = stringResource(R.string.settings_bark_group),
+                        value = barkGroupMode.name,
+                        options = barkGroupModeOptions,
+                        onValueSelected = { barkGroupMode = BarkGroupMode.valueOf(it) },
+                    )
+                    if (barkGroupMode == BarkGroupMode.CUSTOM) {
+                        OutlinedTextField(value = barkGroupCustom, onValueChange = { barkGroupCustom = it }, label = { Text(stringResource(R.string.settings_bark_group_custom)) }, modifier = Modifier.fillMaxWidth())
+                    }
+                    OutlinedTextField(value = barkCiphertext, onValueChange = { barkCiphertext = it }, label = { Text(stringResource(R.string.settings_bark_ciphertext)) }, modifier = Modifier.fillMaxWidth())
+                    OutlinedTextField(value = barkUrl, onValueChange = { barkUrl = it }, label = { Text(stringResource(R.string.settings_bark_jump_url)) }, modifier = Modifier.fillMaxWidth())
+                    uiState.validation.barkUrlError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                    SelectionField(
+                        label = stringResource(R.string.settings_bark_action),
+                        value = barkAction,
+                        options = barkActionOptions,
+                        onValueSelected = { barkAction = it },
+                    )
+                    uiState.validation.barkActionError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                    OutlinedTextField(value = barkNotificationId, onValueChange = { barkNotificationId = it }, label = { Text(stringResource(R.string.settings_bark_notification_id)) }, modifier = Modifier.fillMaxWidth())
+                    SwitchRow(title = stringResource(R.string.settings_bark_call), checked = barkCall, onCheckedChange = { barkCall = it })
+                    SwitchRow(title = stringResource(R.string.settings_bark_auto_copy), checked = barkAutoCopy, onCheckedChange = { barkAutoCopy = it })
+                    SwitchRow(title = stringResource(R.string.settings_bark_markdown), checked = barkUseMarkdown, onCheckedChange = { barkUseMarkdown = it })
+                    SwitchRow(title = stringResource(R.string.settings_bark_archive), checked = barkIsArchive, onCheckedChange = { barkIsArchive = it })
+                    SwitchRow(title = stringResource(R.string.settings_bark_delete), checked = barkDelete, onCheckedChange = { barkDelete = it })
                 }
-                OutlinedTextField(
-                    value = barkCiphertext,
-                    onValueChange = { barkCiphertext = it },
-                    label = { Text(stringResource(R.string.settings_bark_ciphertext)) },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                OutlinedTextField(
-                    value = barkUrl,
-                    onValueChange = { barkUrl = it },
-                    label = { Text(stringResource(R.string.settings_bark_jump_url)) },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                uiState.validation.barkUrlError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-                SelectionField(
-                    label = stringResource(R.string.settings_bark_action),
-                    value = barkAction,
-                    options = barkActionOptions,
-                    onValueSelected = { barkAction = it },
-                )
-                uiState.validation.barkActionError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-                OutlinedTextField(
-                    value = barkNotificationId,
-                    onValueChange = { barkNotificationId = it },
-                    label = { Text(stringResource(R.string.settings_bark_notification_id)) },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                SwitchRow(title = stringResource(R.string.settings_bark_call), checked = barkCall, onCheckedChange = { barkCall = it })
-                SwitchRow(title = stringResource(R.string.settings_bark_auto_copy), checked = barkAutoCopy, onCheckedChange = { barkAutoCopy = it })
-                SwitchRow(title = stringResource(R.string.settings_bark_markdown), checked = barkUseMarkdown, onCheckedChange = { barkUseMarkdown = it })
-                SwitchRow(title = stringResource(R.string.settings_bark_archive), checked = barkIsArchive, onCheckedChange = { barkIsArchive = it })
-                SwitchRow(title = stringResource(R.string.settings_bark_delete), checked = barkDelete, onCheckedChange = { barkDelete = it })
+                DeliveryChannel.TELEGRAM -> ExpandableSection(
+                    title = stringResource(R.string.settings_channel_telegram),
+                    summary = stringResource(R.string.settings_section_collapsed_hint),
+                    initiallyExpanded = true,
+                ) {
+                    OutlinedTextField(value = telegramBotToken, onValueChange = { telegramBotToken = it }, label = { Text(stringResource(R.string.settings_telegram_bot_token)) }, modifier = Modifier.fillMaxWidth())
+                    uiState.validation.telegramBotTokenError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                    OutlinedTextField(value = telegramChatId, onValueChange = { telegramChatId = it }, label = { Text(stringResource(R.string.settings_telegram_chat_id)) }, modifier = Modifier.fillMaxWidth())
+                    uiState.validation.telegramChatIdError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                    OutlinedTextField(value = telegramMessageThreadId, onValueChange = { telegramMessageThreadId = it }, label = { Text(stringResource(R.string.settings_telegram_thread_id)) }, modifier = Modifier.fillMaxWidth())
+                    SwitchRow(title = stringResource(R.string.settings_telegram_disable_notification), checked = telegramDisableNotification, onCheckedChange = { telegramDisableNotification = it })
+                    SwitchRow(title = stringResource(R.string.settings_telegram_markdown), checked = telegramUseMarkdown, onCheckedChange = { telegramUseMarkdown = it })
+                }
+                DeliveryChannel.SLACK -> ExpandableSection(
+                    title = stringResource(R.string.settings_channel_slack),
+                    summary = stringResource(R.string.settings_section_collapsed_hint),
+                    initiallyExpanded = true,
+                ) {
+                    OutlinedTextField(value = slackWebhookUrl, onValueChange = { slackWebhookUrl = it }, label = { Text(stringResource(R.string.settings_slack_webhook_url)) }, modifier = Modifier.fillMaxWidth())
+                    uiState.validation.slackWebhookUrlError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                    OutlinedTextField(value = slackUsername, onValueChange = { slackUsername = it }, label = { Text(stringResource(R.string.settings_slack_username)) }, modifier = Modifier.fillMaxWidth())
+                    OutlinedTextField(value = slackIconEmoji, onValueChange = { slackIconEmoji = it }, label = { Text(stringResource(R.string.settings_slack_icon_emoji)) }, modifier = Modifier.fillMaxWidth())
+                }
+                DeliveryChannel.EMAIL -> ExpandableSection(
+                    title = stringResource(R.string.settings_channel_email),
+                    summary = stringResource(R.string.settings_section_collapsed_hint),
+                    initiallyExpanded = true,
+                ) {
+                    OutlinedTextField(value = emailSmtpHost, onValueChange = { emailSmtpHost = it }, label = { Text(stringResource(R.string.settings_email_smtp_host)) }, modifier = Modifier.fillMaxWidth())
+                    uiState.validation.emailSmtpHostError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                    OutlinedTextField(value = emailSmtpPort, onValueChange = { emailSmtpPort = it }, label = { Text(stringResource(R.string.settings_email_smtp_port)) }, modifier = Modifier.fillMaxWidth())
+                    uiState.validation.emailSmtpPortError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                    SelectionField(
+                        label = stringResource(R.string.settings_email_security_mode),
+                        value = emailSecurityMode.name,
+                        options = emailSecurityOptions,
+                        onValueSelected = { emailSecurityMode = EmailSecurityMode.valueOf(it) },
+                    )
+                    OutlinedTextField(value = emailUsername, onValueChange = { emailUsername = it }, label = { Text(stringResource(R.string.settings_email_username)) }, modifier = Modifier.fillMaxWidth())
+                    uiState.validation.emailUsernameError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                    OutlinedTextField(value = emailPassword, onValueChange = { emailPassword = it }, label = { Text(stringResource(R.string.settings_email_password)) }, modifier = Modifier.fillMaxWidth())
+                    uiState.validation.emailPasswordError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                    OutlinedTextField(value = emailFromAddress, onValueChange = { emailFromAddress = it }, label = { Text(stringResource(R.string.settings_email_from_address)) }, modifier = Modifier.fillMaxWidth())
+                    uiState.validation.emailFromAddressError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                    OutlinedTextField(value = emailToAddress, onValueChange = { emailToAddress = it }, label = { Text(stringResource(R.string.settings_email_to_address)) }, modifier = Modifier.fillMaxWidth())
+                    uiState.validation.emailToAddressError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                    OutlinedTextField(value = emailSubjectPrefix, onValueChange = { emailSubjectPrefix = it }, label = { Text(stringResource(R.string.settings_email_subject_prefix)) }, modifier = Modifier.fillMaxWidth())
+                }
             }
         }
 
@@ -487,74 +504,22 @@ private fun SettingsScreen(
                 SwitchRow(
                     title = stringResource(R.string.settings_exclude_system),
                     checked = uiState.settings.filterRuleSet.excludeSystemNotifications,
-                    onCheckedChange = {
-                        save(
-                            current = uiState.settings,
-                            onAction = onAction,
-                            barkServerUrl = barkServerUrl,
-                            barkDeviceKey = barkDeviceKey,
-                            allowedPackages = allowedPackages,
-                            blockedPackages = blockedPackages,
-                            whitelist = whitelist,
-                            blacklist = blacklist,
-                            dedupeSeconds = dedupeSeconds,
-                            excludeSystem = it,
-                        )
-                    }
+                    onCheckedChange = { onAction(SettingsAction.Save(draft.copy(excludeSystem = it))) }
                 )
                 SwitchRow(
                     title = stringResource(R.string.settings_exclude_ongoing),
                     checked = uiState.settings.filterRuleSet.excludeOngoingNotifications,
-                    onCheckedChange = {
-                        save(
-                            current = uiState.settings,
-                            onAction = onAction,
-                            barkServerUrl = barkServerUrl,
-                            barkDeviceKey = barkDeviceKey,
-                            allowedPackages = allowedPackages,
-                            blockedPackages = blockedPackages,
-                            whitelist = whitelist,
-                            blacklist = blacklist,
-                            dedupeSeconds = dedupeSeconds,
-                            excludeOngoing = it,
-                        )
-                    }
+                    onCheckedChange = { onAction(SettingsAction.Save(draft.copy(excludeOngoing = it))) }
                 )
                 SwitchRow(
                     title = stringResource(R.string.settings_exclude_empty),
                     checked = uiState.settings.filterRuleSet.excludeEmptyTextNotifications,
-                    onCheckedChange = {
-                        save(
-                            current = uiState.settings,
-                            onAction = onAction,
-                            barkServerUrl = barkServerUrl,
-                            barkDeviceKey = barkDeviceKey,
-                            allowedPackages = allowedPackages,
-                            blockedPackages = blockedPackages,
-                            whitelist = whitelist,
-                            blacklist = blacklist,
-                            dedupeSeconds = dedupeSeconds,
-                            excludeEmpty = it,
-                        )
-                    }
+                    onCheckedChange = { onAction(SettingsAction.Save(draft.copy(excludeEmpty = it))) }
                 )
                 SwitchRow(
                     title = stringResource(R.string.settings_auto_retry),
                     checked = uiState.settings.filterRuleSet.autoRetryEnabled,
-                    onCheckedChange = {
-                        save(
-                            current = uiState.settings,
-                            onAction = onAction,
-                            barkServerUrl = barkServerUrl,
-                            barkDeviceKey = barkDeviceKey,
-                            allowedPackages = allowedPackages,
-                            blockedPackages = blockedPackages,
-                            whitelist = whitelist,
-                            blacklist = blacklist,
-                            dedupeSeconds = dedupeSeconds,
-                            autoRetry = it,
-                        )
-                    }
+                    onCheckedChange = { onAction(SettingsAction.Save(draft.copy(autoRetry = it))) }
                 )
             }
         }
@@ -786,83 +751,12 @@ private fun String.asLocalizedOption(): String = when (this) {
     "settings_group_app_at_device" -> stringResource(R.string.settings_group_app_at_device)
     "settings_group_custom" -> stringResource(R.string.settings_group_custom)
     "settings_sound_default" -> stringResource(R.string.settings_sound_default)
+    "settings_channel_bark" -> stringResource(R.string.settings_channel_bark)
+    "settings_channel_telegram" -> stringResource(R.string.settings_channel_telegram)
+    "settings_channel_slack" -> stringResource(R.string.settings_channel_slack)
+    "settings_channel_email" -> stringResource(R.string.settings_channel_email)
+    "settings_email_security_none" -> stringResource(R.string.settings_email_security_none)
+    "settings_email_security_starttls" -> stringResource(R.string.settings_email_security_starttls)
+    "settings_email_security_ssl_tls" -> stringResource(R.string.settings_email_security_ssl_tls)
     else -> this
-}
-
-private fun save(
-    current: AppSettings,
-    onAction: (SettingsAction) -> Unit,
-    barkServerUrl: String,
-    barkDeviceKey: String,
-    barkDeviceKeys: String = current.barkDeviceKeys.joinToString(","),
-    barkLevel: String = current.barkLevel,
-    barkVolume: String = current.barkVolume?.toString().orEmpty(),
-    barkBadge: String = current.barkBadge?.toString().orEmpty(),
-    barkCall: Boolean = current.barkCall,
-    barkAutoCopy: Boolean = current.barkAutoCopy,
-    barkCopy: String = current.barkCopy,
-    barkSound: String = current.barkSound,
-    barkIcon: String = current.barkIcon,
-    barkImage: String = current.barkImage,
-    barkGroupMode: BarkGroupMode = current.barkGroupMode,
-    barkGroupCustom: String = current.barkGroupCustom,
-    barkCiphertext: String = current.barkCiphertext,
-    barkIsArchive: Boolean = current.barkIsArchive ?: true,
-    barkUrl: String = current.barkUrl,
-    barkAction: String = current.barkAction,
-    barkNotificationId: String = current.barkNotificationId,
-    barkDelete: Boolean = current.barkDelete,
-    barkUseMarkdown: Boolean = current.barkUseMarkdown,
-    allowedPackages: String,
-    blockedPackages: String,
-    whitelist: String,
-    blacklist: String,
-    dedupeSeconds: String,
-    forwardingEnabled: Boolean = current.forwardingEnabled,
-    cancelNotificationOnSuccess: Boolean = current.cancelNotificationOnSuccess,
-    filtersEnabled: Boolean = current.filterRuleSet.enabled,
-    excludeSystem: Boolean = current.filterRuleSet.excludeSystemNotifications,
-    excludeOngoing: Boolean = current.filterRuleSet.excludeOngoingNotifications,
-    excludeEmpty: Boolean = current.filterRuleSet.excludeEmptyTextNotifications,
-    autoRetry: Boolean = current.filterRuleSet.autoRetryEnabled,
-) {
-    onAction(
-        SettingsAction.Save(
-            SettingsDraft(
-                forwardingEnabled = forwardingEnabled,
-                cancelNotificationOnSuccess = cancelNotificationOnSuccess,
-                barkServerUrl = barkServerUrl,
-                barkDeviceKey = barkDeviceKey,
-                barkDeviceKeys = barkDeviceKeys,
-                barkLevel = barkLevel,
-                barkVolume = barkVolume,
-                barkBadge = barkBadge,
-                barkCall = barkCall,
-                barkAutoCopy = barkAutoCopy,
-                barkCopy = barkCopy,
-                barkSound = barkSound,
-                barkIcon = barkIcon,
-                barkImage = barkImage,
-                barkGroupMode = barkGroupMode,
-                barkGroupCustom = barkGroupCustom,
-                barkCiphertext = barkCiphertext,
-                barkIsArchive = barkIsArchive,
-                barkUrl = barkUrl,
-                barkAction = barkAction,
-                barkNotificationId = barkNotificationId,
-                barkDelete = barkDelete,
-                barkUseMarkdown = barkUseMarkdown,
-                allowedPackages = allowedPackages,
-                blockedPackages = blockedPackages,
-                keywordWhitelist = whitelist,
-                keywordBlacklist = blacklist,
-                dedupeSeconds = dedupeSeconds,
-                filtersEnabled = filtersEnabled,
-                excludeSystem = excludeSystem,
-                excludeOngoing = excludeOngoing,
-                excludeEmpty = excludeEmpty,
-                autoRetry = autoRetry,
-            )
-        )
-    )
 }

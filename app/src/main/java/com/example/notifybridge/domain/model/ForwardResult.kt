@@ -11,7 +11,9 @@ sealed class ForwardError(
     open val message: String,
     open val retryable: Boolean,
 ) {
-    class EndpointNotConfigured : ForwardError(LocalizedText.endpointNotConfigured(), false)
+    class EndpointNotConfigured(
+        override val message: String = LocalizedText.endpointNotConfigured(),
+    ) : ForwardError(message, false)
     class NetworkUnavailable : ForwardError(LocalizedText.networkUnavailable(), true)
     data class ConnectionFailure(override val message: String) : ForwardError(message, true)
     data class Timeout(override val message: String) : ForwardError(message, true)

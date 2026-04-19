@@ -8,6 +8,8 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.example.notifybridge.domain.model.AppSettings
 import com.example.notifybridge.domain.model.BarkGroupMode
+import com.example.notifybridge.domain.model.DeliveryChannel
+import com.example.notifybridge.domain.model.EmailSecurityMode
 import com.example.notifybridge.domain.model.FilterRuleSet
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
@@ -24,6 +26,7 @@ class SettingsDataStore @Inject constructor(
     private object Keys {
         val forwardingEnabled = booleanPreferencesKey("forwarding_enabled")
         val cancelNotificationOnSuccess = booleanPreferencesKey("cancel_notification_on_success")
+        val deliveryChannel = stringPreferencesKey("delivery_channel")
         val barkServerUrl = stringPreferencesKey("bark_server_url")
         val barkDeviceKey = stringPreferencesKey("bark_device_key")
         val barkDeviceKeys = stringPreferencesKey("bark_device_keys")
@@ -46,6 +49,22 @@ class SettingsDataStore @Inject constructor(
         val barkNotificationId = stringPreferencesKey("bark_notification_id")
         val barkDelete = booleanPreferencesKey("bark_delete")
         val barkUseMarkdown = booleanPreferencesKey("bark_use_markdown")
+        val telegramBotToken = stringPreferencesKey("telegram_bot_token")
+        val telegramChatId = stringPreferencesKey("telegram_chat_id")
+        val telegramMessageThreadId = stringPreferencesKey("telegram_message_thread_id")
+        val telegramDisableNotification = booleanPreferencesKey("telegram_disable_notification")
+        val telegramUseMarkdown = booleanPreferencesKey("telegram_use_markdown")
+        val slackWebhookUrl = stringPreferencesKey("slack_webhook_url")
+        val slackUsername = stringPreferencesKey("slack_username")
+        val slackIconEmoji = stringPreferencesKey("slack_icon_emoji")
+        val emailSmtpHost = stringPreferencesKey("email_smtp_host")
+        val emailSmtpPort = intPreferencesKey("email_smtp_port")
+        val emailSecurityMode = stringPreferencesKey("email_security_mode")
+        val emailUsername = stringPreferencesKey("email_username")
+        val emailPassword = stringPreferencesKey("email_password")
+        val emailFromAddress = stringPreferencesKey("email_from_address")
+        val emailToAddress = stringPreferencesKey("email_to_address")
+        val emailSubjectPrefix = stringPreferencesKey("email_subject_prefix")
         val filtersEnabled = booleanPreferencesKey("filters_enabled")
         val allowedPackages = stringPreferencesKey("allowed_packages")
         val blockedPackages = stringPreferencesKey("blocked_packages")
@@ -68,6 +87,9 @@ class SettingsDataStore @Inject constructor(
         AppSettings(
             forwardingEnabled = prefs[Keys.forwardingEnabled] ?: false,
             cancelNotificationOnSuccess = prefs[Keys.cancelNotificationOnSuccess] ?: false,
+            deliveryChannel = prefs[Keys.deliveryChannel]
+                ?.let { runCatching { DeliveryChannel.valueOf(it) }.getOrNull() }
+                ?: DeliveryChannel.BARK,
             barkServerUrl = prefs[Keys.barkServerUrl] ?: "https://api.day.app",
             barkDeviceKey = prefs[Keys.barkDeviceKey].orEmpty(),
             barkDeviceKeys = prefs[Keys.barkDeviceKeys].toTokenList(),
@@ -89,6 +111,24 @@ class SettingsDataStore @Inject constructor(
             barkNotificationId = prefs[Keys.barkNotificationId].orEmpty(),
             barkDelete = prefs[Keys.barkDelete] ?: false,
             barkUseMarkdown = prefs[Keys.barkUseMarkdown] ?: false,
+            telegramBotToken = prefs[Keys.telegramBotToken].orEmpty(),
+            telegramChatId = prefs[Keys.telegramChatId].orEmpty(),
+            telegramMessageThreadId = prefs[Keys.telegramMessageThreadId].orEmpty(),
+            telegramDisableNotification = prefs[Keys.telegramDisableNotification] ?: false,
+            telegramUseMarkdown = prefs[Keys.telegramUseMarkdown] ?: false,
+            slackWebhookUrl = prefs[Keys.slackWebhookUrl].orEmpty(),
+            slackUsername = prefs[Keys.slackUsername].orEmpty(),
+            slackIconEmoji = prefs[Keys.slackIconEmoji].orEmpty(),
+            emailSmtpHost = prefs[Keys.emailSmtpHost].orEmpty(),
+            emailSmtpPort = prefs[Keys.emailSmtpPort] ?: 587,
+            emailSecurityMode = prefs[Keys.emailSecurityMode]
+                ?.let { runCatching { EmailSecurityMode.valueOf(it) }.getOrNull() }
+                ?: EmailSecurityMode.STARTTLS,
+            emailUsername = prefs[Keys.emailUsername].orEmpty(),
+            emailPassword = prefs[Keys.emailPassword].orEmpty(),
+            emailFromAddress = prefs[Keys.emailFromAddress].orEmpty(),
+            emailToAddress = prefs[Keys.emailToAddress].orEmpty(),
+            emailSubjectPrefix = prefs[Keys.emailSubjectPrefix] ?: "[NotifyBridge]",
             filterRuleSet = FilterRuleSet(
                 enabled = prefs[Keys.filtersEnabled] ?: false,
                 allowedPackages = prefs[Keys.allowedPackages].toTokenSet(),
@@ -110,6 +150,7 @@ class SettingsDataStore @Inject constructor(
         context.settingsDataStore.edit { prefs ->
             prefs[Keys.forwardingEnabled] = settings.forwardingEnabled
             prefs[Keys.cancelNotificationOnSuccess] = settings.cancelNotificationOnSuccess
+            prefs[Keys.deliveryChannel] = settings.deliveryChannel.name
             prefs[Keys.barkServerUrl] = settings.barkServerUrl
             prefs[Keys.barkDeviceKey] = settings.barkDeviceKey
             prefs[Keys.barkDeviceKeys] = settings.barkDeviceKeys.joinToString(",")
@@ -132,6 +173,22 @@ class SettingsDataStore @Inject constructor(
             prefs[Keys.barkNotificationId] = settings.barkNotificationId
             prefs[Keys.barkDelete] = settings.barkDelete
             prefs[Keys.barkUseMarkdown] = settings.barkUseMarkdown
+            prefs[Keys.telegramBotToken] = settings.telegramBotToken
+            prefs[Keys.telegramChatId] = settings.telegramChatId
+            prefs[Keys.telegramMessageThreadId] = settings.telegramMessageThreadId
+            prefs[Keys.telegramDisableNotification] = settings.telegramDisableNotification
+            prefs[Keys.telegramUseMarkdown] = settings.telegramUseMarkdown
+            prefs[Keys.slackWebhookUrl] = settings.slackWebhookUrl
+            prefs[Keys.slackUsername] = settings.slackUsername
+            prefs[Keys.slackIconEmoji] = settings.slackIconEmoji
+            prefs[Keys.emailSmtpHost] = settings.emailSmtpHost
+            prefs[Keys.emailSmtpPort] = settings.emailSmtpPort
+            prefs[Keys.emailSecurityMode] = settings.emailSecurityMode.name
+            prefs[Keys.emailUsername] = settings.emailUsername
+            prefs[Keys.emailPassword] = settings.emailPassword
+            prefs[Keys.emailFromAddress] = settings.emailFromAddress
+            prefs[Keys.emailToAddress] = settings.emailToAddress
+            prefs[Keys.emailSubjectPrefix] = settings.emailSubjectPrefix
             prefs[Keys.filtersEnabled] = settings.filterRuleSet.enabled
             prefs[Keys.allowedPackages] = settings.filterRuleSet.allowedPackages.joinToString(",")
             prefs[Keys.blockedPackages] = settings.filterRuleSet.blockedPackages.joinToString(",")
