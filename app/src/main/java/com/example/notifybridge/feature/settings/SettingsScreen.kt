@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -194,6 +195,8 @@ private fun SettingsScreen(
         mutableStateOf(uiState.settings.filterRuleSet.dedupeWindowSeconds.toString())
     }
     var appSearchQuery by rememberSaveable { mutableStateOf("") }
+    var appRulesExpanded by rememberSaveable { mutableStateOf(false) }
+    var appVisibleCount by rememberSaveable { mutableStateOf(40) }
 
     val allowedPackageSet = remember(allowedPackages) { allowedPackages.splitToSet() }
     val blockedPackageSet = remember(blockedPackages) { blockedPackages.splitToSet() }
@@ -208,6 +211,7 @@ private fun SettingsScreen(
             }
         }
     }
+    val visibleApps = remember(filteredApps, appVisibleCount) { filteredApps.take(appVisibleCount) }
     val draft = SettingsDraft(
         forwardingEnabled = uiState.settings.forwardingEnabled,
         cancelNotificationOnSuccess = uiState.settings.cancelNotificationOnSuccess,
@@ -304,41 +308,82 @@ private fun SettingsScreen(
         }
 
         item {
-            ExpandableSection(
-                title = stringResource(R.string.settings_app_rules),
-                summary = stringResource(
-                    R.string.settings_app_rules_summary,
-                    allowedPackageSet.size,
-                    blockedPackageSet.size,
-                ),
-                initiallyExpanded = false,
-            ) {
-                OutlinedTextField(
-                    value = appSearchQuery,
-                    onValueChange = { appSearchQuery = it },
-                    label = { Text(stringResource(R.string.settings_app_search)) },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                Text(
-                    text = stringResource(R.string.settings_app_search_result, filteredApps.size),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                filteredApps.forEach { app ->
-                    AppRuleCard(
-                        app = app,
-                        mode = app.forwardMode(allowedPackageSet, blockedPackageSet),
-                        onModeSelected = { mode ->
-                            val (updatedAllowed, updatedBlocked) = updatePackageFilters(
-                                packageName = app.packageName,
-                                mode = mode,
-                                allowedPackages = allowedPackages,
-                                blockedPackages = blockedPackages,
+            Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp)) {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { appRulesExpanded = !appRulesExpanded },
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text(stringResource(R.string.settings_app_rules), style = MaterialTheme.typography.titleMedium)
+                            Text(
+                                text = stringResource(
+                                    R.string.settings_app_rules_summary,
+                                    allowedPackageSet.size,
+                                    blockedPackageSet.size,
+                                ),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
-                            allowedPackages = updatedAllowed
-                            blockedPackages = updatedBlocked
-                        },
-                    )
+                        }
+                        Text(
+                            text = stringResource(
+                                if (appRulesExpanded) R.string.settings_section_collapse else R.string.settings_section_expand
+                            ),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                    AnimatedVisibility(appRulesExpanded) {
+                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            OutlinedTextField(
+                                value = appSearchQuery,
+                                onValueChange = {
+                                    appSearchQuery = it
+                                    appVisibleCount = 40
+                                },
+                                label = { Text(stringResource(R.string.settings_app_search)) },
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                            Text(
+                                text = stringResource(R.string.settings_app_search_result, filteredApps.size),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        if (appRulesExpanded) {
+            items(visibleApps, key = { it.packageName }) { app ->
+                AppRuleCard(
+                    app = app,
+                    mode = app.forwardMode(allowedPackageSet, blockedPackageSet),
+                    onModeSelected = { mode ->
+                        val (updatedAllowed, updatedBlocked) = updatePackageFilters(
+                            packageName = app.packageName,
+                            mode = mode,
+                            allowedPackages = allowedPackages,
+                            blockedPackages = blockedPackages,
+                        )
+                        allowedPackages = updatedAllowed
+                        blockedPackages = updatedBlocked
+                    },
+                )
+            }
+            if (visibleApps.size < filteredApps.size) {
+                item {
+                    Button(
+                        onClick = { appVisibleCount += 40 },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(stringResource(R.string.settings_app_load_more, visibleApps.size, filteredApps.size))
+                    }
                 }
             }
         }

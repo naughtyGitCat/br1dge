@@ -154,6 +154,7 @@
     <string name="settings_app_rules_summary">Forward: %1$d | Block: %2$d</string>
     <string name="settings_app_search">Search installed apps</string>
     <string name="settings_app_search_result">Visible apps: %1$d</string>
+    <string name="settings_app_load_more">Load more apps (%1$d/%2$d)</string>
     <string name="settings_app_mode_forward">Forward</string>
     <string name="settings_app_mode_block">Do not forward</string>
     <string name="settings_app_mode_default">Default</string>

@@ -154,6 +154,7 @@
     <string name="settings_app_rules_summary">允许转发：%1$d | 禁止转发：%2$d</string>
     <string name="settings_app_search">搜索已安装应用</string>
     <string name="settings_app_search_result">当前显示应用：%1$d</string>
+    <string name="settings_app_load_more">加载更多应用（%1$d/%2$d）</string>
     <string name="settings_app_mode_forward">转发</string>
     <string name="settings_app_mode_block">不转发</string>
     <string name="settings_app_mode_default">默认</string>
