@@ -77,6 +77,8 @@ app/src/main/java/com/example/notifybridge
 - Google Play 上架整改清单：`docs/GOOGLE_PLAY_RELEASE_CHECKLIST.md`
 - Play 签名配置说明：`docs/PLAY_SIGNING.md`
 - Play Data safety 草稿：`docs/GOOGLE_PLAY_DATA_SAFETY_NOTES.md`
+- Play 商店文案草稿：`docs/PLAY_STORE_LISTING.md`
+- Play Console 字段清单：`docs/PLAY_CONSOLE_FIELD_CHECKLIST.md`
 - 隐私政策正式文案：`docs/PRIVACY_POLICY.md`
 - 隐私政策网页文件：`docs/privacy-policy.html`
 - 隐私政策模板：`docs/PRIVACY_POLICY_TEMPLATE.md`
