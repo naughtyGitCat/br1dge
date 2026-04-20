@@ -9,7 +9,7 @@ This file is a ready-to-use draft for the main store listing of NotifyBridge.
 - Category suggestion: `Tools`
 - Contact email: `psyduck007@outlook.com`
 - Website: `https://blog.ngcat.uk/`
-- Privacy policy URL: `https://naughtygitcat.github.io/br1dge/privacy-policy.html`
+- Privacy policy URL: `https://blog.ngcat.uk/privacy-policy.html`
 
 ## Short description
 

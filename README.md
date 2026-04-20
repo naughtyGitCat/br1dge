@@ -85,8 +85,8 @@ app/src/main/java/com/example/notifybridge
 
 GitHub Pages 公开地址约定：
 
-- 首页：`https://naughtygitcat.github.io/br1dge/`
-- 隐私政策：`https://naughtygitcat.github.io/br1dge/privacy-policy.html`
+- 首页：`https://blog.ngcat.uk/`
+- 隐私政策：`https://blog.ngcat.uk/privacy-policy.html`
 
 仓库内已经包含 GitHub Pages 工作流：`.github/workflows/deploy-pages.yml`
 
