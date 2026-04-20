@@ -1,5 +1,10 @@
 # NotifyBridge Privacy Policy Template
 
+This file is now superseded by:
+
+- `docs/PRIVACY_POLICY.md`
+- `docs/privacy-policy.html`
+
 This template is intended to be published at a public HTTPS URL before distributing NotifyBridge on Google Play.
 
 ## 1. Who operates the app

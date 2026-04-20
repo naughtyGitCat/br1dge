@@ -75,6 +75,8 @@ app/src/main/java/com/example/notifybridge
 ## 上架准备
 
 - Google Play 上架整改清单：`docs/GOOGLE_PLAY_RELEASE_CHECKLIST.md`
+- 隐私政策正式文案：`docs/PRIVACY_POLICY.md`
+- 隐私政策网页文件：`docs/privacy-policy.html`
 - 隐私政策模板：`docs/PRIVACY_POLICY_TEMPLATE.md`
 
 当前工程已经包含：

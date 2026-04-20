@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NotifyBridge Privacy Policy</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --bg: #f5f3ee;
+            --surface: #fffdf8;
+            --border: #ddd6c8;
+            --text: #1d2b2b;
+            --muted: #5a6765;
+            --accent: #1f6b68;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", "PingFang SC", "Noto Sans", sans-serif;
+            background: linear-gradient(180deg, #f6f1e8 0%, var(--bg) 100%);
+            color: var(--text);
+            line-height: 1.65;
+        }
+
+        main {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 40px 20px 72px;
+        }
+
+        header {
+            margin-bottom: 28px;
+        }
+
+        h1, h2 {
+            line-height: 1.25;
+            margin: 0 0 12px;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+        }
+
+        h2 {
+            font-size: 1.25rem;
+            margin-top: 28px;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 22px 24px;
+            margin-top: 18px;
+            box-shadow: 0 8px 32px rgba(31, 43, 43, 0.06);
+        }
+
+        p, ul {
+            margin: 0 0 12px;
+        }
+
+        ul {
+            padding-left: 22px;
+        }
+
+        .meta {
+            color: var(--muted);
+            margin-top: 8px;
+        }
+
+        a {
+            color: var(--accent);
+        }
+    </style>
+</head>
+<body>
+<main>
+    <header>
+        <h1>NotifyBridge Privacy Policy</h1>
+        <p class="meta">Publisher: ngcat</p>
+        <p class="meta">Effective date: 2026-04-20</p>
+        <p class="meta">Contact: <a href="mailto:psyduck007@outlook.com">psyduck007@outlook.com</a></p>
+        <p class="meta">Website: <a href="https://blog.ngcat.uk/">https://blog.ngcat.uk/</a></p>
+    </header>
+
+    <section class="card">
+        <h2>1. What NotifyBridge does</h2>
+        <p>NotifyBridge is an Android application that listens to notifications only after the user explicitly grants Android Notification Access permission. The app can filter notifications and forward selected notification content to a destination chosen by the user, such as Bark, Telegram, Slack, or Email.</p>
+    </section>
+
+    <section class="card">
+        <h2>2. Data processed by the app</h2>
+        <p>Depending on user settings, NotifyBridge may process the following categories of data on the device:</p>
+        <ul>
+            <li>Notification source app name and package name</li>
+            <li>Notification title, body text, and subtext</li>
+            <li>Notification timestamps and delivery metadata</li>
+            <li>Device model and Android version</li>
+            <li>Installed app names and package names for app-based forwarding rules</li>
+            <li>User-provided delivery configuration such as webhook URLs, bot tokens, or SMTP settings</li>
+        </ul>
+    </section>
+
+    <section class="card">
+        <h2>3. Why the data is processed</h2>
+        <ul>
+            <li>To decide which notifications should be forwarded</li>
+            <li>To show local delivery logs, retry state, and diagnostic information on the device</li>
+            <li>To send selected notifications to the delivery channel configured by the user</li>
+        </ul>
+    </section>
+
+    <section class="card">
+        <h2>4. Data sharing</h2>
+        <p>When forwarding is enabled, NotifyBridge transmits selected notification data to the third-party service chosen by the user. Depending on configuration, this may include:</p>
+        <ul>
+            <li>Bark servers</li>
+            <li>Telegram Bot API</li>
+            <li>Slack Incoming Webhooks</li>
+            <li>SMTP email providers</li>
+        </ul>
+        <p>Those third parties process data under their own privacy policies and terms.</p>
+    </section>
+
+    <section class="card">
+        <h2>5. Local storage</h2>
+        <p>NotifyBridge stores settings, delivery logs, and retry queue records locally on the user’s device. Credentials used for automation, such as channel tokens, webhook URLs, or SMTP settings, may also be stored locally on the device to enable forwarding.</p>
+    </section>
+
+    <section class="card">
+        <h2>6. Data retention</h2>
+        <p>Local logs and queued delivery records remain on the device until they are cleared by the user, overwritten by later cleanup behavior in the app, or removed when the app is uninstalled. Forwarded data retained by Bark, Telegram, Slack, email providers, or any self-hosted endpoint is controlled by those services and not by ngcat.</p>
+    </section>
+
+    <section class="card">
+        <h2>7. Security</h2>
+        <p>NotifyBridge uses Android platform APIs and network libraries to process and transmit data. When a configured endpoint supports HTTPS or TLS, the app can use encrypted transport. Some user-configured self-hosted endpoints may use HTTP or other settings chosen by the user. Users are responsible for the security of third-party services and endpoints they configure.</p>
+        <p>At the time of this policy, sensitive channel configuration remains stored locally on-device for automation purposes. Users should secure their device and avoid entering credentials for services they do not trust on that device.</p>
+    </section>
+
+    <section class="card">
+        <h2>8. User choices and control</h2>
+        <ul>
+            <li>Enable or disable forwarding at any time</li>
+            <li>Revoke Notification Access in Android settings</li>
+            <li>Remove configured channel credentials</li>
+            <li>Clear local logs and exported debug files</li>
+            <li>Uninstall the app to remove locally stored app data, subject to Android backup behavior</li>
+        </ul>
+    </section>
+
+    <section class="card">
+        <h2>9. Children</h2>
+        <p>NotifyBridge is not designed for children. The app should only be used by people who understand the consequences of forwarding notification content to external services.</p>
+    </section>
+
+    <section class="card">
+        <h2>10. Changes to this policy</h2>
+        <p>This policy may be updated as NotifyBridge changes. The latest version should be published at the same public URL used for the Google Play listing.</p>
+    </section>
+
+    <section class="card">
+        <h2>11. Contact</h2>
+        <p>If you have privacy questions about NotifyBridge, contact ngcat at <a href="mailto:psyduck007@outlook.com">psyduck007@outlook.com</a>.</p>
+    </section>
+</main>
+</body>
+</html>
