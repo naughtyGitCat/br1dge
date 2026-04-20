@@ -75,6 +75,8 @@ app/src/main/java/com/example/notifybridge
 ## 上架准备
 
 - Google Play 上架整改清单：`docs/GOOGLE_PLAY_RELEASE_CHECKLIST.md`
+- Play 签名配置说明：`docs/PLAY_SIGNING.md`
+- Play Data safety 草稿：`docs/GOOGLE_PLAY_DATA_SAFETY_NOTES.md`
 - 隐私政策正式文案：`docs/PRIVACY_POLICY.md`
 - 隐私政策网页文件：`docs/privacy-policy.html`
 - 隐私政策模板：`docs/PRIVACY_POLICY_TEMPLATE.md`
@@ -94,7 +96,6 @@ GitHub Pages 公开地址约定：
 
 正式上架前仍建议补齐：
 
-- 公开 HTTPS 隐私政策 URL
 - Release AAB 签名与 Play App Signing
 - 面向公开版的网络安全策略审查
 

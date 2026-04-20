@@ -1,3 +1,6 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -5,6 +8,29 @@ plugins {
     id("org.jetbrains.kotlin.kapt")
     id("com.google.dagger.hilt.android")
 }
+
+val signingProperties = Properties().apply {
+    val candidate = rootProject.file("keystore.properties")
+    if (candidate.exists()) {
+        FileInputStream(candidate).use { load(it) }
+    }
+}
+
+fun resolveSigningValue(propertyKey: String, envKey: String): String? {
+    return (signingProperties.getProperty(propertyKey) ?: System.getenv(envKey))
+        ?.takeIf { it.isNotBlank() }
+}
+
+val uploadStoreFile = resolveSigningValue("storeFile", "NB_UPLOAD_STORE_FILE")
+val uploadStorePassword = resolveSigningValue("storePassword", "NB_UPLOAD_STORE_PASSWORD")
+val uploadKeyAlias = resolveSigningValue("keyAlias", "NB_UPLOAD_KEY_ALIAS")
+val uploadKeyPassword = resolveSigningValue("keyPassword", "NB_UPLOAD_KEY_PASSWORD")
+
+val hasReleaseSigning =
+    !uploadStoreFile.isNullOrBlank() &&
+        !uploadStorePassword.isNullOrBlank() &&
+        !uploadKeyAlias.isNullOrBlank() &&
+        !uploadKeyPassword.isNullOrBlank()
 
 android {
     namespace = "uk.deprecated.notifybridge"
@@ -23,9 +49,23 @@ android {
         }
     }
 
+    signingConfigs {
+        if (hasReleaseSigning) {
+            create("release") {
+                storeFile = file(requireNotNull(uploadStoreFile))
+                storePassword = requireNotNull(uploadStorePassword)
+                keyAlias = requireNotNull(uploadKeyAlias)
+                keyPassword = requireNotNull(uploadKeyPassword)
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
+            if (hasReleaseSigning) {
+                signingConfig = signingConfigs.getByName("release")
+            }
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
