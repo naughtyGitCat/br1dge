@@ -95,9 +95,15 @@ GitHub Pages 公开地址约定：
 正式上架前仍建议补齐：
 
 - 公开 HTTPS 隐私政策 URL
-- 加密存储渠道密钥与 SMTP 凭据
 - Release AAB 签名与 Play App Signing
 - 面向公开版的网络安全策略审查
+
+当前版本已将以下敏感配置迁移到本地加密存储：
+
+- Bark Device Key / Device Keys
+- Telegram Bot Token
+- Slack Webhook URL
+- SMTP 用户名 / SMTP 密码
 
 ## 如何授予通知访问权限
 

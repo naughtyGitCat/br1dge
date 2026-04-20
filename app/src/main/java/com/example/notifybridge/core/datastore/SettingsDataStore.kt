@@ -22,9 +22,12 @@ private val Context.settingsDataStore by preferencesDataStore(name = "notifybrid
 @Singleton
 class SettingsDataStore @Inject constructor(
     @ApplicationContext private val context: Context,
+    private val secureSettingsStore: SecureSettingsStore,
 ) {
     private object Keys {
         val prominentDisclosureAccepted = booleanPreferencesKey("prominent_disclosure_accepted")
+        val secureSettingsMigrated = booleanPreferencesKey("secure_settings_migrated")
+        val secureSettingsVersion = intPreferencesKey("secure_settings_version")
         val forwardingEnabled = booleanPreferencesKey("forwarding_enabled")
         val cancelNotificationOnSuccess = booleanPreferencesKey("cancel_notification_on_success")
         val preventChannelLoop = booleanPreferencesKey("prevent_channel_loop")
@@ -82,6 +85,7 @@ class SettingsDataStore @Inject constructor(
     }
 
     fun observeSettings(): Flow<AppSettings> = context.settingsDataStore.data.map { prefs ->
+        val secureSnapshot = ensureSecureSettingsMigrated(prefs)
         val legacyGroup = prefs[Keys.barkGroup].orEmpty()
         val barkGroupMode = prefs[Keys.barkGroupMode]
             ?.let { runCatching { BarkGroupMode.valueOf(it) }.getOrNull() }
@@ -95,8 +99,8 @@ class SettingsDataStore @Inject constructor(
                 ?.let { runCatching { DeliveryChannel.valueOf(it) }.getOrNull() }
                 ?: DeliveryChannel.BARK,
             barkServerUrl = prefs[Keys.barkServerUrl] ?: "https://api.day.app",
-            barkDeviceKey = prefs[Keys.barkDeviceKey].orEmpty(),
-            barkDeviceKeys = prefs[Keys.barkDeviceKeys].toTokenList(),
+            barkDeviceKey = secureSnapshot.barkDeviceKey,
+            barkDeviceKeys = secureSnapshot.barkDeviceKeys,
             barkLevel = prefs[Keys.barkLevel] ?: "active",
             barkVolume = prefs[Keys.barkVolume],
             barkBadge = prefs[Keys.barkBadge],
@@ -115,12 +119,12 @@ class SettingsDataStore @Inject constructor(
             barkNotificationId = prefs[Keys.barkNotificationId].orEmpty(),
             barkDelete = prefs[Keys.barkDelete] ?: false,
             barkUseMarkdown = prefs[Keys.barkUseMarkdown] ?: false,
-            telegramBotToken = prefs[Keys.telegramBotToken].orEmpty(),
+            telegramBotToken = secureSnapshot.telegramBotToken,
             telegramChatId = prefs[Keys.telegramChatId].orEmpty(),
             telegramMessageThreadId = prefs[Keys.telegramMessageThreadId].orEmpty(),
             telegramDisableNotification = prefs[Keys.telegramDisableNotification] ?: false,
             telegramUseMarkdown = prefs[Keys.telegramUseMarkdown] ?: false,
-            slackWebhookUrl = prefs[Keys.slackWebhookUrl].orEmpty(),
+            slackWebhookUrl = secureSnapshot.slackWebhookUrl,
             slackUsername = prefs[Keys.slackUsername].orEmpty(),
             slackIconEmoji = prefs[Keys.slackIconEmoji].orEmpty(),
             emailSmtpHost = prefs[Keys.emailSmtpHost].orEmpty(),
@@ -128,8 +132,8 @@ class SettingsDataStore @Inject constructor(
             emailSecurityMode = prefs[Keys.emailSecurityMode]
                 ?.let { runCatching { EmailSecurityMode.valueOf(it) }.getOrNull() }
                 ?: EmailSecurityMode.STARTTLS,
-            emailUsername = prefs[Keys.emailUsername].orEmpty(),
-            emailPassword = prefs[Keys.emailPassword].orEmpty(),
+            emailUsername = secureSnapshot.emailUsername,
+            emailPassword = secureSnapshot.emailPassword,
             emailFromAddress = prefs[Keys.emailFromAddress].orEmpty(),
             emailToAddress = prefs[Keys.emailToAddress].orEmpty(),
             emailSubjectPrefix = prefs[Keys.emailSubjectPrefix] ?: "[NotifyBridge]",
@@ -151,15 +155,27 @@ class SettingsDataStore @Inject constructor(
     }
 
     suspend fun updateSettings(settings: AppSettings) {
+        secureSettingsStore.update(
+            SecureSettingsSnapshot(
+                barkDeviceKey = settings.barkDeviceKey,
+                barkDeviceKeys = settings.barkDeviceKeys,
+                telegramBotToken = settings.telegramBotToken,
+                slackWebhookUrl = settings.slackWebhookUrl,
+                emailUsername = settings.emailUsername,
+                emailPassword = settings.emailPassword,
+            ),
+        )
         context.settingsDataStore.edit { prefs ->
             prefs[Keys.prominentDisclosureAccepted] = settings.prominentDisclosureAccepted
+            prefs[Keys.secureSettingsMigrated] = true
+            prefs[Keys.secureSettingsVersion] = (prefs[Keys.secureSettingsVersion] ?: 0) + 1
             prefs[Keys.forwardingEnabled] = settings.forwardingEnabled
             prefs[Keys.cancelNotificationOnSuccess] = settings.cancelNotificationOnSuccess
             prefs[Keys.preventChannelLoop] = settings.preventChannelLoop
             prefs[Keys.deliveryChannel] = settings.deliveryChannel.name
             prefs[Keys.barkServerUrl] = settings.barkServerUrl
-            prefs[Keys.barkDeviceKey] = settings.barkDeviceKey
-            prefs[Keys.barkDeviceKeys] = settings.barkDeviceKeys.joinToString(",")
+            prefs.remove(Keys.barkDeviceKey)
+            prefs.remove(Keys.barkDeviceKeys)
             prefs[Keys.barkLevel] = settings.barkLevel
             settings.barkVolume?.let { prefs[Keys.barkVolume] = it } ?: prefs.remove(Keys.barkVolume)
             settings.barkBadge?.let { prefs[Keys.barkBadge] = it } ?: prefs.remove(Keys.barkBadge)
@@ -179,19 +195,19 @@ class SettingsDataStore @Inject constructor(
             prefs[Keys.barkNotificationId] = settings.barkNotificationId
             prefs[Keys.barkDelete] = settings.barkDelete
             prefs[Keys.barkUseMarkdown] = settings.barkUseMarkdown
-            prefs[Keys.telegramBotToken] = settings.telegramBotToken
+            prefs.remove(Keys.telegramBotToken)
             prefs[Keys.telegramChatId] = settings.telegramChatId
             prefs[Keys.telegramMessageThreadId] = settings.telegramMessageThreadId
             prefs[Keys.telegramDisableNotification] = settings.telegramDisableNotification
             prefs[Keys.telegramUseMarkdown] = settings.telegramUseMarkdown
-            prefs[Keys.slackWebhookUrl] = settings.slackWebhookUrl
+            prefs.remove(Keys.slackWebhookUrl)
             prefs[Keys.slackUsername] = settings.slackUsername
             prefs[Keys.slackIconEmoji] = settings.slackIconEmoji
             prefs[Keys.emailSmtpHost] = settings.emailSmtpHost
             prefs[Keys.emailSmtpPort] = settings.emailSmtpPort
             prefs[Keys.emailSecurityMode] = settings.emailSecurityMode.name
-            prefs[Keys.emailUsername] = settings.emailUsername
-            prefs[Keys.emailPassword] = settings.emailPassword
+            prefs.remove(Keys.emailUsername)
+            prefs.remove(Keys.emailPassword)
             prefs[Keys.emailFromAddress] = settings.emailFromAddress
             prefs[Keys.emailToAddress] = settings.emailToAddress
             prefs[Keys.emailSubjectPrefix] = settings.emailSubjectPrefix
@@ -208,6 +224,36 @@ class SettingsDataStore @Inject constructor(
             prefs[Keys.connectTimeoutSeconds] = settings.connectTimeoutSeconds
             prefs[Keys.readTimeoutSeconds] = settings.readTimeoutSeconds
         }
+    }
+
+    private suspend fun ensureSecureSettingsMigrated(
+        prefs: androidx.datastore.preferences.core.Preferences,
+    ): SecureSettingsSnapshot {
+        val alreadyMigrated = prefs[Keys.secureSettingsMigrated] ?: false
+        if (alreadyMigrated) {
+            return secureSettingsStore.snapshot()
+        }
+
+        val migratedSnapshot = SecureSettingsSnapshot(
+            barkDeviceKey = prefs[Keys.barkDeviceKey].orEmpty(),
+            barkDeviceKeys = prefs[Keys.barkDeviceKeys].toTokenList(),
+            telegramBotToken = prefs[Keys.telegramBotToken].orEmpty(),
+            slackWebhookUrl = prefs[Keys.slackWebhookUrl].orEmpty(),
+            emailUsername = prefs[Keys.emailUsername].orEmpty(),
+            emailPassword = prefs[Keys.emailPassword].orEmpty(),
+        )
+        secureSettingsStore.update(migratedSnapshot)
+        context.settingsDataStore.edit { editable ->
+            editable[Keys.secureSettingsMigrated] = true
+            editable[Keys.secureSettingsVersion] = (editable[Keys.secureSettingsVersion] ?: 0) + 1
+            editable.remove(Keys.barkDeviceKey)
+            editable.remove(Keys.barkDeviceKeys)
+            editable.remove(Keys.telegramBotToken)
+            editable.remove(Keys.slackWebhookUrl)
+            editable.remove(Keys.emailUsername)
+            editable.remove(Keys.emailPassword)
+        }
+        return migratedSnapshot
     }
 }
 

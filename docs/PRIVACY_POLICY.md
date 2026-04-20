@@ -39,7 +39,7 @@ Those third parties process data under their own privacy policies and terms.
 
 ## 5. Local storage
 
-NotifyBridge stores settings, delivery logs, and retry queue records locally on the user’s device. Credentials used for automation, such as channel tokens, webhook URLs, or SMTP settings, may also be stored locally on the device to enable forwarding.
+NotifyBridge stores settings, delivery logs, and retry queue records locally on the user’s device. Credentials used for automation, such as channel tokens, webhook URLs, or SMTP settings, may also be stored locally on the device in encrypted local storage to enable forwarding.
 
 ## 6. Data retention
 
@@ -49,7 +49,7 @@ Local logs and queued delivery records remain on the device until they are clear
 
 NotifyBridge uses Android platform APIs and network libraries to process and transmit data. When a configured endpoint supports HTTPS or TLS, the app can use encrypted transport. Some user-configured self-hosted endpoints may use HTTP or other settings chosen by the user. Users are responsible for the security of third-party services and endpoints they configure.
 
-At the time of this policy, sensitive channel configuration remains stored locally on-device for automation purposes. Users should secure their device and avoid entering credentials for services they do not trust on that device.
+Sensitive channel configuration is stored locally on-device in encrypted local storage for automation purposes. Users should still secure their device and avoid entering credentials for services they do not trust on that device.
 
 ## 8. User choices and control
 
