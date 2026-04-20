@@ -79,6 +79,13 @@ app/src/main/java/com/example/notifybridge
 - 隐私政策网页文件：`docs/privacy-policy.html`
 - 隐私政策模板：`docs/PRIVACY_POLICY_TEMPLATE.md`
 
+GitHub Pages 公开地址约定：
+
+- 首页：`https://naughtygitcat.github.io/br1dge/`
+- 隐私政策：`https://naughtygitcat.github.io/br1dge/privacy-policy.html`
+
+仓库内已经包含 GitHub Pages 工作流：`.github/workflows/deploy-pages.yml`
+
 当前工程已经包含：
 
 - 首启显著披露与同意
