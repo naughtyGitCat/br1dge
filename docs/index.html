@@ -3,35 +3,263 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>NotifyBridge Docs</title>
-    <meta http-equiv="refresh" content="0; url=./privacy-policy.html" />
+    <title>ngcat</title>
+    <meta name="description" content="ngcat builds small, practical tools. NotifyBridge is an Android notification forwarding app for Bark, Telegram, Slack, and Email." />
     <style>
+        :root {
+            color-scheme: light;
+            --bg: #f5f3ee;
+            --surface: rgba(255, 253, 248, 0.84);
+            --border: rgba(148, 155, 153, 0.22);
+            --text: #1d2b2b;
+            --muted: #5c6665;
+            --accent: #1f6b68;
+            --accent-strong: #16504d;
+            --shadow: 0 18px 54px rgba(23, 33, 33, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
             min-height: 100vh;
-            display: grid;
-            place-items: center;
-            background: #f5f3ee;
-            color: #1d2b2b;
             font-family: "Segoe UI", "PingFang SC", "Noto Sans", sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(31, 107, 104, 0.12), transparent 34%),
+                radial-gradient(circle at top right, rgba(230, 140, 68, 0.14), transparent 28%),
+                linear-gradient(180deg, #faf5ec 0%, var(--bg) 100%);
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                linear-gradient(rgba(29, 43, 43, 0.035) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(29, 43, 43, 0.035) 1px, transparent 1px);
+            background-size: 28px 28px;
+            mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.36), transparent 88%);
         }
 
         main {
-            max-width: 640px;
-            padding: 32px;
-            text-align: center;
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 72px 20px 88px;
+            position: relative;
+            z-index: 1;
         }
 
-        a {
-            color: #1f6b68;
+        .hero {
+            display: grid;
+            gap: 24px;
+            grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.9fr);
+            align-items: stretch;
+        }
+
+        .panel {
+            background: var(--surface);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+        }
+
+        .intro {
+            padding: 34px 34px 38px;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: rgba(31, 107, 104, 0.08);
+            color: var(--accent-strong);
+            font-size: 0.92rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+
+        h1 {
+            margin: 22px 0 14px;
+            font-size: clamp(2.6rem, 5vw, 4.3rem);
+            line-height: 0.98;
+            letter-spacing: -0.04em;
+        }
+
+        .lede {
+            margin: 0;
+            max-width: 38rem;
+            color: var(--muted);
+            font-size: 1.05rem;
+            line-height: 1.8;
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-top: 28px;
+        }
+
+        .button,
+        .link-card {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .button {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            min-height: 48px;
+            padding: 0 18px;
+            border-radius: 14px;
+            font-weight: 600;
+            transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+        }
+
+        .button.primary {
+            background: var(--accent);
+            color: #fefbf6;
+            box-shadow: 0 12px 28px rgba(31, 107, 104, 0.24);
+        }
+
+        .button.secondary {
+            background: rgba(31, 107, 104, 0.08);
+            color: var(--accent-strong);
+        }
+
+        .button:hover,
+        .button:focus-visible,
+        .link-card:hover,
+        .link-card:focus-visible {
+            transform: translateY(-2px);
+        }
+
+        .side {
+            padding: 22px;
+            display: grid;
+            gap: 14px;
+        }
+
+        .link-card {
+            display: block;
+            padding: 18px 18px 20px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.58);
+            border: 1px solid rgba(148, 155, 153, 0.18);
+            transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
+        }
+
+        .link-card strong {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        .link-card span {
+            color: var(--muted);
+            line-height: 1.65;
+            font-size: 0.95rem;
+        }
+
+        .section {
+            margin-top: 24px;
+            padding: 24px;
+        }
+
+        .section h2 {
+            margin: 0 0 10px;
+            font-size: 1.1rem;
+        }
+
+        .section p {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.75;
+        }
+
+        footer {
+            margin-top: 20px;
+            padding: 0 6px;
+            color: var(--muted);
+            font-size: 0.94rem;
+        }
+
+        footer a {
+            color: var(--accent);
+        }
+
+        @media (max-width: 860px) {
+            main {
+                padding-top: 32px;
+            }
+
+            .hero {
+                grid-template-columns: 1fr;
+            }
+
+            .intro {
+                padding: 28px 24px 30px;
+            }
         }
     </style>
 </head>
 <body>
 <main>
-    <h1>NotifyBridge Docs</h1>
-    <p>Redirecting to the privacy policy…</p>
-    <p>If you are not redirected automatically, open <a href="./privacy-policy.html">privacy-policy.html</a>.</p>
+    <section class="hero">
+        <article class="panel intro">
+            <div class="eyebrow">ngcat • practical software</div>
+            <h1>Small tools, built to stay useful.</h1>
+            <p class="lede">
+                This space is the public home for ngcat projects. Right now the main release is
+                <strong>NotifyBridge</strong>, an Android notification forwarding app that helps route
+                selected notifications to Bark, Telegram, Slack, or Email with local logging, retry,
+                and filtering support.
+            </p>
+            <div class="actions">
+                <a class="button primary" href="https://github.com/naughtyGitCat/br1dge">View on GitHub</a>
+                <a class="button secondary" href="./privacy-policy.html">Privacy policy</a>
+            </div>
+        </article>
+
+        <aside class="panel side" aria-label="Project links">
+            <a class="link-card" href="https://github.com/naughtyGitCat/br1dge">
+                <strong>NotifyBridge</strong>
+                <span>Android-native notification forwarding with filters, queueing, retries, and multiple delivery channels.</span>
+            </a>
+            <a class="link-card" href="./privacy-policy.html">
+                <strong>Privacy policy</strong>
+                <span>Public policy page prepared for Google Play listing and user-facing disclosure requirements.</span>
+            </a>
+            <a class="link-card" href="mailto:psyduck007@outlook.com">
+                <strong>Contact</strong>
+                <span>Reach ngcat by email for product questions, Play listing support, or privacy inquiries.</span>
+            </a>
+        </aside>
+    </section>
+
+    <section class="panel section">
+        <h2>What is this site for?</h2>
+        <p>
+            It keeps the public essentials in one place: a clean landing page, project links, and a stable
+            privacy policy URL for distribution channels such as Google Play. The goal is simple, readable,
+            and easy to maintain without turning this into a full blog or CMS.
+        </p>
+    </section>
+
+    <footer>
+        <p>
+            Published by ngcat. Contact:
+            <a href="mailto:psyduck007@outlook.com">psyduck007@outlook.com</a>
+        </p>
+    </footer>
 </main>
 </body>
 </html>
