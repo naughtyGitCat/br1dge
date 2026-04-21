@@ -3,7 +3,7 @@
 Publisher: ngcat  
 Effective date: 2026-04-20  
 Contact: psyduck007@outlook.com  
-Website: https://blog.ngcat.uk/
+Website: https://ngcat.uk/
 
 ## 1. What NotifyBridge does
 
@@ -65,7 +65,7 @@ NotifyBridge is not designed for children. The app should only be used by people
 
 ## 10. Changes to this policy
 
-This policy may be updated as NotifyBridge changes. The latest version should be published at https://blog.ngcat.uk/privacy-policy.html or the latest public URL used for the Google Play listing.
+This policy may be updated as NotifyBridge changes. The latest version should be published at https://ngcat.uk/privacy-policy.html or the latest public URL used for the Google Play listing.
 
 ## 11. Contact
 

@@ -13,7 +13,7 @@ Use this when filling the first Play Console draft.
 - Contact email
 - Website
 - Privacy policy URL
-  - `https://blog.ngcat.uk/privacy-policy.html`
+  - `https://ngcat.uk/privacy-policy.html`
 
 ## App content
 
