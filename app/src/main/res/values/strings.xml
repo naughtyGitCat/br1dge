@@ -202,6 +202,8 @@
     <string name="settings_testing">Testing…</string>
     <string name="settings_clear_logs">Clear logs</string>
     <string name="settings_export_debug">Export debug</string>
+    <string name="settings_export_backup">Export settings</string>
+    <string name="settings_import_backup">Import settings</string>
     <string name="settings_open_privacy_policy">Open privacy policy</string>
     <string name="settings_testing_message">Requesting Bark with current draft…</string>
     <string name="settings_connectivity_result">Connectivity result: %1$s</string>
@@ -222,6 +224,10 @@
     <string name="settings_msg_test_failed">Test send failed: %1$s</string>
     <string name="settings_msg_logs_cleared">Logs cleared</string>
     <string name="settings_msg_debug_exported">Debug snapshot exported</string>
+    <string name="settings_msg_backup_exported">Settings backup exported</string>
+    <string name="settings_msg_backup_export_failed">Settings backup failed: %1$s</string>
+    <string name="settings_msg_backup_imported">Settings imported</string>
+    <string name="settings_msg_backup_import_failed">Settings import failed: %1$s</string>
     <string name="settings_error_server_empty">Bark Server URL is required</string>
     <string name="settings_error_server_invalid">Please enter a valid Bark Server URL</string>
     <string name="settings_error_device_key_required">At least one of Bark Device Key or Device Keys is required</string>

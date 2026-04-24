@@ -202,6 +202,8 @@
     <string name="settings_testing">测试中...</string>
     <string name="settings_clear_logs">清空日志</string>
     <string name="settings_export_debug">导出调试信息</string>
+    <string name="settings_export_backup">导出设置</string>
+    <string name="settings_import_backup">导入设置</string>
     <string name="settings_open_privacy_policy">查看隐私政策</string>
     <string name="settings_testing_message">正在请求当前表单配置对应的 Bark 接口...</string>
     <string name="settings_connectivity_result">连通性结果：%1$s</string>
@@ -222,6 +224,10 @@
     <string name="settings_msg_test_failed">测试发送失败：%1$s</string>
     <string name="settings_msg_logs_cleared">日志已清空</string>
     <string name="settings_msg_debug_exported">调试信息已导出</string>
+    <string name="settings_msg_backup_exported">设置备份已导出</string>
+    <string name="settings_msg_backup_export_failed">设置备份失败：%1$s</string>
+    <string name="settings_msg_backup_imported">设置已导入</string>
+    <string name="settings_msg_backup_import_failed">设置导入失败：%1$s</string>
     <string name="settings_error_server_empty">Bark Server URL 不能为空</string>
     <string name="settings_error_server_invalid">请输入有效的 Bark Server URL</string>
     <string name="settings_error_device_key_required">Bark Device Key 或 Device Keys 至少填写一个</string>

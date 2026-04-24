@@ -2,6 +2,7 @@ package com.example.notifybridge.feature.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import android.net.Uri
 import uk.ngcat.notifybridge.R
 import com.example.notifybridge.core.common.StringsProvider
 import com.example.notifybridge.domain.model.AppSettings
@@ -17,6 +18,7 @@ import com.example.notifybridge.domain.usecase.UpdateSettingsUseCase
 import com.example.notifybridge.system.util.DebugExportManager
 import com.example.notifybridge.system.util.InstalledAppInfo
 import com.example.notifybridge.system.util.InstalledAppsProvider
+import com.example.notifybridge.system.util.SettingsBackupManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
@@ -32,6 +34,8 @@ import javax.inject.Inject
 sealed class SettingsAction {
     data class Save(val draft: SettingsDraft) : SettingsAction()
     data class TestSend(val draft: SettingsDraft) : SettingsAction()
+    data class ExportSettingsBackup(val uri: Uri) : SettingsAction()
+    data class ImportSettingsBackup(val uri: Uri) : SettingsAction()
     data object ClearLogs : SettingsAction()
     data object ExportDebug : SettingsAction()
 }
@@ -153,12 +157,13 @@ data class SettingsUiState(
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    settingsRepository: SettingsRepository,
+    private val settingsRepository: SettingsRepository,
     private val stringsProvider: StringsProvider,
     private val updateSettingsUseCase: UpdateSettingsUseCase,
     private val forwardRepository: ForwardRepository,
     private val deliveryLogRepository: DeliveryLogRepository,
     private val debugExportManager: DebugExportManager,
+    private val settingsBackupManager: SettingsBackupManager,
     private val installedAppsProvider: InstalledAppsProvider,
 ) : ViewModel() {
 
@@ -240,6 +245,37 @@ class SettingsViewModel @Inject constructor(
                         }
                     }
                     ephemeralState.value = ephemeralState.value.copy(message = message)
+                }
+                is SettingsAction.ExportSettingsBackup -> {
+                    runCatching {
+                        withContext(Dispatchers.IO) {
+                            settingsBackupManager.exportToUri(action.uri, settingsRepository.getSettings())
+                        }
+                    }.onSuccess {
+                        ephemeralState.value = ephemeralState.value.copy(
+                            message = stringsProvider.get(R.string.settings_msg_backup_exported),
+                        )
+                    }.onFailure { throwable ->
+                        ephemeralState.value = ephemeralState.value.copy(
+                            message = stringsProvider.get(R.string.settings_msg_backup_export_failed, throwable.message.orEmpty()),
+                        )
+                    }
+                }
+                is SettingsAction.ImportSettingsBackup -> {
+                    runCatching {
+                        withContext(Dispatchers.IO) {
+                            settingsBackupManager.importFromUri(action.uri)
+                        }
+                    }.onSuccess { imported ->
+                        updateSettingsUseCase(imported)
+                        ephemeralState.value = ephemeralState.value.copy(
+                            message = stringsProvider.get(R.string.settings_msg_backup_imported),
+                        )
+                    }.onFailure { throwable ->
+                        ephemeralState.value = ephemeralState.value.copy(
+                            message = stringsProvider.get(R.string.settings_msg_backup_import_failed, throwable.message.orEmpty()),
+                        )
+                    }
                 }
                 SettingsAction.ClearLogs -> {
                     deliveryLogRepository.clearLogs()

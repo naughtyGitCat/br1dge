@@ -1,5 +1,7 @@
 package com.example.notifybridge.feature.settings
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -144,6 +146,17 @@ private fun SettingsScreen(
     onAction: (SettingsAction) -> Unit,
     onOpenPrivacyPolicy: () -> Unit,
 ) {
+    val exportSettingsLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/json"),
+    ) { uri ->
+        uri?.let { onAction(SettingsAction.ExportSettingsBackup(it)) }
+    }
+    val importSettingsLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument(),
+    ) { uri ->
+        uri?.let { onAction(SettingsAction.ImportSettingsBackup(it)) }
+    }
+
     var deliveryChannel by remember(uiState.settings.deliveryChannel) { mutableStateOf(uiState.settings.deliveryChannel) }
     var preventChannelLoop by remember(uiState.settings.preventChannelLoop) { mutableStateOf(uiState.settings.preventChannelLoop) }
     var barkServerUrl by remember(uiState.settings.barkServerUrl) { mutableStateOf(uiState.settings.barkServerUrl) }
@@ -608,6 +621,20 @@ private fun SettingsScreen(
                     }
                     Button(onClick = { onAction(SettingsAction.ExportDebug) }, modifier = Modifier.weight(1f)) {
                         Text(stringResource(R.string.settings_export_debug))
+                    }
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                    OutlinedButton(
+                        onClick = { exportSettingsLauncher.launch("notifybridge-settings-backup.json") },
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        Text(stringResource(R.string.settings_export_backup))
+                    }
+                    OutlinedButton(
+                        onClick = { importSettingsLauncher.launch(arrayOf("application/json", "text/*", "*/*")) },
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        Text(stringResource(R.string.settings_import_backup))
                     }
                 }
                 OutlinedButton(

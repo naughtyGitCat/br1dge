@@ -32,16 +32,18 @@ val hasReleaseSigning =
         !uploadKeyAlias.isNullOrBlank() &&
         !uploadKeyPassword.isNullOrBlank()
 
+val applicationIdOverride = providers.gradleProperty("applicationIdOverride").orNull
+
 android {
     namespace = "uk.ngcat.notifybridge"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "uk.ngcat.notifybridge"
+        applicationId = applicationIdOverride ?: "uk.ngcat.notifybridge"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 2
+        versionName = "0.1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
