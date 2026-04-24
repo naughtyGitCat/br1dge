@@ -26,7 +26,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import uk.deprecated.notifybridge.R
+import uk.ngcat.notifybridge.R
 import com.example.notifybridge.core.ui.NotifyBridgeTheme
 import com.example.notifybridge.feature.dashboard.DashboardScreenRoute
 import com.example.notifybridge.feature.detail.LogDetailScreenRoute

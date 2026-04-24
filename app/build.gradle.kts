@@ -33,11 +33,11 @@ val hasReleaseSigning =
         !uploadKeyPassword.isNullOrBlank()
 
 android {
-    namespace = "uk.deprecated.notifybridge"
+    namespace = "uk.ngcat.notifybridge"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "uk.deprecated.notifybridge"
+        applicationId = "uk.ngcat.notifybridge"
         minSdk = 26
         targetSdk = 35
         versionCode = 1

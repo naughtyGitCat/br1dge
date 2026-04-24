@@ -44,18 +44,18 @@ For Google Play Console:
 
 - Minimum Android version: 8.0 (API 26)
 - Target Android version: API 35
-- Package name: `uk.deprecated.notifybridge`
+- Package name: `uk.ngcat.notifybridge`
 - If you are installing manually, Android may ask you to allow installs from unknown sources
 - If you are not sure which APK to use, choose `app-universal-release.apk`
 
 ## SHA-256 checksums
 
 ```text
-app-universal-release.apk  5675dcb15138f56afa8f0151125e63be0184eea5ff6b6a7270aed50ca07cce07
-app-arm64-v8a-release.apk  b5956f74fbf734c282fef6fa593a966ca50d2da257abe6e522a2059ed55655ab
-app-armeabi-v7a-release.apk  85bb4f88ac52e0f7507a61c16c2c0fe6cde2108fbe743a38727998364c421abe
-app-x86_64-release.apk  91528099ab364bc26357d5c1bb109b3ed31a4b5787d7ef0bbb2be55a764cd57d
-app-release.aab  ae268cf33555475f14433e008dc11f112fa936796190f7c80ff968fbdb08ae4c
+app-universal-release.apk  38101efd82482f14f1dd5af1e1d8b290b317a6a9f53e8fc00b19c9c343196d4d
+app-arm64-v8a-release.apk  518257420db7a08833f8e2b29fd2c0b02e2f6134e72e5f0a45877034fc5615b9
+app-armeabi-v7a-release.apk  2d41ee16e098ef8cb8422b8484121bf6fc142bfc784b0fc7ce5b7d0911f15372
+app-x86_64-release.apk  4361f4e051d43ba756db0bc1295605c9e2fcd0029478f8b13d0d5be68fd4d6ce
+app-release.aab  b026f23fc6e2c122aafa255bfc0218656356c7807c778fd1394ef662e9240a34
 ```
 
 ## Links

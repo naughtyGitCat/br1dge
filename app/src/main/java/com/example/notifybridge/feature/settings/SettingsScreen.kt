@@ -44,7 +44,7 @@ import com.example.notifybridge.domain.model.BarkGroupMode
 import com.example.notifybridge.domain.model.DeliveryChannel
 import com.example.notifybridge.domain.model.EmailSecurityMode
 import com.example.notifybridge.system.util.InstalledAppInfo
-import uk.deprecated.notifybridge.R
+import uk.ngcat.notifybridge.R
 
 private const val BarkSoundDefaultValue = ""
 

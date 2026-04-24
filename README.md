@@ -69,7 +69,7 @@ app/src/main/java/com/example/notifybridge
 
 - `minSdk = 26`
 - `targetSdk = 35`
-- 包名：`uk.deprecated.notifybridge`
+- 包名：`uk.ngcat.notifybridge`
 - 语言：默认跟随系统语言，当前提供 `中文(简体)` 与 `English`
 
 ## 上架准备

@@ -23,7 +23,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import uk.deprecated.notifybridge.R
+import uk.ngcat.notifybridge.R
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale

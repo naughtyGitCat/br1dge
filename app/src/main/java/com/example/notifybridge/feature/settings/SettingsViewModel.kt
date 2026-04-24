@@ -2,7 +2,7 @@ package com.example.notifybridge.feature.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import uk.deprecated.notifybridge.R
+import uk.ngcat.notifybridge.R
 import com.example.notifybridge.core.common.StringsProvider
 import com.example.notifybridge.domain.model.AppSettings
 import com.example.notifybridge.domain.model.BarkGroupMode

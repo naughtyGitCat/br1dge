@@ -2,7 +2,7 @@ package com.example.notifybridge.feature.dashboard
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import uk.deprecated.notifybridge.R
+import uk.ngcat.notifybridge.R
 import com.example.notifybridge.core.common.StringsProvider
 import com.example.notifybridge.domain.model.DashboardState
 import com.example.notifybridge.domain.usecase.GetDashboardStateUseCase

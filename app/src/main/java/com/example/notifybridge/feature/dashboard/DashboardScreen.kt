@@ -25,7 +25,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import uk.deprecated.notifybridge.R
+import uk.ngcat.notifybridge.R
 import com.example.notifybridge.core.common.NotifyBridgeStrings
 import java.text.SimpleDateFormat
 import java.util.Date
