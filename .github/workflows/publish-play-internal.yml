@@ -1,0 +1,67 @@
+name: Publish Play Internal Test
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  publish-internal:
+    runs-on: ubuntu-latest
+    env:
+      NB_UPLOAD_STORE_B64: ${{ secrets.NB_UPLOAD_STORE_B64 }}
+      NB_UPLOAD_STORE_PASSWORD: ${{ secrets.NB_UPLOAD_STORE_PASSWORD }}
+      NB_UPLOAD_KEY_ALIAS: ${{ secrets.NB_UPLOAD_KEY_ALIAS }}
+      NB_UPLOAD_KEY_PASSWORD: ${{ secrets.NB_UPLOAD_KEY_PASSWORD }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Create local.properties
+        run: echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
+
+      - name: Decode upload keystore
+        run: |
+          test -n "$NB_UPLOAD_STORE_B64"
+          echo "$NB_UPLOAD_STORE_B64" | base64 --decode > "$RUNNER_TEMP/notifybridge-upload.jks"
+
+      - name: Export signing environment
+        run: |
+          echo "NB_UPLOAD_STORE_FILE=$RUNNER_TEMP/notifybridge-upload.jks" >> "$GITHUB_ENV"
+          echo "NB_UPLOAD_STORE_PASSWORD=$NB_UPLOAD_STORE_PASSWORD" >> "$GITHUB_ENV"
+          echo "NB_UPLOAD_KEY_ALIAS=$NB_UPLOAD_KEY_ALIAS" >> "$GITHUB_ENV"
+          echo "NB_UPLOAD_KEY_PASSWORD=$NB_UPLOAD_KEY_PASSWORD" >> "$GITHUB_ENV"
+
+      - name: Build signed release bundle
+        run: ./gradlew :app:bundleRelease
+
+      - name: Upload bundle to Play internal testing
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: uk.ngcat.notifybridge
+          releaseFiles: app/build/outputs/bundle/release/app-release.aab
+          track: internal
+          status: completed
+          whatsNewDirectory: distribution/whatsnew
+
+      - name: Upload AAB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: notifybridge-play-internal-aab
+          path: app/build/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
