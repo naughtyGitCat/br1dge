@@ -2,6 +2,8 @@
 
 本项目通过 GitHub Actions 自动构建 signed AAB，并上传到 Google Play Internal testing。
 
+当前 Play 应用仍处于 draft app 状态时，Google Play API 只允许创建 draft release。工作流会先上传为 draft internal release；进入 Play Console 检查无误后，再手动确认发布。等应用完成首次审核/状态不再是 draft 后，可以把 workflow 中的 `status: draft` 改成 `status: completed`，实现更完整的自动发版。
+
 ## 触发方式
 
 - 手动触发：GitHub 仓库 -> Actions -> `Publish Play Internal Test` -> `Run workflow`
@@ -47,3 +49,4 @@ Google 官方文档：
 - 每次上传到 Play 的 `versionCode` 必须递增。
 - 第一次启用 API 或新增 service account 权限后，Google Play 可能需要几分钟到数小时生效。
 - 如果开启 Managed publishing，API 可以上传内测 release，但部分“最终发布/上线”动作可能仍需要在 Play Console 里确认。
+- 如果 Play 返回 `Only releases with status draft may be created on draft app.`，说明应用仍是 draft app，保持 `status: draft` 并在 Play Console 里完成最终确认即可。
