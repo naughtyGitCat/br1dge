@@ -1,5 +1,8 @@
 # NotifyBridge
 
+🎉 **We are currently recruiting testers for Google Play Closed Testing!**  
+If you are interested in trying out NotifyBridge and can stay opted-in for 14 days, please fill out our **[Tester Sign-up Form](https://docs.google.com/forms/d/e/1FAIpQLSdyP3E1yqCJkDBVwevcdNBb15eKCqJSRg7wBc3F_D7vPAu5eg/viewform)**.
+
 NotifyBridge 是一个 Android 原生通知转发桥接应用。它通过 `NotificationListenerService` 监听设备收到的系统通知，将符合规则的通知入库、写入 Outbox，再通过 `WorkManager` 异步转发到 Bark、Telegram、Slack 或 Email。
 
 ## 总体方案
