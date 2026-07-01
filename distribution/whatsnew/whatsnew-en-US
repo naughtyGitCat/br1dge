@@ -1,3 +1,3 @@
-Settings backup and restore.
+App filter now lists all your installed apps.
 
-You can now export and import NotifyBridge settings from the Settings screen.
+Fixed an issue on Android 11 and newer where the app filter could not show or find installed apps such as Bilibili.

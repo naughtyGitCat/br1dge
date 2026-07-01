@@ -8,6 +8,16 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 
+    <!-- Android 11+ package visibility: without this, app-list queries only return self and
+         default-visible packages, so the app-filter picker cannot see third-party apps.
+         LAUNCHER covers all user-launchable apps (e.g. Bilibili). Avoids QUERY_ALL_PACKAGES. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
+    </queries>
+
     <application
         android:name="com.example.notifybridge.app.NotifyBridgeApplication"
         android:allowBackup="true"
