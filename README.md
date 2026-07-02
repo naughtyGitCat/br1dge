@@ -1,9 +1,27 @@
 # NotifyBridge
 
-🎉 **We are currently recruiting testers for Google Play Closed Testing!**  
-If you are interested in trying out NotifyBridge and can stay opted-in for 14 days, please fill out our **[Tester Sign-up Form](https://docs.google.com/forms/d/e/1FAIpQLSdyP3E1yqCJkDBVwevcdNBb15eKCqJSRg7wBc3F_D7vPAu5eg/viewform)**.
+> 🎉 **正在招募 Google Play 闭测测试者 · Recruiting testers for Google Play Closed Testing!**
+>
+> **自助加入 / Self-serve (~1 min):**
+> 1. 加入测试者群组 · Join the tester group: <https://groups.google.com/g/notifybridge-testers>
+> 2. 在 Google Play 加入测试 · Opt in on Google Play: <https://play.google.com/apps/testing/uk.ngcat.notifybridge>
+> 3. 安装后请保持 opt-in 至少 14 天 · Please stay opted in for at least 14 days
+>
+> 也可以填写[报名 / 反馈表单 · sign-up / feedback form](https://forms.gle/efAdc7BtDn4zTxWh8)（可留下你的 App 互测链接 · reciprocal testing welcome）。
 
 NotifyBridge 是一个 Android 原生通知转发桥接应用。它通过 `NotificationListenerService` 监听设备收到的系统通知，将符合规则的通知入库、写入 Outbox，再通过 `WorkManager` 异步转发到 Bark、Telegram、Slack 或 Email。
+
+## 功能特性
+
+- **多渠道转发**：Bark、Telegram、Slack、Email（一次启用一个渠道）
+- **精细过滤**：按应用白/黑名单、关键词白/黑名单、排除系统/常驻/空正文通知
+- **去重**：可配置时间窗口内的重复通知去重
+- **可靠投递**：Outbox + `WorkManager` 异步重试，支持网络约束、指数退避、重启恢复
+- **投递日志**：本地记录事件、状态、错误详情与重试状态，支持在应用内查看
+- **防回环**：可选忽略当前转发渠道自身的通知（Telegram / Slack）
+- **隐私优先**：默认不启用转发；首启显著披露；日志与设置仅存本地；敏感渠道配置本地加密存储
+- **本地化**：跟随系统语言，内置 `中文(简体)` 与 `English`
+- **无常驻前台服务**：不常驻通知，减少系统限制
 
 ## 总体方案
 
@@ -64,9 +82,10 @@ app/src/main/java/com/example/notifybridge
 4. 首次运行后进入应用首页与设置页完成授权和转发渠道配置。
 5. 首次进入应用时，会先看到显著披露与隐私政策入口；同意后才会请求通知权限并进入主界面。
 
-命令行构建：
+命令行构建（需 JDK 17；Gradle 8.7 不支持更高版本的 JDK）：
 
 - `./gradlew :app:assembleDebug`
+- 如系统默认 JDK 版本过高，可临时指定：`JAVA_HOME=/path/to/jdk-17 ./gradlew :app:assembleDebug`
 
 当前配置：
 
