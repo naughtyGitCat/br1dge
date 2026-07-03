@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -27,32 +28,39 @@ fun PrivacyDisclosureScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(24.dp),
+            .safeDrawingPadding()
+            .padding(horizontal = 24.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Text(
-            text = stringResource(R.string.privacy_disclosure_title),
-            style = MaterialTheme.typography.headlineSmall,
-        )
-        Text(
-            text = stringResource(R.string.privacy_disclosure_body),
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Card(modifier = Modifier.fillMaxWidth()) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                Text(
-                    text = stringResource(R.string.privacy_disclosure_points_title),
-                    style = MaterialTheme.typography.titleMedium,
-                )
-                PolicyBullet(text = stringResource(R.string.privacy_disclosure_point_notifications))
-                PolicyBullet(text = stringResource(R.string.privacy_disclosure_point_apps))
-                PolicyBullet(text = stringResource(R.string.privacy_disclosure_point_transfer))
-                PolicyBullet(text = stringResource(R.string.privacy_disclosure_point_control))
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.privacy_disclosure_title),
+                style = MaterialTheme.typography.headlineSmall,
+            )
+            Text(
+                text = stringResource(R.string.privacy_disclosure_body),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Text(
+                        text = stringResource(R.string.privacy_disclosure_points_title),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    PolicyBullet(text = stringResource(R.string.privacy_disclosure_point_notifications))
+                    PolicyBullet(text = stringResource(R.string.privacy_disclosure_point_apps))
+                    PolicyBullet(text = stringResource(R.string.privacy_disclosure_point_transfer))
+                    PolicyBullet(text = stringResource(R.string.privacy_disclosure_point_control))
+                }
             }
         }
         OutlinedButton(

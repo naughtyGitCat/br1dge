@@ -603,6 +603,7 @@ private fun SettingsScreen(
                 summary = uiState.message ?: stringResource(R.string.settings_actions_summary),
                 initiallyExpanded = true,
             ) {
+                val channelConfigured = draft.hasRequiredChannelFields()
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
                     Button(onClick = { onAction(SettingsAction.Save(draft)) }, modifier = Modifier.weight(1f)) {
                         Text(stringResource(R.string.settings_save))
@@ -610,10 +611,21 @@ private fun SettingsScreen(
                     Button(
                         onClick = { onAction(SettingsAction.TestSend(draft)) },
                         modifier = Modifier.weight(1f),
-                        enabled = uiState.testSendState !is TestSendState.Running,
+                        enabled = channelConfigured && uiState.testSendState !is TestSendState.Running,
                     ) {
                         Text(stringResource(if (uiState.testSendState is TestSendState.Running) R.string.settings_testing else R.string.settings_test_send))
                     }
+                }
+                if (!channelConfigured) {
+                    val channelLabel = deliveryChannelOptions
+                        .first { it.first == deliveryChannel.name }
+                        .second
+                        .asLocalizedOption()
+                    Text(
+                        text = stringResource(R.string.settings_test_send_requires_channel, channelLabel),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
                     Button(onClick = { onAction(SettingsAction.ClearLogs) }, modifier = Modifier.weight(1f)) {
@@ -830,6 +842,22 @@ private fun String.splitToSet(): Set<String> = split(",")
     .map { it.trim() }
     .filter { it.isNotEmpty() }
     .toSet()
+
+// Presence-only gate for Test send; format checks still run in SettingsViewModel.validate().
+private fun SettingsDraft.hasRequiredChannelFields(): Boolean = when (deliveryChannel) {
+    DeliveryChannel.BARK ->
+        barkServerUrl.isNotBlank() && (barkDeviceKey.isNotBlank() || barkDeviceKeys.splitToSet().isNotEmpty())
+    DeliveryChannel.TELEGRAM ->
+        telegramBotToken.isNotBlank() && telegramChatId.isNotBlank()
+    DeliveryChannel.SLACK ->
+        slackWebhookUrl.isNotBlank()
+    DeliveryChannel.EMAIL ->
+        emailSmtpHost.isNotBlank() &&
+            emailUsername.isNotBlank() &&
+            emailPassword.isNotBlank() &&
+            emailFromAddress.isNotBlank() &&
+            emailToAddress.isNotBlank()
+}
 
 private fun List<Pair<String, String>>.withCurrentValue(current: String): List<Pair<String, String>> {
     if (current.isBlank() || any { it.first == current }) return this

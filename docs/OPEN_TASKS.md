@@ -143,6 +143,14 @@ Verify: confirm on an Android 11+ device the picker currently lists very few app
 
 Files: `app/src/main/AndroidManifest.xml`, `app/src/main/java/com/example/notifybridge/system/util/InstalledAppsProvider.kt`, `app/src/main/java/com/example/notifybridge/feature/settings/SettingsScreen.kt` (search ~lines 220-230) and `SettingsViewModel.kt`.
 
+### 12. Tester feedback round 1 (2026-07-03, reciprocal tester on a Samsung-style device)
+
+Status: DONE — both fixes shipped in 0.1.3 (versionCode 4): consent screen made scrollable with a pinned agree button (PrivacyScreens.kt + safeDrawing insets), and Test send gated behind per-channel required fields with a localized hint. Reported by the first external closed tester; both acknowledged with the tester.
+
+1. BUG — first-run disclosure/consent screen cannot scroll to the bottom on some devices (screenshot shows top text clipped and the tester says "can't scroll more"; the agree button was still reachable but cramped). Check the consent screen's scroll container / insets / small-screen + large-font behavior.
+2. UX — tester tapped "Test send" right after granting notification access, with no delivery channel configured, and read the failure as a bug. The settings screen does show "Please fix invalid settings first", but the expectation gap is real. Consider: disable Test send until the active channel validates, and/or a first-run pointer that a channel must be configured before anything can be sent.
+   - FIXED in working tree (2026-07-03, not yet committed): Test send is now disabled while the active channel's required fields are blank (`SettingsDraft.hasRequiredChannelFields()` in `SettingsScreen.kt`), with a localized inline hint (en + zh-CN, `settings_test_send_requires_channel`) naming the channel and pointing to the channel section above. Format validation still runs on tap via `SettingsViewModel.validate()`.
+
 ## Lower Priority
 
 ### 8. Polish public download page

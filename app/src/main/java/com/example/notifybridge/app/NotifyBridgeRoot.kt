@@ -1,7 +1,10 @@
 package com.example.notifybridge.app
 
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.List
 import androidx.compose.material.icons.outlined.Dashboard
@@ -57,7 +60,7 @@ fun NotifyBridgeRoot(
             var showPolicy by rememberSaveable { mutableStateOf(false) }
             if (showPolicy) {
                 PrivacyPolicyScreenRoute(
-                    contentPadding = PaddingValues(),
+                    contentPadding = WindowInsets.safeDrawing.asPaddingValues(),
                     onBack = { showPolicy = false },
                 )
             } else {

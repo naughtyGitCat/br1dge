@@ -1,3 +1,4 @@
-App filter now lists all your installed apps.
+Fixes from tester feedback — thank you!
 
-Fixed an issue on Android 11 and newer where the app filter could not show or find installed apps such as Bilibili.
+- The first-run consent screen now scrolls correctly on small screens, and the agree button is always visible.
+- "Test send" now explains that a delivery channel must be configured first, instead of failing silently.

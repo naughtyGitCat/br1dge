@@ -200,6 +200,7 @@
     <string name="settings_save">Save</string>
     <string name="settings_test_send">Test send</string>
     <string name="settings_testing">Testing…</string>
+    <string name="settings_test_send_requires_channel">To send a test, first configure the %1$s channel: fill in its required fields in the channel section above.</string>
     <string name="settings_clear_logs">Clear logs</string>
     <string name="settings_export_debug">Export debug</string>
     <string name="settings_export_backup">Export settings</string>

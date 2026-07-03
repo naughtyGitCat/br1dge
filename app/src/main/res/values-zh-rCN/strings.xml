@@ -200,6 +200,7 @@
     <string name="settings_save">保存设置</string>
     <string name="settings_test_send">测试发送</string>
     <string name="settings_testing">测试中...</string>
+    <string name="settings_test_send_requires_channel">发送测试前请先配置 %1$s 渠道：在上方渠道设置中填写必填项。</string>
     <string name="settings_clear_logs">清空日志</string>
     <string name="settings_export_debug">导出调试信息</string>
     <string name="settings_export_backup">导出设置</string>
