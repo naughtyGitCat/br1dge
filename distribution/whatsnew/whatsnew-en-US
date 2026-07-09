@@ -1,4 +1,3 @@
 Fixes from tester feedback — thank you!
 
-- The first-run consent screen now scrolls correctly on small screens, and the agree button is always visible.
-- "Test send" now explains that a delivery channel must be configured first, instead of failing silently.
+- Fixed the layout mirroring on right-to-left / non-Latin device locales (e.g. Arabic): the interface now always displays left-to-right, so toggles and text line up correctly.

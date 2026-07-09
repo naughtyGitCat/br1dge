@@ -15,12 +15,15 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -54,33 +57,38 @@ fun NotifyBridgeRoot(
     onRequestNotificationPermission: () -> Unit = {},
 ) {
     NotifyBridgeTheme {
-        val privacyViewModel: PrivacyViewModel = hiltViewModel()
-        val privacyState by privacyViewModel.uiState.collectAsStateWithLifecycle()
-        if (!privacyState.prominentDisclosureAccepted) {
-            var showPolicy by rememberSaveable { mutableStateOf(false) }
-            if (showPolicy) {
-                PrivacyPolicyScreenRoute(
-                    contentPadding = WindowInsets.safeDrawing.asPaddingValues(),
-                    onBack = { showPolicy = false },
-                )
-            } else {
-                PrivacyDisclosureScreen(
-                    onAccept = {
-                        privacyViewModel.acceptDisclosure()
-                        onRequestNotificationPermission()
-                    },
-                    onOpenPrivacyPolicy = { showPolicy = true },
-                )
-            }
-        } else {
-            val navController = rememberNavController()
-            Scaffold(
-                modifier = Modifier.fillMaxSize(),
-                bottomBar = {
-                    BottomBar(navController)
+        // The app only ships English and Chinese strings — neither is an RTL language — so
+        // Compose's automatic locale-based RTL mirroring can only ever break the layout on
+        // RTL-locale devices (e.g. Arabic). Force LTR globally for every surface.
+        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+            val privacyViewModel: PrivacyViewModel = hiltViewModel()
+            val privacyState by privacyViewModel.uiState.collectAsStateWithLifecycle()
+            if (!privacyState.prominentDisclosureAccepted) {
+                var showPolicy by rememberSaveable { mutableStateOf(false) }
+                if (showPolicy) {
+                    PrivacyPolicyScreenRoute(
+                        contentPadding = WindowInsets.safeDrawing.asPaddingValues(),
+                        onBack = { showPolicy = false },
+                    )
+                } else {
+                    PrivacyDisclosureScreen(
+                        onAccept = {
+                            privacyViewModel.acceptDisclosure()
+                            onRequestNotificationPermission()
+                        },
+                        onOpenPrivacyPolicy = { showPolicy = true },
+                    )
                 }
-            ) { padding ->
-                NotifyBridgeNavHost(navController = navController, padding = padding)
+            } else {
+                val navController = rememberNavController()
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                    bottomBar = {
+                        BottomBar(navController)
+                    }
+                ) { padding ->
+                    NotifyBridgeNavHost(navController = navController, padding = padding)
+                }
             }
         }
     }
