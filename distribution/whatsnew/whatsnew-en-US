@@ -1,3 +1,3 @@
-Fixes from tester feedback — thank you!
+Play policy update — the app now targets Android 16.
 
-- Fixed the layout mirroring on right-to-left / non-Latin device locales (e.g. Arabic): the interface now always displays left-to-right, so toggles and text line up correctly.
+- Target API raised to Android 16 (API 36) so closed-testing updates can keep shipping after Google Play's 2026 target-API requirement.
